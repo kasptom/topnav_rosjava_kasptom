@@ -51,6 +51,11 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rosjava_build_tools</build_depend>
 
+  <!-- topnav_msgs -->
+  <build_depend>rosjava_bootstrap</build_depend>
+  <build_depend>rosjava_messages</build_depend>
+  <build_depend>topnav_msgs</build_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
