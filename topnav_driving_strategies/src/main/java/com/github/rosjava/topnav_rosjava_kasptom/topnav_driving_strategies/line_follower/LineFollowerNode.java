@@ -1,5 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.line_follower;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsController;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
@@ -19,8 +20,7 @@ public class LineFollowerNode extends AbstractNodeMain {
     public void onStart(ConnectedNode connectedNode) {
         Subscriber<AngleRangesMsg> angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
         angleRangesMsgSubscriber.addMessageListener(
-                new WheelsJointStatePublisher("joint_states", connectedNode)
-//                new WheelsJointStatePublisher("capo_diff_drive_controller/cmd_vel", connectedNode)
+                new WheelsController(connectedNode)
         );
     }
 }
