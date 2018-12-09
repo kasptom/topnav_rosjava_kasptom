@@ -1,5 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
 
+import models.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
 import org.ros.node.ConnectedNode;
@@ -18,37 +19,41 @@ public class WheelsController implements MessageListener<AngleRangesMsg> {
             "/capo_rear_left_wheel_controller/command",
             "/capo_rear_right_wheel_controller/command"));
 
-    public WheelsController(ConnectedNode connectedNode) {
+    private AngleRangeMessageHandler angleRangeMsgHandler;
+
+    public WheelsController(ConnectedNode connectedNode, AngleRangeMessageHandler handler) {
         log = connectedNode.getLog();
         wheelPublishersMap = new LinkedHashMap<>();
+        this.angleRangeMsgHandler = handler;
 
         for (String topicName : WHEEL_JOINT_NAMES) {
-            wheelPublishersMap.put(topicName, connectedNode.<Float64>newPublisher(topicName ,Float64._TYPE));
+            wheelPublishersMap.put(topicName, connectedNode.<Float64>newPublisher(topicName, Float64._TYPE));
         }
     }
 
     @Override
     public void onNewMessage(AngleRangesMsg angleRangesMsg) {
-        double distance = angleRangesMsg.getDistances()[angleRangesMsg.getDistances().length / 2 + 1];
-        log.info(String.format("Number of rays: %d", angleRangesMsg.getAngles().length));
-        log.info(String.format("Distance to the front wall [m]: %.2f", distance));
-        if (distance <= 1.0) {
-            setVelocities(0.0, 0.0, 0.0, 0.0);
-        } else {
-            setVelocities(2.0, 2.0, 2.0, 2.0);
+
+        if (angleRangeMsgHandler == null) {
+            log.warn("Set AngleRangeMessageHandler");
+            return;
         }
+
+        log.info(String.format("new message: %s", angleRangesMsg.toString()));
+
+        WheelsVelocities velocities = angleRangeMsgHandler.handleMessage(angleRangesMsg);
+        setVelocities(velocities);
     }
 
-    /**
-     * @param frontLeft  - front_left_wheel_joint
-     * @param frontRight - rear_right_wheel_joint
-     * @param rearLeft   - rear_left_wheel_joint
-     * @param rearRight  - front_right_wheel_joint
-     */
-    private void setVelocities(double frontLeft, double frontRight, double rearLeft, double rearRight) {
-        log.info(String.format("Setting velocities (%.2f, %.2f,%.2f, %.2f)", frontLeft, frontRight, rearLeft, rearRight));
-        double[] velocities = new double[]{frontLeft, frontRight, rearLeft, rearRight};
-
+    private void setVelocities(WheelsVelocities wheelsVelocities) {
+        double[] velocities = new double[]{
+                wheelsVelocities.getFrontLeft(),
+                wheelsVelocities.getFrontRight(),
+                wheelsVelocities.getRearLeft(),
+                wheelsVelocities.getRearRight()
+        };
+        log.info(String.format("Setting velocities (%.2f, %.2f,%.2f, %.2f)",
+                velocities[0], velocities[1], velocities[2], velocities[3]));
 
         List<Float64> messages = new ArrayList<>();
         int i = 0;
@@ -63,5 +68,9 @@ public class WheelsController implements MessageListener<AngleRangesMsg> {
         for (String topicName : wheelPublishersMap.keySet()) {
             wheelPublishersMap.get(topicName).publish(messages.get(i++));
         }
+    }
+
+    public interface AngleRangeMessageHandler {
+        WheelsVelocities handleMessage(AngleRangesMsg message);
     }
 }
