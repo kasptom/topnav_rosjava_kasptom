@@ -5,13 +5,19 @@ import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 import std_msgs.Float64;
 import topnav_msgs.AngleRangesMsg;
+import topnav_msgs.HoughAcc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
 
-public class WheelsController implements MessageListener<AngleRangesMsg> {
+public class WheelsController implements WheelsVelocitiesChangeListener {
     private final LinkedHashMap<String, Publisher<Float64>> wheelPublishersMap;
+
     private Log log;
     private static final List<String> WHEEL_JOINT_NAMES = new ArrayList<>(Arrays.asList(
             "/capo_front_left_wheel_controller/command",
@@ -19,30 +25,24 @@ public class WheelsController implements MessageListener<AngleRangesMsg> {
             "/capo_rear_left_wheel_controller/command",
             "/capo_rear_right_wheel_controller/command"));
 
-    private AngleRangeMessageHandler angleRangeMsgHandler;
+    WheelsController(IDrivingStrategy drivingStrategy, ConnectedNode connectedNode) {
+        HoughMessageHandler houghMessageHandler = new HoughMessageHandler(drivingStrategy);
+        AngleRangeMessageHandler angleRangeMessageHandler = new AngleRangeMessageHandler(drivingStrategy);
 
-    public WheelsController(ConnectedNode connectedNode, AngleRangeMessageHandler handler) {
+        Subscriber<AngleRangesMsg> angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
+        Subscriber<HoughAcc> houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
+
+        drivingStrategy.setWheelsVelocitiesListener(this);
+
+        houghAccSubscriber.addMessageListener(houghMessageHandler);
+        angleRangesMsgSubscriber.addMessageListener(angleRangeMessageHandler);
+
         log = connectedNode.getLog();
         wheelPublishersMap = new LinkedHashMap<>();
-        this.angleRangeMsgHandler = handler;
 
         for (String topicName : WHEEL_JOINT_NAMES) {
             wheelPublishersMap.put(topicName, connectedNode.<Float64>newPublisher(topicName, Float64._TYPE));
         }
-    }
-
-    @Override
-    public void onNewMessage(AngleRangesMsg angleRangesMsg) {
-
-        if (angleRangeMsgHandler == null) {
-            log.warn("Set AngleRangeMessageHandler");
-            return;
-        }
-
-        log.info(String.format("new message: %s", angleRangesMsg.toString()));
-
-        WheelsVelocities velocities = angleRangeMsgHandler.handleMessage(angleRangesMsg);
-        setVelocities(velocities);
     }
 
     private void setVelocities(WheelsVelocities wheelsVelocities) {
@@ -70,7 +70,44 @@ public class WheelsController implements MessageListener<AngleRangesMsg> {
         }
     }
 
-    public interface AngleRangeMessageHandler {
-        WheelsVelocities handleMessage(AngleRangesMsg message);
+    @Override
+    public void onWheelsVelocitiesChanged(WheelsVelocities velocities) {
+        setVelocities(velocities);
+    }
+
+    class HoughMessageHandler implements MessageListener<HoughAcc> {
+
+        private IDrivingStrategy drivingStrategy;
+
+        HoughMessageHandler(IDrivingStrategy drivingStrategy) {
+            this.drivingStrategy = drivingStrategy;
+        }
+
+        @Override
+        public void onNewMessage(HoughAcc houghAcc) {
+            this.drivingStrategy.handleHoughAccMessage(houghAcc);
+        }
+    }
+
+    class AngleRangeMessageHandler implements MessageListener<AngleRangesMsg> {
+
+        private IDrivingStrategy drivingStrategy;
+
+        AngleRangeMessageHandler(IDrivingStrategy drivingStrategy) {
+            this.drivingStrategy = drivingStrategy;
+        }
+
+        @Override
+        public void onNewMessage(AngleRangesMsg angleRangesMsg) {
+            this.drivingStrategy.handleAngleRangeMessage(angleRangesMsg);
+        }
+    }
+
+    public interface IDrivingStrategy {
+        void handleHoughAccMessage(HoughAcc houghAcc);
+
+        void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg);
+
+        void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener);
     }
 }
