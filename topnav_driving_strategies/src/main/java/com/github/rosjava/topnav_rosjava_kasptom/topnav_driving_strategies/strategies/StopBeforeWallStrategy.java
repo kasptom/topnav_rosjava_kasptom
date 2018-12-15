@@ -6,6 +6,7 @@ import models.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.HoughAcc;
+import topnav_msgs.TopNavConfigMsg;
 
 public class StopBeforeWallStrategy implements WheelsController.IDrivingStrategy {
     private final Log log;
@@ -14,6 +15,9 @@ public class StopBeforeWallStrategy implements WheelsController.IDrivingStrategy
     public StopBeforeWallStrategy(Log log) {
         this.log = log;
     }
+
+    @Override
+    public void handleConfigMessage(TopNavConfigMsg configMsg) {}
 
     @Override
     public void handleHoughAccMessage(HoughAcc houghAcc) {

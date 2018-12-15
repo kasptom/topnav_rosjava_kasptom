@@ -9,6 +9,7 @@ import org.ros.node.topic.Subscriber;
 import std_msgs.Float64;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.HoughAcc;
+import topnav_msgs.TopNavConfigMsg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,14 +27,17 @@ public class WheelsController implements WheelsVelocitiesChangeListener {
             "/capo_rear_right_wheel_controller/command"));
 
     WheelsController(IDrivingStrategy drivingStrategy, ConnectedNode connectedNode) {
+        ConfigMessageHandler configMessageHandler = new ConfigMessageHandler(drivingStrategy);
         HoughMessageHandler houghMessageHandler = new HoughMessageHandler(drivingStrategy);
         AngleRangeMessageHandler angleRangeMessageHandler = new AngleRangeMessageHandler(drivingStrategy);
 
         Subscriber<AngleRangesMsg> angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
         Subscriber<HoughAcc> houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
+        Subscriber<TopNavConfigMsg> configMsgSubscriber = connectedNode.newSubscriber("topnav/config", TopNavConfigMsg._TYPE);
 
         drivingStrategy.setWheelsVelocitiesListener(this);
 
+        configMsgSubscriber.addMessageListener(configMessageHandler);
         houghAccSubscriber.addMessageListener(houghMessageHandler);
         angleRangesMsgSubscriber.addMessageListener(angleRangeMessageHandler);
 
@@ -103,7 +107,23 @@ public class WheelsController implements WheelsVelocitiesChangeListener {
         }
     }
 
+    class ConfigMessageHandler implements MessageListener<TopNavConfigMsg>{
+        private IDrivingStrategy drivingStrategy;
+
+        ConfigMessageHandler(IDrivingStrategy drivingStrategy) {
+            this.drivingStrategy = drivingStrategy;
+        }
+
+
+        @Override
+        public void onNewMessage(TopNavConfigMsg configMsg) {
+            this.drivingStrategy.handleConfigMessage(configMsg);
+        }
+    }
+
     public interface IDrivingStrategy {
+        void handleConfigMessage(TopNavConfigMsg configMsg);
+
         void handleHoughAccMessage(HoughAcc houghAcc);
 
         void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg);
