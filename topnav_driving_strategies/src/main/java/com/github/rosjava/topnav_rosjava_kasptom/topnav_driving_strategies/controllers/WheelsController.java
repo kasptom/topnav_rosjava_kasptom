@@ -22,10 +22,6 @@ public class WheelsController {
     private final Subscriber<AngleRangesMsg> angleRangesMsgSubscriber;
     private final Subscriber<HoughAcc> houghAccSubscriber;
 
-    private final ConfigMessageHandler configMessageHandler;
-    private final AngleRangeMessageHandler angleRangeMessageHandler;
-    private final HoughMessageHandler houghMessageHandler;
-
     private Log log;
     private static final List<String> WHEEL_JOINT_NAMES = new ArrayList<>(Arrays.asList(
             "/capo_front_left_wheel_controller/command",
@@ -35,19 +31,15 @@ public class WheelsController {
     private WheelsVelocities currentVelocity = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
 
     WheelsController(IDrivingStrategy drivingStrategy, ConnectedNode connectedNode) {
-        configMessageHandler = new ConfigMessageHandler(drivingStrategy);
-        angleRangeMessageHandler = new AngleRangeMessageHandler(drivingStrategy);
-        houghMessageHandler = new HoughMessageHandler(drivingStrategy);
-
         configMsgSubscriber = connectedNode.newSubscriber("topnav/config", TopNavConfigMsg._TYPE);
         angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
         houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
 
         drivingStrategy.setWheelsVelocitiesListener(this::setVelocities);
 
-        configMsgSubscriber.addMessageListener(configMessageHandler);
-        angleRangesMsgSubscriber.addMessageListener(angleRangeMessageHandler);
-        houghAccSubscriber.addMessageListener(houghMessageHandler);
+        configMsgSubscriber.addMessageListener(drivingStrategy::handleConfigMessage);
+        angleRangesMsgSubscriber.addMessageListener(drivingStrategy::handleAngleRangeMessage);
+        houghAccSubscriber.addMessageListener(drivingStrategy::handleHoughAccMessage);
 
         log = connectedNode.getLog();
         wheelPublishersMap = new LinkedHashMap<>();
@@ -59,9 +51,9 @@ public class WheelsController {
 
     void emergencyStop() {
         log.info("removing message handlers");
-        this.configMsgSubscriber.removeMessageListener(configMessageHandler);
-        this.angleRangesMsgSubscriber.removeMessageListener(angleRangeMessageHandler);
-        this.houghAccSubscriber.removeMessageListener(houghMessageHandler);
+        this.configMsgSubscriber.removeAllMessageListeners();
+        this.angleRangesMsgSubscriber.removeAllMessageListeners();
+        this.houghAccSubscriber.removeAllMessageListeners();
 
         log.info("stopping the robot");
         setVelocities(new WheelsVelocities(0.0, 0.0, 0.0, 0.0));

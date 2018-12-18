@@ -2,6 +2,8 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.HoughUtils;
+import models.HoughCell;
 import models.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
@@ -39,16 +41,22 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
     public void handleHoughAccMessage(HoughAcc houghAcc) {
         refreshRateCheck();
 
-        List<HoughAccRow> houghAccRows = houghAcc.getAccumulator()
+        List<HoughCell> filteredHoughCells = HoughUtils.toList(houghAcc)
                 .stream()
-                .filter(row -> Arrays.stream(row.getAccRow()).filter(vote -> vote > lineDetectionThreshold).count() > 0)
+                .filter(cell -> cell.getVotes() >= this.lineDetectionThreshold)
                 .collect(Collectors.toList());
+
+        filteredHoughCells
+                .forEach(cell -> log.info(String.format(
+                        "detected line: (dst, ang, vts) = (%.2f %.2f [°], %d)",
+                        cell.getRange(), cell.getAngleDegrees(), cell.getVotes())));
 
         listener.onWheelsVelocitiesChanged(wheelsVelocities);
     }
 
     @Override
-    public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) { }
+    public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
+    }
 
     @Override
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
