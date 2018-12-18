@@ -2,7 +2,6 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 
 import models.WheelsVelocities;
 import org.apache.commons.logging.Log;
-import org.ros.message.MessageListener;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
@@ -16,8 +15,16 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class WheelsController implements WheelsVelocitiesChangeListener {
+public class WheelsController {
     private final LinkedHashMap<String, Publisher<Float64>> wheelPublishersMap;
+
+    private final Subscriber<TopNavConfigMsg> configMsgSubscriber;
+    private final Subscriber<AngleRangesMsg> angleRangesMsgSubscriber;
+    private final Subscriber<HoughAcc> houghAccSubscriber;
+
+    private final ConfigMessageHandler configMessageHandler;
+    private final AngleRangeMessageHandler angleRangeMessageHandler;
+    private final HoughMessageHandler houghMessageHandler;
 
     private Log log;
     private static final List<String> WHEEL_JOINT_NAMES = new ArrayList<>(Arrays.asList(
@@ -25,28 +32,39 @@ public class WheelsController implements WheelsVelocitiesChangeListener {
             "/capo_front_right_wheel_controller/command",
             "/capo_rear_left_wheel_controller/command",
             "/capo_rear_right_wheel_controller/command"));
+    private WheelsVelocities currentVelocity = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
 
     WheelsController(IDrivingStrategy drivingStrategy, ConnectedNode connectedNode) {
-        ConfigMessageHandler configMessageHandler = new ConfigMessageHandler(drivingStrategy);
-        HoughMessageHandler houghMessageHandler = new HoughMessageHandler(drivingStrategy);
-        AngleRangeMessageHandler angleRangeMessageHandler = new AngleRangeMessageHandler(drivingStrategy);
+        configMessageHandler = new ConfigMessageHandler(drivingStrategy);
+        angleRangeMessageHandler = new AngleRangeMessageHandler(drivingStrategy);
+        houghMessageHandler = new HoughMessageHandler(drivingStrategy);
 
-        Subscriber<AngleRangesMsg> angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
-        Subscriber<HoughAcc> houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
-        Subscriber<TopNavConfigMsg> configMsgSubscriber = connectedNode.newSubscriber("topnav/config", TopNavConfigMsg._TYPE);
+        configMsgSubscriber = connectedNode.newSubscriber("topnav/config", TopNavConfigMsg._TYPE);
+        angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
+        houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
 
-        drivingStrategy.setWheelsVelocitiesListener(this);
+        drivingStrategy.setWheelsVelocitiesListener(this::setVelocities);
 
         configMsgSubscriber.addMessageListener(configMessageHandler);
-        houghAccSubscriber.addMessageListener(houghMessageHandler);
         angleRangesMsgSubscriber.addMessageListener(angleRangeMessageHandler);
+        houghAccSubscriber.addMessageListener(houghMessageHandler);
 
         log = connectedNode.getLog();
         wheelPublishersMap = new LinkedHashMap<>();
 
         for (String topicName : WHEEL_JOINT_NAMES) {
-            wheelPublishersMap.put(topicName, connectedNode.<Float64>newPublisher(topicName, Float64._TYPE));
+            wheelPublishersMap.put(topicName, connectedNode.newPublisher(topicName, Float64._TYPE));
         }
+    }
+
+    void emergencyStop() {
+        log.info("removing message handlers");
+        this.configMsgSubscriber.removeMessageListener(configMessageHandler);
+        this.angleRangesMsgSubscriber.removeMessageListener(angleRangeMessageHandler);
+        this.houghAccSubscriber.removeMessageListener(houghMessageHandler);
+
+        log.info("stopping the robot");
+        setVelocities(new WheelsVelocities(0.0, 0.0, 0.0, 0.0));
     }
 
     private void setVelocities(WheelsVelocities wheelsVelocities) {
@@ -56,8 +74,11 @@ public class WheelsController implements WheelsVelocitiesChangeListener {
                 wheelsVelocities.getRearLeft(),
                 wheelsVelocities.getRearRight()
         };
-        log.info(String.format("Setting velocities (%.2f, %.2f,%.2f, %.2f)",
-                velocities[0], velocities[1], velocities[2], velocities[3]));
+
+        if (isVelocityChanged(wheelsVelocities, currentVelocity)) {
+            log.info(String.format("Setting velocities (%.2f, %.2f,%.2f, %.2f)",
+                    velocities[0], velocities[1], velocities[2], velocities[3]));
+        }
 
         List<Float64> messages = new ArrayList<>();
         int i = 0;
@@ -74,51 +95,11 @@ public class WheelsController implements WheelsVelocitiesChangeListener {
         }
     }
 
-    @Override
-    public void onWheelsVelocitiesChanged(WheelsVelocities velocities) {
-        setVelocities(velocities);
-    }
-
-    class HoughMessageHandler implements MessageListener<HoughAcc> {
-
-        private IDrivingStrategy drivingStrategy;
-
-        HoughMessageHandler(IDrivingStrategy drivingStrategy) {
-            this.drivingStrategy = drivingStrategy;
-        }
-
-        @Override
-        public void onNewMessage(HoughAcc houghAcc) {
-            this.drivingStrategy.handleHoughAccMessage(houghAcc);
-        }
-    }
-
-    class AngleRangeMessageHandler implements MessageListener<AngleRangesMsg> {
-
-        private IDrivingStrategy drivingStrategy;
-
-        AngleRangeMessageHandler(IDrivingStrategy drivingStrategy) {
-            this.drivingStrategy = drivingStrategy;
-        }
-
-        @Override
-        public void onNewMessage(AngleRangesMsg angleRangesMsg) {
-            this.drivingStrategy.handleAngleRangeMessage(angleRangesMsg);
-        }
-    }
-
-    class ConfigMessageHandler implements MessageListener<TopNavConfigMsg>{
-        private IDrivingStrategy drivingStrategy;
-
-        ConfigMessageHandler(IDrivingStrategy drivingStrategy) {
-            this.drivingStrategy = drivingStrategy;
-        }
-
-
-        @Override
-        public void onNewMessage(TopNavConfigMsg configMsg) {
-            this.drivingStrategy.handleConfigMessage(configMsg);
-        }
+    private boolean isVelocityChanged(WheelsVelocities wheelsVelocities, WheelsVelocities currentVelocity) {
+        return wheelsVelocities.getRearLeft() != currentVelocity.getRearLeft()
+                || wheelsVelocities.getRearRight() != currentVelocity.getRearRight()
+                || wheelsVelocities.getFrontLeft() != currentVelocity.getFrontLeft()
+                || wheelsVelocities.getFrontRight() != currentVelocity.getFrontRight();
     }
 
     public interface IDrivingStrategy {
