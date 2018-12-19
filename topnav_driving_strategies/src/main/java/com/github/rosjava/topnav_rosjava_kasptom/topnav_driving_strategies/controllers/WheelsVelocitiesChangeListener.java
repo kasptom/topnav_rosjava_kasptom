@@ -3,5 +3,5 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 import models.WheelsVelocities;
 
 public interface WheelsVelocitiesChangeListener {
-    void onWheelsVelocitiesChanged(WheelsVelocities velocities);
+    void onWheelsVelocitiesChanged(final WheelsVelocities velocities);
 }

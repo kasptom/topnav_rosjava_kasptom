@@ -15,8 +15,8 @@ public class HoughUtils {
 
         /* TODO pass it in the HoughAcc
          tnavbot_ws/src/topnav_ros_kasptom/topnav_bot_description/urdf/capo/head/hokuyo.gazebo */
-        double minAngle = -Math.PI / 2;
-        double maxAngle = Math.PI / 2;
+        double minAngle = -Math.PI;
+        double maxAngle = Math.PI;
         double angleStep = (maxAngle - minAngle) / angleSamples;
 
         double minRange = 0.20;

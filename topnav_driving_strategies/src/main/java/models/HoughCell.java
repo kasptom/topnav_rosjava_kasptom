@@ -1,12 +1,14 @@
 package models;
 
-public class HoughCell {
+public class HoughCell implements Comparable<HoughCell> {
     private double angle;
+    private double angleDeg;
     private double range;
     private int votes;
 
     public HoughCell(double angle, double range, int votes) {
         this.angle = angle;
+        this.angleDeg = angle / Math.PI * 180;
         this.range = range;
         this.votes = votes;
     }
@@ -16,7 +18,7 @@ public class HoughCell {
     }
 
     public double getAngleDegrees() {
-        return angle / Math.PI * 180;
+        return angleDeg;
     }
 
     public double getRange() {
@@ -25,5 +27,10 @@ public class HoughCell {
 
     public int getVotes() {
         return votes;
+    }
+
+    @Override
+    public int compareTo(HoughCell other) {
+        return Integer.compare(this.votes, other.votes);
     }
 }
