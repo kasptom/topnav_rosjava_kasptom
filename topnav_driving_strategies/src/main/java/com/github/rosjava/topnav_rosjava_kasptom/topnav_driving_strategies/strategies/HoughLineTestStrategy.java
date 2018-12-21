@@ -10,24 +10,22 @@ import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy {
+public class HoughLineTestStrategy implements WheelsController.IDrivingStrategy {
 
     private final Log log;
     private static final WheelsVelocities ZERO_VELOCITY = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
-    private double TOO_CLOSE_RANGE = 0.3;
-
-    private static final double PARALLEL_TO_LEFT_WALL_ANGLE = -90;
 
     private WheelsVelocitiesChangeListener listener;
 
     private int lineDetectionThreshold = 5;
 
-    private boolean isObstacleToClose;
+    private int messageCounter = 0;
+    private long timeStamp;
 
-    public DriveAlongWallStrategy(Log log) {
+    public HoughLineTestStrategy(Log log) {
         this.log = log;
     }
 
@@ -40,68 +38,73 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
 
     @Override
     public void handleHoughAccMessage(HoughAcc houghAcc) {
+        refreshRateCheck();
+
         List<HoughCell> houghCells = HoughUtils.toList(houghAcc);
 
-        houghCells
+        houghCells = houghCells
                 .stream()
                 .filter(cell -> cell.getVotes() >= this.lineDetectionThreshold)
-                .forEach(cell -> log.info(String.format(
-                        "detected line: (dst, ang, vts) = (%.2f %.2f [°], %d)",
-                        cell.getRange(), cell.getAngleDegrees(), cell.getVotes())));
+                .collect(Collectors.toList());
+
+        houghCells.forEach(cell -> log.debug(String.format(
+                "detected line: (dst, ang, vts) = (%.2f %.2f [°], %d)",
+                cell.getRange(), cell.getAngleDegrees(), cell.getVotes())));
 
         WheelsVelocities wheelsVelocities = computeVelocities(houghCells);
         listener.onWheelsVelocitiesChanged(wheelsVelocities);
     }
 
+    private int counter = 0;
+    private double minBest = 400.0;
+    private double maxBest = -400.0;
+
     private WheelsVelocities computeVelocities(List<HoughCell> filteredHoughCells) {
         HoughCell bestLine = filteredHoughCells.stream().max(HoughCell::compareTo).orElse(null);
-        if (bestLine == null || isObstacleToClose) {
-            String stopReason = bestLine == null ? "no walls detected" : "obstacle is too close";
-            log.info(stopReason);
+        if (bestLine == null) {
             return ZERO_VELOCITY;
         }
 
         double angle = bestLine.getAngleDegrees();
         double range = bestLine.getRange();
 
-        log.info(String.format("best line: %.2f[°], %.2f[m]", angle, range));
+        log.debug(String.format("best line: %.2f[°], %.2f[m]", angle, range));
 
-        WheelsVelocities velocities;
-        if (isInCloseRange(range)) {
-            log.info("parallel to the wall");
-            velocities = keepParallelDirection(angle);
+        if (counter != 100) {
+            counter++;
+            minBest = angle < minBest ? angle : minBest;
+            maxBest = angle > maxBest ? angle : maxBest;
         } else {
-            log.info("closing to the wall");
-            velocities = driveTowardsWall(angle);
+            log.info(String.format("Min best: %.2f, max best: %.2f", minBest, maxBest));
+            counter = 0;
+            minBest = 400.0;
+            maxBest = -400.0;
         }
 
-        return velocities;
-    }
-
-    private boolean isInCloseRange(double range) {
-        return range > TOO_CLOSE_RANGE && range <= 5 * TOO_CLOSE_RANGE;
-    }
-
-    private WheelsVelocities keepParallelDirection(double angle) {
-        double angleDelta = Math.signum(angle) * (PARALLEL_TO_LEFT_WALL_ANGLE - angle);
-        double leftSpeed =  2.0 - (angleDelta / 90.0) * 2.0;
-        double rightSpeed =  2.0 + (angleDelta / 90.0) * 2.0;
-
-        return new WheelsVelocities(leftSpeed, rightSpeed, leftSpeed, rightSpeed);
-    }
-
-    private WheelsVelocities driveTowardsWall(double angle) {
-//        if (angle < )
         return ZERO_VELOCITY;
     }
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-        isObstacleToClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
     }
 
     @Override
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
         this.listener = listener;
     }
+
+    private void refreshRateCheck() {
+        if (messageCounter == 0) {
+            timeStamp = System.nanoTime();
+        }
+
+        this.messageCounter++;
+
+        if (messageCounter == 40) {
+            String timeInfo = String.format("received 40 messages within approx: %.3f [s]", (System.nanoTime() - timeStamp) / 1e9);
+            log.info(timeInfo);
+            messageCounter = 0;
+        }
+    }
+
 }
