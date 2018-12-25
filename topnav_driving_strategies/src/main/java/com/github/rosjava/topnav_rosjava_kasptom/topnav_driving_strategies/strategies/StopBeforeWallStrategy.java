@@ -2,7 +2,7 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import models.WheelsVelocities;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.HoughAcc;

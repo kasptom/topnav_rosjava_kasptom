@@ -1,6 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils;
 
-import models.HoughCell;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.HoughCell;
 import topnav_msgs.HoughAcc;
 
 import java.util.ArrayList;
@@ -15,8 +15,8 @@ public class HoughUtils {
 
         /* TODO pass it in the HoughAcc
          tnavbot_ws/src/topnav_ros_kasptom/topnav_bot_description/urdf/capo/head/hokuyo.gazebo */
-        double minAngle = -Math.PI;
-        double maxAngle = Math.PI;
+        double minAngle = 0;
+        double maxAngle = 2 * Math.PI;
         double angleStep = (maxAngle - minAngle) / angleSamples;
 
         double minRange = 0.20;

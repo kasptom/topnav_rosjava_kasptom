@@ -1,8 +1,7 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
 
-import models.WheelsVelocities;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
 import org.apache.commons.logging.Log;
-import org.ros.message.MessageListener;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
