@@ -10,6 +10,7 @@ import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,7 +61,10 @@ public class HoughLineTestStrategy implements WheelsController.IDrivingStrategy 
     private double maxBest = -400.0;
 
     private WheelsVelocities logStatistics(List<HoughCell> filteredHoughCells) {
-        HoughCell bestLine = filteredHoughCells.stream().max(HoughCell::compareTo).orElse(null);
+        HoughCell bestLine = filteredHoughCells
+                .stream()
+                .min(Comparator.comparingDouble(HoughCell::getRange)).orElse(null);
+
         if (bestLine == null) {
             return ZERO_VELOCITY;
         }

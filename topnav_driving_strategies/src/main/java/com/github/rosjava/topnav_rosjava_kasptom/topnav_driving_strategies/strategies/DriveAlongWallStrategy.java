@@ -12,6 +12,7 @@ import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,13 +46,6 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
     public void handleHoughAccMessage(HoughAcc houghAcc) {
         List<HoughCell> houghCells = HoughUtils.toList(houghAcc);
 
-        houghCells
-                .stream()
-                .filter(cell -> cell.getVotes() >= this.lineDetectionThreshold)
-                .forEach(cell -> log.info(String.format(
-                        "detected line: (dst, ang, vts) = (%.2f %.2f [°], %d)",
-                        cell.getRange(), cell.getAngleDegrees(), cell.getVotes())));
-
         List<HoughCell> filteredHoughCells = houghCells.stream()
                 .filter(cell -> cell.getVotes() >= this.lineDetectionThreshold)
                 .collect(Collectors.toList());
@@ -61,7 +55,9 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
     }
 
     private WheelsVelocities computeVelocities(List<HoughCell> filteredHoughCells) {
-        HoughCell bestLine = filteredHoughCells.stream().max(HoughCell::compareTo).orElse(null);
+        HoughCell bestLine = filteredHoughCells.stream()
+                .min(Comparator.comparingDouble(HoughCell::getRange)).orElse(null);
+
         if (isObstacleToClose) {
             log.info("obstacle is too close");
             return ZERO_VELOCITY;
@@ -96,8 +92,8 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
     public WheelsVelocities keepTargetAngle(double angle, double targetAngle) {
         double diffMod = MathUtils.modulo(-angle - targetAngle, 360) - 180;
 
-        double leftSpeed = 2.0 - (diffMod / 180.0) * 2.0;
-        double rightSpeed = 2.0 + (diffMod / 180.0) * 2.0;
+        double leftSpeed = 2.0 + (diffMod / 180.0) * 2.0;
+        double rightSpeed = 2.0 - (diffMod / 180.0) * 2.0;
 
         return new WheelsVelocities(leftSpeed, rightSpeed, leftSpeed, rightSpeed);
     }
