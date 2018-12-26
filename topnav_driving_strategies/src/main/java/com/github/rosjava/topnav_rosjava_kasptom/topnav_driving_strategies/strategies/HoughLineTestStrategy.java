@@ -68,7 +68,7 @@ public class HoughLineTestStrategy implements WheelsController.IDrivingStrategy 
         double angle = (bestLine.getAngleDegrees() + 90) % 360;
         double range = bestLine.getRange();
 
-        log.debug(String.format("best line: %.2f[°], %.2f[m]", angle, range));
+        log.info(String.format("best line: %.2f[°], %.2f[m]", angle, range));
 
         if (counter != 100) {
             counter++;
@@ -86,6 +86,18 @@ public class HoughLineTestStrategy implements WheelsController.IDrivingStrategy 
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
+        double minRange = Double.POSITIVE_INFINITY;
+        double angle = -1000;
+        double angleStep = 240.0 / (angleRangesMsg.getAngles().length - 1);
+
+        for (int i = 0; i < angleRangesMsg.getAngles().length; i++) {
+            if (minRange > angleRangesMsg.getDistances()[i]) {
+                minRange = angleRangesMsg.getDistances()[i];
+                angle = i * angleStep;
+            }
+        }
+
+        log.info(String.format("Angle / range: min range: %.2f at angle %.2f[°]", minRange, angle));
     }
 
     @Override
