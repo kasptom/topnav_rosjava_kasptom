@@ -62,10 +62,14 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
 
     private WheelsVelocities computeVelocities(List<HoughCell> filteredHoughCells) {
         HoughCell bestLine = filteredHoughCells.stream().max(HoughCell::compareTo).orElse(null);
-        if (bestLine == null || isObstacleToClose) {
-            String stopReason = bestLine == null ? "no walls detected" : "obstacle is too close";
-            log.info(stopReason);
+        if (isObstacleToClose) {
+            log.info("obstacle is too close");
             return ZERO_VELOCITY;
+        }
+
+        if (bestLine == null) {
+            log.info("no walls detected... driving straight ahead");
+            return new WheelsVelocities(2.0, 2.0, 2.0, 2.0);
         }
 
         double angle = (bestLine.getAngleDegrees() + 90) % 360;
