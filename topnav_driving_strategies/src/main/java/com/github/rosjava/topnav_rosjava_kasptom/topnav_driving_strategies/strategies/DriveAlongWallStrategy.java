@@ -19,7 +19,8 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
     private static final WheelsVelocities ZERO_VELOCITY = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
     private double TOO_CLOSE_RANGE = 0.3;
 
-    private static final double PARALLEL_TO_LEFT_WALL_ANGLE = -90;
+    private static final double PARALLEL_TO_LEFT_WALL_ANGLE = 270;
+    private static final double AHEAD_THE_WALL = 180;
 
     private WheelsVelocitiesChangeListener listener;
 
@@ -61,7 +62,7 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
             return ZERO_VELOCITY;
         }
 
-        double angle = bestLine.getAngleDegrees();
+        double angle = (bestLine.getAngleDegrees() + 90) % 360;
         double range = bestLine.getRange();
 
         log.info(String.format("best line: %.2f[°], %.2f[m]", angle, range));
@@ -69,10 +70,10 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
         WheelsVelocities velocities;
         if (isInCloseRange(range)) {
             log.info("parallel to the wall");
-            velocities = keepParallelDirection(angle);
+            velocities = keepTargetAngle(angle, PARALLEL_TO_LEFT_WALL_ANGLE);
         } else {
             log.info("closing to the wall");
-            velocities = driveTowardsWall(angle);
+            velocities = keepTargetAngle(angle, AHEAD_THE_WALL);
         }
 
         return velocities;
@@ -82,17 +83,13 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
         return range > TOO_CLOSE_RANGE && range <= 5 * TOO_CLOSE_RANGE;
     }
 
-    private WheelsVelocities keepParallelDirection(double angle) {
-        double angleDelta = Math.signum(angle) * (PARALLEL_TO_LEFT_WALL_ANGLE - angle);
-        double leftSpeed =  2.0 - (angleDelta / 90.0) * 2.0;
-        double rightSpeed =  2.0 + (angleDelta / 90.0) * 2.0;
+    public WheelsVelocities keepTargetAngle(double angle, double targetAngle) {
+        double diffMod = (-angle - targetAngle) % 360.0 - 180; // FIXME remainder -> modulo
+
+        double leftSpeed =  2.0 - (diffMod / 180.0) * 2.0;
+        double rightSpeed =  2.0 + (diffMod / 180.0) * 2.0;
 
         return new WheelsVelocities(leftSpeed, rightSpeed, leftSpeed, rightSpeed);
-    }
-
-    private WheelsVelocities driveTowardsWall(double angle) {
-//        if (angle < )
-        return ZERO_VELOCITY;
     }
 
     @Override

@@ -51,7 +51,7 @@ public class HoughLineTestStrategy implements WheelsController.IDrivingStrategy 
                 "detected line: (dst, ang, vts) = (%.2f %.2f [°], %d)",
                 cell.getRange(), cell.getAngleDegrees(), cell.getVotes())));
 
-        WheelsVelocities wheelsVelocities = computeVelocities(houghCells);
+        WheelsVelocities wheelsVelocities = logStatistics(houghCells);
         listener.onWheelsVelocitiesChanged(wheelsVelocities);
     }
 
@@ -59,13 +59,13 @@ public class HoughLineTestStrategy implements WheelsController.IDrivingStrategy 
     private double minBest = 400.0;
     private double maxBest = -400.0;
 
-    private WheelsVelocities computeVelocities(List<HoughCell> filteredHoughCells) {
+    private WheelsVelocities logStatistics(List<HoughCell> filteredHoughCells) {
         HoughCell bestLine = filteredHoughCells.stream().max(HoughCell::compareTo).orElse(null);
         if (bestLine == null) {
             return ZERO_VELOCITY;
         }
 
-        double angle = bestLine.getAngleDegrees();
+        double angle = (bestLine.getAngleDegrees() + 90) % 360;
         double range = bestLine.getRange();
 
         log.debug(String.format("best line: %.2f[°], %.2f[m]", angle, range));
@@ -75,7 +75,7 @@ public class HoughLineTestStrategy implements WheelsController.IDrivingStrategy 
             minBest = angle < minBest ? angle : minBest;
             maxBest = angle > maxBest ? angle : maxBest;
         } else {
-            log.info(String.format("Min best: %.2f, max best: %.2f", minBest, maxBest));
+            log.info(String.format("Min best: %.2f[°], max best: %.2f[°]", minBest, maxBest));
             counter = 0;
             minBest = 400.0;
             maxBest = -400.0;
