@@ -5,6 +5,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.HoughUtils;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.HoughCell;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.MathUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.HoughAcc;
@@ -12,6 +13,7 @@ import topnav_msgs.TopNavConfigMsg;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy {
 
@@ -50,7 +52,11 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
                         "detected line: (dst, ang, vts) = (%.2f %.2f [°], %d)",
                         cell.getRange(), cell.getAngleDegrees(), cell.getVotes())));
 
-        WheelsVelocities wheelsVelocities = computeVelocities(houghCells);
+        List<HoughCell> filteredHoughCells = houghCells.stream()
+                .filter(cell -> cell.getVotes() >= this.lineDetectionThreshold)
+                .collect(Collectors.toList());
+
+        WheelsVelocities wheelsVelocities = computeVelocities(filteredHoughCells);
         listener.onWheelsVelocitiesChanged(wheelsVelocities);
     }
 
@@ -84,10 +90,10 @@ public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy
     }
 
     public WheelsVelocities keepTargetAngle(double angle, double targetAngle) {
-        double diffMod = (-angle - targetAngle) % 360.0 - 180; // FIXME remainder -> modulo
+        double diffMod = MathUtils.modulo(-angle - targetAngle, 360) - 180;
 
-        double leftSpeed =  2.0 - (diffMod / 180.0) * 2.0;
-        double rightSpeed =  2.0 + (diffMod / 180.0) * 2.0;
+        double leftSpeed = 2.0 - (diffMod / 180.0) * 2.0;
+        double rightSpeed = 2.0 + (diffMod / 180.0) * 2.0;
 
         return new WheelsVelocities(leftSpeed, rightSpeed, leftSpeed, rightSpeed);
     }
