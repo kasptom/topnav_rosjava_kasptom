@@ -1,6 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsController;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
 import org.apache.commons.logging.Log;
@@ -8,7 +8,7 @@ import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
-public class StopBeforeWallStrategy implements WheelsController.IDrivingStrategy {
+public class StopBeforeWallStrategy implements IDrivingStrategy {
     private final Log log;
     private WheelsVelocitiesChangeListener listener;
 

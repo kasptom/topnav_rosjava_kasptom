@@ -1,10 +1,10 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsController;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.HoughUtils;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.HoughCell;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.HoughUtils;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.MathUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
@@ -16,7 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DriveAlongWallStrategy implements WheelsController.IDrivingStrategy {
+public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     private final Log log;
     private static final WheelsVelocities ZERO_VELOCITY = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);

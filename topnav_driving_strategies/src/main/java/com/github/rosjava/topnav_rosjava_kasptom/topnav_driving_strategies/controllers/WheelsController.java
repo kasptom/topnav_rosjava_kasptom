@@ -34,6 +34,7 @@ public class WheelsController {
         configMsgSubscriber = connectedNode.newSubscriber("topnav/config", TopNavConfigMsg._TYPE);
         angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
         houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
+//        markersSubscriber = connectedNode.newSUbscriber("")
 
         drivingStrategy.setWheelsVelocitiesListener(this::setVelocities);
 
@@ -92,15 +93,5 @@ public class WheelsController {
                 || wheelsVelocities.getRearRight() != currentVelocity.getRearRight()
                 || wheelsVelocities.getFrontLeft() != currentVelocity.getFrontLeft()
                 || wheelsVelocities.getFrontRight() != currentVelocity.getFrontRight();
-    }
-
-    public interface IDrivingStrategy {
-        void handleConfigMessage(TopNavConfigMsg configMsg);
-
-        void handleHoughAccMessage(HoughAcc houghAcc);
-
-        void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg);
-
-        void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener);
     }
 }
