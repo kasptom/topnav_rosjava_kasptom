@@ -22,12 +22,15 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     private static final WheelsVelocities ZERO_VELOCITY = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
     private double TOO_CLOSE_RANGE = 0.3;
 
+    private static final double BASE_VELOCITY = 2.0;
+    private static final double MAX_VELOCITY_DELTA = 2.0;
+
     private static final double PARALLEL_TO_LEFT_WALL_ANGLE = 270;
     private static final double AHEAD_THE_WALL = 180;
 
     private WheelsVelocitiesChangeListener listener;
 
-    private int lineDetectionThreshold = 5;
+    private int lineDetectionThreshold = 8;
 
     private boolean isObstacleToClose;
 
@@ -90,10 +93,15 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     }
 
     public WheelsVelocities keepTargetAngle(double angle, double targetAngle) {
-        double diffMod = MathUtils.modulo(-angle - targetAngle, 360) - 180;
+        double leftSpeed = Math.abs(targetAngle - angle) <= 180
+                ? (BASE_VELOCITY + MAX_VELOCITY_DELTA) / 360.0 * (angle - targetAngle) + BASE_VELOCITY
+                : -(BASE_VELOCITY + MAX_VELOCITY_DELTA) / 360.0 * (angle - targetAngle + Math.signum(targetAngle - 180))
+                + BASE_VELOCITY;
 
-        double leftSpeed = 2.0 + (diffMod / 180.0) * 2.0;
-        double rightSpeed = 2.0 - (diffMod / 180.0) * 2.0;
+        double rightSpeed = Math.abs(targetAngle - angle) <= 180
+                ? -(BASE_VELOCITY + MAX_VELOCITY_DELTA) / 360.0 * (angle - targetAngle) + BASE_VELOCITY
+                : (BASE_VELOCITY + MAX_VELOCITY_DELTA) / 360.0 * (angle - targetAngle + Math.signum(targetAngle - 180))
+                + BASE_VELOCITY;
 
         return new WheelsVelocities(leftSpeed, rightSpeed, leftSpeed, rightSpeed);
     }

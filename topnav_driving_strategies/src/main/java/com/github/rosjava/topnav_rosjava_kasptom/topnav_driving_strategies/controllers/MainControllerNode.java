@@ -1,11 +1,14 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navigation.MarkerMessageHandler;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
 import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
+import org.ros.node.topic.Subscriber;
+import topnav_msgs.MarkersMsg;
 
 //import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.HoughLineTestStrategy;
 //import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
@@ -15,6 +18,7 @@ import org.ros.node.Node;
 public class MainControllerNode extends AbstractNodeMain {
 
     private WheelsController wheelsController;
+    private Subscriber<MarkersMsg> markersMsgSubscriber;
 
     @Override
     public GraphName getDefaultNodeName() {
@@ -26,11 +30,19 @@ public class MainControllerNode extends AbstractNodeMain {
         Log log = connectedNode.getLog();
         IDrivingStrategy drivingStrategy = new DriveAlongWallStrategy(log);
         wheelsController = new WheelsController(drivingStrategy, connectedNode);
+//        markersMsgSubscriber = connectedNode.newSubscriber("capo/camera/aruco", MarkersMsg._TYPE);
+//        markersMsgSubscriber.addMessageListener(new MarkerMessageHandler());
     }
 
     @Override
     public void onShutdown(Node node) {
-        wheelsController.emergencyStop();
+        if (wheelsController != null) {
+            wheelsController.emergencyStop();
+        }
+
+        if (markersMsgSubscriber != null) {
+            markersMsgSubscriber.removeAllMessageListeners();
+        }
         super.onShutdown(node);
     }
 }

@@ -2,6 +2,6 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navi
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.SceneEvent;
 
-public interface SceneChangeListener {
+public interface ISceneChangeListener {
     void onSceneChanged(SceneEvent event);
 }
