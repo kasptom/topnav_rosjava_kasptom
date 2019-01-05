@@ -16,6 +16,6 @@ public class ArucoMarkerUtils {
     }
 
     private static MarkerDetection createMarkerDetection(MarkerMsg marker) {
-        return new MarkerDetection();
+        return MarkerDetection.createDetection(Integer.toString(marker.getId()), marker.getCameraPosition());
     }
 }

@@ -15,8 +15,10 @@ public class MarkerMessageHandler implements MessageListener<MarkersMsg> {
         System.out.println("--------------------");
         double[] rVec = markerMsg.getRotation();
         double[] tVec = markerMsg.getTranslation();
-        System.out.printf("Marker ID: %d\n Rotation: (%.2f, %.2f, %.2f)\n Translation: (%.2f, %.2f, %.2f)\n",
-                markerMsg.getId(), rVec[0], rVec[1], rVec[2], tVec[0], tVec[1], tVec[2]);
+        double[] pos = markerMsg.getCameraPosition();
+//        System.out.printf("Marker ID: %d\n Rotation: (%.2f, %.2f, %.2f)\n Translation: (%.2f, %.2f, %.2f)\n",
+//                markerMsg.getId(), rVec[0], rVec[1], rVec[2], tVec[0], tVec[1], tVec[2]);
+        System.out.printf("Marker ID: %d\n Position: (%.2f, %.2f, %.2f)\n", markerMsg.getId(), pos[0], pos[1], pos[2]);
     }
 
     public void addOnSceneChangeListener(ISceneChangeListener sceneChangeListener) {
