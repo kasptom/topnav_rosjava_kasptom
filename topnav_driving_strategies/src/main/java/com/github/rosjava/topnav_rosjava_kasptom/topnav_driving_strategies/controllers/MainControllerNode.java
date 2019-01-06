@@ -30,8 +30,8 @@ public class MainControllerNode extends AbstractNodeMain {
         Log log = connectedNode.getLog();
         IDrivingStrategy drivingStrategy = new DriveAlongWallStrategy(log);
         wheelsController = new WheelsController(drivingStrategy, connectedNode);
-//        markersMsgSubscriber = connectedNode.newSubscriber("capo/camera/aruco", MarkersMsg._TYPE);
-//        markersMsgSubscriber.addMessageListener(new MarkerMessageHandler());
+        markersMsgSubscriber = connectedNode.newSubscriber("capo/camera/aruco", MarkersMsg._TYPE);
+        markersMsgSubscriber.addMessageListener(new MarkerMessageHandler());
     }
 
     @Override
