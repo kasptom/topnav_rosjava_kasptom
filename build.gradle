@@ -35,6 +35,7 @@ allprojects {
     version = project.catkin.pkg.version
 }
 
+
 subprojects {
     /*
      * The ros-java plugin configures a few things:
@@ -53,8 +54,10 @@ subprojects {
      */
     /* apply plugin: "eclipse" */
     /* apply plugin: "idea"    */
-}
 
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
 /*
   Some useful tasks:
 
