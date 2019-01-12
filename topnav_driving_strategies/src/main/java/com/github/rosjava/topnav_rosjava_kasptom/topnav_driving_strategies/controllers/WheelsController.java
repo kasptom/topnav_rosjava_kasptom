@@ -30,7 +30,7 @@ public class WheelsController {
             "/capo_rear_right_wheel_controller/command"));
     private WheelsVelocities currentVelocity = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
 
-    WheelsController(IDrivingStrategy drivingStrategy, ConnectedNode connectedNode) {
+    public WheelsController(IDrivingStrategy drivingStrategy, ConnectedNode connectedNode) {
         configMsgSubscriber = connectedNode.newSubscriber("topnav/config", TopNavConfigMsg._TYPE);
         angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
         houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
@@ -50,7 +50,7 @@ public class WheelsController {
         }
     }
 
-    void emergencyStop() {
+    public void emergencyStop() {
         log.info("removing message handlers");
         this.configMsgSubscriber.removeAllMessageListeners();
         this.angleRangesMsgSubscriber.removeAllMessageListeners();

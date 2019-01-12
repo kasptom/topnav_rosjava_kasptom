@@ -1,5 +1,7 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navigation.MarkerMessageHandler;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
 import org.apache.commons.logging.Log;
