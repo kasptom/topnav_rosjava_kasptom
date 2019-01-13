@@ -43,6 +43,8 @@ public class WheelsController {
     public WheelsController(ConnectedNode connectedNode) {
         log = connectedNode.getLog();
 
+        setUpJointsPublishers(connectedNode);
+
         configMsgSubscriber = connectedNode.newSubscriber("topnav/config", TopNavConfigMsg._TYPE);
         angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
         houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
@@ -54,7 +56,6 @@ public class WheelsController {
 
         guidelineSubscriber.addMessageListener(guidelineMsg -> this.selectStrategy(guidelineMsg.getGuidelineType()));
 
-        setUpJointsPublishers(connectedNode);
     }
 
     private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies) {
@@ -88,12 +89,6 @@ public class WheelsController {
         houghAccSubscriber.addMessageListener(drivingStrategy::handleHoughAccMessage);
     }
 
-    private void tearDownDrivingStrategy() {
-        this.configMsgSubscriber.removeAllMessageListeners();
-        this.angleRangesMsgSubscriber.removeAllMessageListeners();
-        this.houghAccSubscriber.removeAllMessageListeners();
-    }
-
     private void selectStrategy(String strategyName) {
         tearDownDrivingStrategy();
 
@@ -109,6 +104,12 @@ public class WheelsController {
         }
 
         setUpDrivingStrategy(drivingStrategies.get(strategyName));
+    }
+
+    private void tearDownDrivingStrategy() {
+        this.configMsgSubscriber.removeAllMessageListeners();
+        this.angleRangesMsgSubscriber.removeAllMessageListeners();
+        this.houghAccSubscriber.removeAllMessageListeners();
     }
 
     private void setVelocities(WheelsVelocities wheelsVelocities) {
