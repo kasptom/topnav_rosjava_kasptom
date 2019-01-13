@@ -1,5 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
@@ -43,4 +44,9 @@ public class StopBeforeWallStrategy implements IDrivingStrategy {
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
         this.listener = listener;
     }
+
+    @Override
+    public void setHeadRotationListener(HeadRotationListener listener) {
+    }
+
 }

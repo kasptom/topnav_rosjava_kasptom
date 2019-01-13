@@ -12,4 +12,6 @@ public interface IDrivingStrategy {
     void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg);
 
     void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener);
+
+    void setHeadRotationListener(HeadRotationListener listener);
 }
