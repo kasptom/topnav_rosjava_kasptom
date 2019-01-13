@@ -15,11 +15,9 @@ import topnav_msgs.TopNavConfigMsg;
 
 import java.util.*;
 
-public class WheelsController {
-    public final String DRIVING_STRATEGY_IDLE = "DS_IDLE";
-    public final String DRIVING_STRATEGY_ALONG_WALL = "DS_ALONG_WALL";
-    public final String DRIVING_STRATEGY_STOP_BEFORE_WALL = "DS_STOP_WALL";
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.*;
 
+public class WheelsController {
     private LinkedHashMap<String, Publisher<Float64>> wheelPublishersMap;
     private Publisher<Float64> headRotationPublisher;
 

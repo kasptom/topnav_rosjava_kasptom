@@ -1,7 +1,5 @@
-package com.github.topnav_rosjava_kasptom.topnav_navigator;
+package com.github.topnav_rosjava_kasptom.services;
 
-import com.github.topnav_rosjava_kasptom.topnav_navigator.presenter.IGuidelinePresenter;
-import com.github.topnav_rosjava_kasptom.topnav_navigator.presenter.GuidelinePresenter;
 import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
@@ -11,8 +9,7 @@ import org.ros.node.topic.Publisher;
 import topnav_msgs.GuidelineMsg;
 
 public class NavigationNode extends AbstractNodeMain {
-
-    private IGuidelinePresenter presenter = new GuidelinePresenter();
+    private Publisher<GuidelineMsg> guidelinePublisher;
 
     @Override
     public GraphName getDefaultNodeName() {
@@ -22,7 +19,7 @@ public class NavigationNode extends AbstractNodeMain {
     @Override
     public void onStart(ConnectedNode connectedNode) {
         Log log = connectedNode.getLog();
-        Publisher<GuidelineMsg> guideLinePublisher = connectedNode.newPublisher("topnav/guidelines", GuidelineMsg._TYPE);
+        guidelinePublisher = connectedNode.newPublisher("topnav/guidelines", GuidelineMsg._TYPE);
     }
 
     @Override
@@ -31,4 +28,7 @@ public class NavigationNode extends AbstractNodeMain {
     }
 
 
+    public Publisher<GuidelineMsg> getGuidelinePublisher() {
+        return guidelinePublisher;
+    }
 }
