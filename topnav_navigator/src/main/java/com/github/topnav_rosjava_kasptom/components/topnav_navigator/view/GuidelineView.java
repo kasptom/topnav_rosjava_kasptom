@@ -2,11 +2,17 @@ package com.github.topnav_rosjava_kasptom.components.topnav_navigator.view;
 
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter.GuidelinePresenter;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter.IGuidelinePresenter;
+import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 
-public class GuidelineView implements IGuidelineView{
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class GuidelineView implements IGuidelineView, Initializable {
 
     private final GuidelinePresenter presenter;
 
@@ -15,7 +21,12 @@ public class GuidelineView implements IGuidelineView{
 
     @FXML
     public Button buttonStartStrategy;
+
+    @FXML
     public Button buttonStopStrategy;
+
+    @FXML
+    public ChoiceBox strategiesSelector;
 
     public GuidelineView() {
         this.presenter = new GuidelinePresenter(this);
@@ -37,8 +48,8 @@ public class GuidelineView implements IGuidelineView{
     }
 
     @Override
-    public void onSelectOption() {
-
+    public void onSelectStrategy(String strategyName) {
+        this.presenter.onSelectStrategy(strategyName);
     }
 
     @Override
@@ -53,11 +64,24 @@ public class GuidelineView implements IGuidelineView{
 
     @Override
     public void onSendGuideline() {
-
+        this.presenter.onStartStrategy();
     }
 
     @Override
     public void onShowError(String format) {
 
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        strategiesSelector.getItems()
+                .addAll(DrivingStrategy.DRIVING_STRATEGIES);
+        strategiesSelector.getSelectionModel().selectFirst();
+    }
+
+    public void onStrategySelect() {
+        String optionName = (String) this.strategiesSelector.getSelectionModel().getSelectedItem();
+        System.out.println(optionName);
+        onSelectStrategy(optionName);
     }
 }

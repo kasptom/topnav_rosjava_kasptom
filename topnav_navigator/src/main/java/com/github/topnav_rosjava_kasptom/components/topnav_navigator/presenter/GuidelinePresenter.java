@@ -30,12 +30,12 @@ public class GuidelinePresenter implements IGuidelinePresenter {
 
     @Override
     public void onSelectStrategy(String strategy) {
-
+        strategyName = strategy;
     }
 
     @Override
     public void onStartStrategy() {
-        rosTopnavService.startStrategy(strategyName);
+        rosTopnavService.startStrategy(this.strategyName);
     }
 
     @Override

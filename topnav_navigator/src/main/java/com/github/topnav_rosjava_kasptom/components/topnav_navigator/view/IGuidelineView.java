@@ -6,7 +6,7 @@ public interface IGuidelineView {
     IGuidelinePresenter getPresenter();
 
     void onShowOptions();
-    void onSelectOption();
+    void onSelectStrategy(String option);
     void onAddParam(String name);
     void onRemoveParam(String name);
 
