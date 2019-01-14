@@ -16,6 +16,7 @@ import topnav_msgs.TopNavConfigMsg;
 import java.util.*;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.HEAD_JOINT_TOPIC;
 
 public class WheelsController {
     private LinkedHashMap<String, Publisher<Float64>> wheelPublishersMap;
@@ -34,7 +35,6 @@ public class WheelsController {
             "/capo_front_right_wheel_controller/command",
             "/capo_rear_left_wheel_controller/command",
             "/capo_rear_right_wheel_controller/command"));
-    private static final String HEAD_JOINT_TOPIC = "/capo_head_rotation_controller/command";
 
     private WheelsVelocities currentVelocity = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
 

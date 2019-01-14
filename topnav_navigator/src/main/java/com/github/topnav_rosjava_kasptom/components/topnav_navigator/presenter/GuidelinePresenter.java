@@ -3,6 +3,7 @@ package com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.view.IGuidelineView;
 import com.github.topnav_rosjava_kasptom.services.IRosTopnavService;
 import com.github.topnav_rosjava_kasptom.services.RosTopNavService;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DRIVING_STRATEGY_IDLE;
 
@@ -41,5 +42,10 @@ public class GuidelinePresenter implements IGuidelinePresenter {
     @Override
     public void onStopStrategy() {
         rosTopnavService.stopStrategy(strategyName);
+    }
+
+    @Override
+    public void onChangeCameraDirection(RelativeDirection relativeDirection) {
+        rosTopnavService.changeCameraDirection(relativeDirection);
     }
 }

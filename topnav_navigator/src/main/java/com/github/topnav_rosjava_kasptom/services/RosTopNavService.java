@@ -1,6 +1,7 @@
 package com.github.topnav_rosjava_kasptom.services;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.ros.exception.RosRuntimeException;
@@ -9,6 +10,7 @@ import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
+import std_msgs.Float64;
 import topnav_msgs.GuidelineMsg;
 
 public class RosTopNavService implements IRosTopnavService {
@@ -59,6 +61,32 @@ public class RosTopNavService implements IRosTopnavService {
 
         message.setGuidelineType(DrivingStrategy.DRIVING_STRATEGY_IDLE);
 
+        publisher.publish(message);
+    }
+
+    @Override
+    public void changeCameraDirection(RelativeDirection relativeDirection) {
+        Publisher<Float64> publisher = navigationNode.getCameraDirectionPublisher();
+
+        double rotation;
+
+        switch (relativeDirection) {
+            case AHEAD:
+                rotation = 0.0;
+                break;
+            case AT_LEFT:
+                rotation = Math.PI / 2;
+                break;
+            case AT_RIGHT:
+                rotation = -Math.PI / 2;
+                break;
+            default:
+                rotation = 0.0;
+                break;
+        }
+
+        Float64 message = publisher.newMessage();
+        message.setData(rotation);
         publisher.publish(message);
     }
 }
