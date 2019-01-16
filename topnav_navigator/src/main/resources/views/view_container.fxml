@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.github.topnav_rosjava_kasptom.components.container.view.ContainerView"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <HBox>
+        <!--suppress JavaFxUnresolvedFxIdReference -->
+        <!-- guideline ==> @FXML guidelineView -->
+        <fx:include fx:id="guideline" source="view_guideline.fxml"/>
+
+        <fx:include source="view_feedback.fxml"/>
+    </HBox>
+
+
+</AnchorPane>

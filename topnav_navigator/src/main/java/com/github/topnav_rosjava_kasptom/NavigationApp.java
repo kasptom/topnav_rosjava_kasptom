@@ -1,7 +1,7 @@
 package com.github.topnav_rosjava_kasptom;
 
+import com.github.topnav_rosjava_kasptom.components.container.view.IContainerView;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter.IGuidelinePresenter;
-import com.github.topnav_rosjava_kasptom.components.topnav_navigator.view.IGuidelineView;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,11 +13,12 @@ public class NavigationApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("views/view_guideline.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("views/view_container.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root, 640, 480);
 
-        presenter = ((IGuidelineView)loader.getController()).getPresenter();
+        // FIXME DI
+        presenter = ((IContainerView) loader.getController()).getGuideLineView().getPresenter();
         presenter.onInit();
 
         primaryStage.setTitle("Navigation app");

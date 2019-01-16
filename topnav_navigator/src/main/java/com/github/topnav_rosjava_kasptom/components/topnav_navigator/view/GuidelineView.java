@@ -68,6 +68,13 @@ public class GuidelineView implements IGuidelineView, Initializable {
     }
 
     @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        strategiesSelector.getItems()
+                .addAll(DrivingStrategy.DRIVING_STRATEGIES);
+        strategiesSelector.getSelectionModel().selectFirst();
+    }
+
+    @Override
     public IGuidelinePresenter getPresenter() {
         return presenter;
     }
@@ -100,13 +107,6 @@ public class GuidelineView implements IGuidelineView, Initializable {
     @Override
     public void onShowError(String format) {
 
-    }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        strategiesSelector.getItems()
-                .addAll(DrivingStrategy.DRIVING_STRATEGIES);
-        strategiesSelector.getSelectionModel().selectFirst();
     }
 
     public void onStrategySelect() {
