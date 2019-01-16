@@ -1,7 +1,9 @@
 package com.github.topnav_rosjava_kasptom.services;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.Feedback;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.Topology;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.ros.exception.RosRuntimeException;
@@ -13,9 +15,13 @@ import org.ros.node.topic.Publisher;
 import std_msgs.Float64;
 import topnav_msgs.GuidelineMsg;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class RosTopNavService implements IRosTopnavService {
 
     private NavigationNode navigationNode;
+    private OnFeedbackChangeListener listener;
 
     public RosTopNavService() {
     }
@@ -38,6 +44,22 @@ public class RosTopNavService implements IRosTopnavService {
         Preconditions.checkState(navigationNode != null);
         NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
         nodeMainExecutor.execute(navigationNode, nodeConfiguration);
+
+        navigationNode.setFeedbackMessageListener(feedbackMsg -> {
+            if (listener != null) {
+                List<Topology> topologies = feedbackMsg.getTopologies()
+                        .stream()
+                        .map(msg -> new Topology(
+                                msg.getTimestamp().totalNsecs(),
+                                msg.getIdentity(),
+                                msg.getRelativeAlignment(),
+                                msg.getRelativeDirection(),
+                                msg.getRelativeDistance()))
+                        .collect(Collectors.toList());
+                Feedback feedback = new Feedback(feedbackMsg.getTimestamp().totalNsecs(), topologies);
+                listener.onFeedbackChange(feedback);
+            }
+        });
     }
 
     @Override
@@ -88,5 +110,10 @@ public class RosTopNavService implements IRosTopnavService {
         Float64 message = publisher.newMessage();
         message.setData(rotation);
         publisher.publish(message);
+    }
+
+    @Override
+    public void setOnFeedbackChangeListener(OnFeedbackChangeListener listener) {
+        this.listener = listener;
     }
 }

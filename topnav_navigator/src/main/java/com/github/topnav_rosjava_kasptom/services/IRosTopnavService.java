@@ -11,4 +11,6 @@ public interface IRosTopnavService {
     void stopStrategy(String strategyName);
 
     void changeCameraDirection(RelativeDirection relativeDirection);
+
+    void setOnFeedbackChangeListener(OnFeedbackChangeListener listener);
 }
