@@ -95,27 +95,10 @@ public class RosTopNavService implements IRosTopnavService {
 
     @Override
     public void changeCameraDirection(RelativeDirection relativeDirection) {
-        Publisher<Float64> publisher = navigationNode.getCameraDirectionPublisher();
+        Publisher<std_msgs.String> publisher = navigationNode.getCameraDirectionPublisher();
 
-        double rotation;
-
-        switch (relativeDirection) {
-            case AHEAD:
-                rotation = 0.0;
-                break;
-            case AT_LEFT:
-                rotation = Math.PI / 2;
-                break;
-            case AT_RIGHT:
-                rotation = -Math.PI / 2;
-                break;
-            default:
-                rotation = 0.0;
-                break;
-        }
-
-        Float64 message = publisher.newMessage();
-        message.setData(rotation);
+        std_msgs.String message = publisher.newMessage();
+        message.setData(relativeDirection.name());
         publisher.publish(message);
     }
 

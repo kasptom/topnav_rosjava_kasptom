@@ -11,12 +11,11 @@ import std_msgs.Float64;
 import topnav_msgs.FeedbackMsg;
 import topnav_msgs.GuidelineMsg;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.HEAD_JOINT_TOPIC;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.TOPNAV_FEEDBACK_TOPIC;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.*;
 
 public class NavigationNode extends AbstractNodeMain implements INavigationNode {
     private Publisher<GuidelineMsg> guidelinePublisher;
-    private Publisher<Float64> cameraDirectionPublisher;
+    private Publisher<std_msgs.String> cameraDirectionPublisher;
     private Subscriber<FeedbackMsg> feedbackSubscriber;
     private MessageListener<FeedbackMsg> feedbackMessageListener;
 
@@ -29,7 +28,7 @@ public class NavigationNode extends AbstractNodeMain implements INavigationNode 
     public void onStart(ConnectedNode connectedNode) {
         Log log = connectedNode.getLog();
         guidelinePublisher = connectedNode.newPublisher("topnav/guidelines", GuidelineMsg._TYPE);
-        cameraDirectionPublisher = connectedNode.newPublisher(HEAD_JOINT_TOPIC, Float64._TYPE);
+        cameraDirectionPublisher = connectedNode.newPublisher(TOPNAV_NAVIGATION_HEAD_DIRECTION_TOPIC, std_msgs.String._TYPE);
 
         feedbackSubscriber = connectedNode.newSubscriber(TOPNAV_FEEDBACK_TOPIC, FeedbackMsg._TYPE);
         feedbackSubscriber.addMessageListener(feedbackMessageListener);
@@ -40,11 +39,11 @@ public class NavigationNode extends AbstractNodeMain implements INavigationNode 
         this.feedbackMessageListener = feedbackMsgMessageListener;
     }
 
-    public Publisher<GuidelineMsg> getGuidelinePublisher() {
+    Publisher<GuidelineMsg> getGuidelinePublisher() {
         return guidelinePublisher;
     }
 
-    public Publisher<Float64> getCameraDirectionPublisher() {
+    Publisher<std_msgs.String> getCameraDirectionPublisher() {
         return cameraDirectionPublisher;
     }
 }

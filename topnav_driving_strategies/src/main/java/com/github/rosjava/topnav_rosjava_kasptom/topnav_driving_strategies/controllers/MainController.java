@@ -74,6 +74,7 @@ public class MainController implements IMainController {
 
     private void selectStrategy(String strategyName) {
         tearDownDrivingStrategy();
+        headController.onStrategyStatusChange(strategyName);
 
         if (DRIVING_STRATEGY_IDLE.equals(strategyName)) {
             log.info("Set to idle state");

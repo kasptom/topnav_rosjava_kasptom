@@ -25,12 +25,15 @@ public class HeadController implements IHeadController {
         drivingHeadRotationSubscriber = connectedNode.newSubscriber(TOPNAV_STRATEGY_HEAD_DIRECTION_TOPIC, std_msgs.String._TYPE);
         navigationHeadRotationSubscriber = connectedNode.newSubscriber(TOPNAV_NAVIGATION_HEAD_DIRECTION_TOPIC, std_msgs.String._TYPE);
 
+        drivingHeadRotationSubscriber.addMessageListener(message -> handleStrategyHeadRotationChange(RelativeDirectionUtils.convertMessageToRelativeDirection(message)));
+        navigationHeadRotationSubscriber.addMessageListener(message -> handleNavigationHeadRotationChange(RelativeDirectionUtils.convertMessageToRelativeDirection(message)));
+
         headRotationPublisher = connectedNode.newPublisher(HEAD_JOINT_TOPIC, Float64._TYPE);
     }
 
     @Override
     public void handleStrategyHeadRotationChange(RelativeDirection relativeDirection) {
-        changeHeadRotation(relativeDirection);
+        publishHeadRotationChange(relativeDirection);
     }
 
     @Override
@@ -38,24 +41,20 @@ public class HeadController implements IHeadController {
         if (!isIdle) {
             return;
         }
-        changeHeadRotation(relativeDirection);
+        publishHeadRotationChange(relativeDirection);
     }
 
     @Override
     public void publishHeadRotationChange(RelativeDirection relativeDirection) {
-
+        double rotationDegrees = RelativeDirectionUtils.convertRelativeDirectionToAngleDegrees(relativeDirection);
+        double rotationRads = rotationDegrees * Math.PI / 180.0;
+        Float64 rotationMsg = headRotationPublisher.newMessage();
+        rotationMsg.setData(rotationRads);
+        headRotationPublisher.publish(rotationMsg);
     }
 
     @Override
     public void onStrategyStatusChange(String strategyName) {
         isIdle = DrivingStrategy.DRIVING_STRATEGY_IDLE.equals(strategyName);
-    }
-
-    private void changeHeadRotation(RelativeDirection direction) {
-        double rotationDegrees = RelativeDirectionUtils.convertRelativeDirectionToAngleDegrees(direction);
-        double rotationRads = rotationDegrees * Math.PI / 180.0;
-        Float64 rotationMsg = headRotationPublisher.newMessage();
-        rotationMsg.setData(rotationRads);
-        headRotationPublisher.publish(rotationMsg);
     }
 }
