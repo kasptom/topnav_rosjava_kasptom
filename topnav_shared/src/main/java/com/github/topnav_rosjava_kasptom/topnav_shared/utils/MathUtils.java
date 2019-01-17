@@ -1,4 +1,4 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils;
+package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
 import java.util.Arrays;
 

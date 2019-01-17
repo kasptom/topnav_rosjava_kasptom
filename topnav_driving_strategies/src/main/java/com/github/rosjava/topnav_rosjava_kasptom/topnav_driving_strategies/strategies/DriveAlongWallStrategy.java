@@ -1,13 +1,13 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.HoughCell;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.HoughUtils;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.HoughUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
+import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
@@ -16,20 +16,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
+
 public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     private final Log log;
     private static final WheelsVelocities ZERO_VELOCITY = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
-    private double TOO_CLOSE_RANGE = 0.3;
-
-    private static final double BASE_VELOCITY = 2.0;
-    private static final double MAX_VELOCITY_DELTA = 2.0;
-
-    private static final double PARALLEL_TO_LEFT_WALL_ANGLE = 270;
-    private static final double AHEAD_THE_WALL = 180;
 
     private WheelsVelocitiesChangeListener listener;
-    private HeadRotationListener headRotationListener;
 
     private int lineDetectionThreshold = 8;
 
@@ -113,13 +107,11 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     }
 
     @Override
-    public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
-        this.listener = listener;
+    public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
     }
 
     @Override
-    public void setHeadRotationListener(HeadRotationListener listener) {
-        this.headRotationListener = listener;
+    public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
+        this.listener = listener;
     }
-
 }

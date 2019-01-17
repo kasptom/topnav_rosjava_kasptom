@@ -1,13 +1,13 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.HoughCell;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.HoughUtils;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.HoughUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
+import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
@@ -15,13 +15,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class HoughLineTestStrategy implements IDrivingStrategy {
 
     private final Log log;
     private static final WheelsVelocities ZERO_VELOCITY = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
 
     private WheelsVelocitiesChangeListener wheelsListener;
-    private HeadRotationListener headRotationListener;
 
     private int lineDetectionThreshold = 5;
 
@@ -107,13 +107,11 @@ public class HoughLineTestStrategy implements IDrivingStrategy {
     }
 
     @Override
-    public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
-        this.wheelsListener = listener;
-    }
+    public void handleDetectionMessage(FeedbackMsg feedbackMsg) {}
 
     @Override
-    public void setHeadRotationListener(HeadRotationListener listener) {
-        this.headRotationListener = listener;
+    public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
+        this.wheelsListener = listener;
     }
 
     private void refreshRateCheck() {

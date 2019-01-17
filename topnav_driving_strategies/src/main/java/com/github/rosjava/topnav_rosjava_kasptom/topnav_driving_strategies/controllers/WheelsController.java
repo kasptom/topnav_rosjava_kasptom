@@ -2,27 +2,24 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.PassThroughDoorStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import std_msgs.Float64;
-import topnav_msgs.AngleRangesMsg;
-import topnav_msgs.GuidelineMsg;
-import topnav_msgs.HoughAcc;
-import topnav_msgs.TopNavConfigMsg;
+import topnav_msgs.*;
 
 import java.util.*;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.*;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.HEAD_JOINT_TOPIC;
 
-public class WheelsController {
+public class WheelsController implements IWheelsController {
     private LinkedHashMap<String, Publisher<Float64>> wheelPublishersMap;
-    private Publisher<Float64> headRotationPublisher;
 
     private final Subscriber<GuidelineMsg> guidelineSubscriber;
+    private final Subscriber<FeedbackMsg> markerDetectionSubscriber;
     private final Subscriber<TopNavConfigMsg> configMsgSubscriber;
     private final Subscriber<AngleRangesMsg> angleRangesMsgSubscriber;
     private final Subscriber<HoughAcc> houghAccSubscriber;
@@ -46,6 +43,7 @@ public class WheelsController {
         configMsgSubscriber = connectedNode.newSubscriber("topnav/config", TopNavConfigMsg._TYPE);
         angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
         houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
+        markerDetectionSubscriber = connectedNode.newSubscriber("topnav/feedback", FeedbackMsg._TYPE);
 
         guidelineSubscriber = connectedNode.newSubscriber("topnav/guidelines", GuidelineMsg._TYPE);
 
@@ -59,6 +57,7 @@ public class WheelsController {
     private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies) {
         drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL, new DriveAlongWallStrategy(this.log));
         drivingStrategies.put(DRIVING_STRATEGY_STOP_BEFORE_WALL, new StopBeforeWallStrategy(this.log));
+        drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR, new PassThroughDoorStrategy(this.log));
         drivingStrategies.values().forEach(strategy -> strategy.setWheelsVelocitiesListener(this::setVelocities));
     }
 
@@ -75,16 +74,15 @@ public class WheelsController {
         for (String topicName : WHEEL_JOINT_NAMES) {
             wheelPublishersMap.put(topicName, connectedNode.newPublisher(topicName, Float64._TYPE));
         }
-
-        headRotationPublisher = connectedNode.newPublisher(HEAD_JOINT_TOPIC, Float64._TYPE);
     }
 
     private void setUpDrivingStrategy(IDrivingStrategy drivingStrategy) {
         drivingStrategy.setWheelsVelocitiesListener(this::setVelocities);
-        drivingStrategy.setHeadRotationListener(this::changeHeadRotation);
+
         configMsgSubscriber.addMessageListener(drivingStrategy::handleConfigMessage);
         angleRangesMsgSubscriber.addMessageListener(drivingStrategy::handleAngleRangeMessage);
         houghAccSubscriber.addMessageListener(drivingStrategy::handleHoughAccMessage);
+        markerDetectionSubscriber.addMessageListener(drivingStrategy::handleDetectionMessage);
     }
 
     private void selectStrategy(String strategyName) {
@@ -108,6 +106,7 @@ public class WheelsController {
         this.configMsgSubscriber.removeAllMessageListeners();
         this.angleRangesMsgSubscriber.removeAllMessageListeners();
         this.houghAccSubscriber.removeAllMessageListeners();
+        this.markerDetectionSubscriber.removeAllMessageListeners();
     }
 
     private void setVelocities(WheelsVelocities wheelsVelocities) {
@@ -136,13 +135,6 @@ public class WheelsController {
         for (String topicName : wheelPublishersMap.keySet()) {
             wheelPublishersMap.get(topicName).publish(messages.get(i++));
         }
-    }
-
-    private void changeHeadRotation(double rotationDegrees) {
-        double rotationRads = rotationDegrees * Math.PI / 180.0;
-        Float64 rotationMsg = headRotationPublisher.newMessage();
-        rotationMsg.setData(rotationRads);
-        headRotationPublisher.publish(rotationMsg);
     }
 
     private boolean isVelocityChanged(WheelsVelocities wheelsVelocities, WheelsVelocities currentVelocity) {
