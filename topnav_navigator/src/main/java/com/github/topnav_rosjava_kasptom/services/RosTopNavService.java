@@ -13,6 +13,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
 import std_msgs.Float64;
+import topnav_msgs.FeedbackMsg;
 import topnav_msgs.GuidelineMsg;
 
 import java.util.List;
@@ -20,14 +21,29 @@ import java.util.stream.Collectors;
 
 public class RosTopNavService implements IRosTopnavService {
 
+    private static IRosTopnavService instance;
+
+    private boolean isInitialized;
+    private boolean isDestroyed;
+
     private NavigationNode navigationNode;
     private OnFeedbackChangeListener listener;
 
-    public RosTopNavService() {
+    public static IRosTopnavService getInstance() {
+        if (instance == null) {
+            instance = new RosTopNavService();
+        }
+        return instance;
     }
 
     @Override
     public void onInit() {
+        if (isInitialized) {
+            return;
+        }
+
+        isInitialized = true;
+
         CommandLineLoader loader = new CommandLineLoader(Lists.newArrayList(NavigationNode.class.getCanonicalName()));
         String nodeClassName = loader.getNodeClassName();
         System.out.println("Loading node class: " + loader.getNodeClassName());
@@ -35,35 +51,26 @@ public class RosTopNavService implements IRosTopnavService {
 
         try {
             navigationNode = (NavigationNode) loader.loadClass(nodeClassName);
-        } catch (ClassNotFoundException var6) {
-            throw new RosRuntimeException("Unable to locate node: " + nodeClassName, var6);
-        } catch (InstantiationException | IllegalAccessException var7) {
-            throw new RosRuntimeException("Unable to instantiate node: " + nodeClassName, var7);
+        } catch (ClassNotFoundException classNotFoundExc) {
+            throw new RosRuntimeException("Unable to locate node: " + nodeClassName, classNotFoundExc);
+        } catch (InstantiationException | IllegalAccessException exception) {
+            throw new RosRuntimeException("Unable to instantiate node: " + nodeClassName, exception);
         }
 
         Preconditions.checkState(navigationNode != null);
         NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
         nodeMainExecutor.execute(navigationNode, nodeConfiguration);
 
-        navigationNode.setFeedbackMessageListener(feedbackMsg -> {
-            if (listener != null) {
-                List<Topology> topologies = feedbackMsg.getTopologies()
-                        .stream()
-                        .map(msg -> new Topology(
-                                msg.getTimestamp().totalNsecs(),
-                                msg.getIdentity(),
-                                msg.getRelativeAlignment(),
-                                msg.getRelativeDirection(),
-                                msg.getRelativeDistance()))
-                        .collect(Collectors.toList());
-                Feedback feedback = new Feedback(feedbackMsg.getTimestamp().totalNsecs(), topologies);
-                listener.onFeedbackChange(feedback);
-            }
-        });
+        navigationNode.setFeedbackMessageListener(this::convertAndPassToListener);
     }
 
     @Override
     public void onDestroy() {
+        if (isDestroyed) {
+            return;
+        }
+        isDestroyed = true;
+        //
     }
 
     @Override
@@ -115,5 +122,23 @@ public class RosTopNavService implements IRosTopnavService {
     @Override
     public void setOnFeedbackChangeListener(OnFeedbackChangeListener listener) {
         this.listener = listener;
+    }
+
+    private RosTopNavService() {}
+
+    private void convertAndPassToListener(FeedbackMsg feedbackMsg) {
+        if (listener != null) {
+            List<Topology> topologies = feedbackMsg.getTopologies()
+                    .stream()
+                    .map(msg -> new Topology(
+                            msg.getTimestamp().totalNsecs(),
+                            msg.getIdentity(),
+                            msg.getRelativeAlignment(),
+                            msg.getRelativeDirection(),
+                            msg.getRelativeDistance()))
+                    .collect(Collectors.toList());
+            Feedback feedback = new Feedback(feedbackMsg.getTimestamp().totalNsecs(), topologies);
+            listener.onFeedbackChange(feedback);
+        }
     }
 }

@@ -15,7 +15,7 @@ public class GuidelinePresenter implements IGuidelinePresenter {
     private String strategyName = DRIVING_STRATEGY_IDLE;
 
     public GuidelinePresenter(IGuidelineView view) {
-        this.rosTopnavService = new RosTopNavService();
+        this.rosTopnavService = RosTopNavService.getInstance();
         this.view = view;
     }
 

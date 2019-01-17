@@ -1,5 +1,6 @@
 package com.github.topnav_rosjava_kasptom.components.topnav_navigator.view;
 
+import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter.GuidelinePresenter;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter.IGuidelinePresenter;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
@@ -75,7 +76,7 @@ public class GuidelineView implements IGuidelineView, Initializable {
     }
 
     @Override
-    public IGuidelinePresenter getPresenter() {
+    public IBasePresenter getPresenter() {
         return presenter;
     }
 

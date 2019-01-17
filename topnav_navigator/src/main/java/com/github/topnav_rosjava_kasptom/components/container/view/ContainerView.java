@@ -11,7 +11,8 @@ public class ContainerView implements IContainerView {
     private IGuidelineView guidelineController;
 
     @FXML
-    private IFeedbackView feedbackView;
+    @SuppressWarnings("unused")
+    private IFeedbackView feedbackController;
 
     @Override
     public IGuidelineView getGuideLineView() {
@@ -20,6 +21,6 @@ public class ContainerView implements IContainerView {
 
     @Override
     public IFeedbackView getFeedbackView() {
-        return feedbackView;
+        return feedbackController;
     }
 }

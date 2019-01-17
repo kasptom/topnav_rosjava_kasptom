@@ -12,7 +12,9 @@
         <!-- guideline ==> @FXML guidelineView -->
         <fx:include fx:id="guideline" source="view_guideline.fxml"/>
 
-        <fx:include source="view_feedback.fxml"/>
+        <!--suppress JavaFxUnresolvedFxIdReference -->
+        <!-- feedback ==> @FXML feedbackView -->
+        <fx:include fx:id="feedback" source="view_feedback.fxml"/>
     </HBox>
 
 

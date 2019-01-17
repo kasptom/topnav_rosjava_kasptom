@@ -1,6 +1,8 @@
 package com.github.topnav_rosjava_kasptom;
 
+import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 import com.github.topnav_rosjava_kasptom.components.container.view.IContainerView;
+import com.github.topnav_rosjava_kasptom.components.feedback.presenter.IFeedbackPresenter;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter.IGuidelinePresenter;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -9,7 +11,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class NavigationApp extends Application {
-    private IGuidelinePresenter presenter;
+    private IBasePresenter guidelinePresenter;
+    private IBasePresenter feedbackPresenter;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -17,9 +20,7 @@ public class NavigationApp extends Application {
         Parent root = loader.load();
         Scene scene = new Scene(root, 640, 480);
 
-        // FIXME DI
-        presenter = ((IContainerView) loader.getController()).getGuideLineView().getPresenter();
-        presenter.onInit();
+        initPresenters(loader);
 
         primaryStage.setTitle("Navigation app");
         primaryStage.setScene(scene);
@@ -28,7 +29,17 @@ public class NavigationApp extends Application {
 
     @Override
     public void stop() throws Exception {
-        this.presenter.onDestroy();
+        this.guidelinePresenter.onDestroy();
+        this.feedbackPresenter.onDestroy();
         super.stop();
+    }
+
+    private void initPresenters(FXMLLoader loader) throws InterruptedException {
+        // FIXME DI
+        guidelinePresenter = ((IContainerView) loader.getController()).getGuideLineView().getPresenter();
+        guidelinePresenter.onInit();
+
+        feedbackPresenter = ((IContainerView) loader.getController()).getFeedbackView().getPresenter();
+        feedbackPresenter.onInit();
     }
 }
