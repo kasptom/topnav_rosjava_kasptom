@@ -1,9 +1,8 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IHeadController;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IWheelsController;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsController;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IMainController;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.MainController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navigation.MarkerMessageHandler;
 import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
@@ -22,7 +21,7 @@ import topnav_msgs.MarkersMsg;
 @SuppressWarnings("unused")
 public class MainControllerNode extends AbstractNodeMain {
 
-    private IWheelsController wheelsController;
+    private IMainController wheelsController;
     private Subscriber<MarkersMsg> markersMsgSubscriber;
     private Publisher<FeedbackMsg> feedbackPublisher;
     private IHeadController headController;
@@ -35,8 +34,7 @@ public class MainControllerNode extends AbstractNodeMain {
     @Override
     public void onStart(ConnectedNode connectedNode) {
         Log log = connectedNode.getLog();
-        wheelsController = new WheelsController(connectedNode);
-        headController = new HeadController(connectedNode);
+        wheelsController = new MainController(connectedNode);
 
         feedbackPublisher = connectedNode.newPublisher("topnav/feedback", FeedbackMsg._TYPE);
         markersMsgSubscriber = connectedNode.newSubscriber("capo/camera/aruco", MarkersMsg._TYPE);

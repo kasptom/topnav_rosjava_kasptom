@@ -15,4 +15,6 @@ public interface IDrivingStrategy {
     void handleDetectionMessage(FeedbackMsg feedbackMsg);
 
     void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener);
+
+    void setHeadRotationChangeListener(HeadRotationChangeListener listener);
 }

@@ -2,6 +2,7 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.RelativeDirectionUtils;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
@@ -18,7 +19,7 @@ public class HeadController implements IHeadController {
     private boolean isIdle = true;
     private Publisher<Float64> headRotationPublisher;
 
-    public HeadController(ConnectedNode connectedNode) {
+    HeadController(ConnectedNode connectedNode) {
         log = connectedNode.getLog();
 
         drivingHeadRotationSubscriber = connectedNode.newSubscriber(TOPNAV_STRATEGY_HEAD_DIRECTION_TOPIC, std_msgs.String._TYPE);
@@ -29,7 +30,7 @@ public class HeadController implements IHeadController {
 
     @Override
     public void handleStrategyHeadRotationChange(RelativeDirection relativeDirection) {
-
+        changeHeadRotation(relativeDirection);
     }
 
     @Override
@@ -37,8 +38,7 @@ public class HeadController implements IHeadController {
         if (!isIdle) {
             return;
         }
-
-
+        changeHeadRotation(relativeDirection);
     }
 
     @Override
@@ -51,7 +51,8 @@ public class HeadController implements IHeadController {
         isIdle = DrivingStrategy.DRIVING_STRATEGY_IDLE.equals(strategyName);
     }
 
-    private void changeHeadRotation(double rotationDegrees) {
+    private void changeHeadRotation(RelativeDirection direction) {
+        double rotationDegrees = RelativeDirectionUtils.convertRelativeDirectionToAngleDegrees(direction);
         double rotationRads = rotationDegrees * Math.PI / 180.0;
         Float64 rotationMsg = headRotationPublisher.newMessage();
         rotationMsg.setData(rotationRads);
