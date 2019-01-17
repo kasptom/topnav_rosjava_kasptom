@@ -1,5 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.HoughCell;
@@ -19,7 +20,8 @@ public class HoughLineTestStrategy implements IDrivingStrategy {
     private final Log log;
     private static final WheelsVelocities ZERO_VELOCITY = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
 
-    private WheelsVelocitiesChangeListener listener;
+    private WheelsVelocitiesChangeListener wheelsListener;
+    private HeadRotationListener headRotationListener;
 
     private int lineDetectionThreshold = 5;
 
@@ -53,7 +55,7 @@ public class HoughLineTestStrategy implements IDrivingStrategy {
                 cell.getRange(), cell.getAngleDegrees(), cell.getVotes())));
 
         WheelsVelocities wheelsVelocities = logStatistics(houghCells);
-        listener.onWheelsVelocitiesChanged(wheelsVelocities);
+        wheelsListener.onWheelsVelocitiesChanged(wheelsVelocities);
     }
 
     private int counter = 0;
@@ -106,7 +108,12 @@ public class HoughLineTestStrategy implements IDrivingStrategy {
 
     @Override
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
-        this.listener = listener;
+        this.wheelsListener = listener;
+    }
+
+    @Override
+    public void setHeadRotationListener(HeadRotationListener listener) {
+        this.headRotationListener = listener;
     }
 
     private void refreshRateCheck() {

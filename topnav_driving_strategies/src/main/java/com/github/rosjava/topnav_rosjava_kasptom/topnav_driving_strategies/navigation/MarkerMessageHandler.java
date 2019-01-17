@@ -1,18 +1,30 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navigation;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.MarkerDetection;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.FeedbackUtils;
 import org.ros.message.MessageListener;
+import org.ros.node.topic.Publisher;
+import topnav_msgs.FeedbackMsg;
 import topnav_msgs.MarkerMsg;
 import topnav_msgs.MarkersMsg;
 
 import java.util.HashMap;
 
 public class MarkerMessageHandler implements MessageListener<MarkersMsg> {
+    private final Publisher<FeedbackMsg> feedbackPublisher;
     private HashMap<String, Long> previousTimeStamp = new HashMap<>();
+
+    public MarkerMessageHandler(Publisher<FeedbackMsg> feedbackPublisher) {
+        this.feedbackPublisher = feedbackPublisher;
+    }
 
     @Override
     public void onNewMessage(MarkersMsg markersMsg) {
-        markersMsg.getMarkers().forEach(this::printMarkerMessage);
+        long currentTimeStamp = System.nanoTime();
+        FeedbackMsg feedbackMsg = feedbackPublisher.newMessage();
+        FeedbackUtils.fillInFeedbackMsg(feedbackMsg, markersMsg, currentTimeStamp);
+        feedbackPublisher.publish(feedbackMsg);
+//        markersMsg.getMarkers().forEach(this::printMarkerMessage);
     }
 
     private void printMarkerMessage(MarkerMsg markerMsg) {

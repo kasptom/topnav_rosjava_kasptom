@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.BorderPane?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.github.topnav_rosjava_kasptom.components.feedback.view.FeedbackView"
+            prefHeight="400.0" prefWidth="300.0">
+
+    <center>
+        <ListView fx:id="listDetections">
+        </ListView>
+    </center>
+</BorderPane>

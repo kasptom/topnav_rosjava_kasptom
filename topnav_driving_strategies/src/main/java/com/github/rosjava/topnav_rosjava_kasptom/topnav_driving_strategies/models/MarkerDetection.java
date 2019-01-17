@@ -1,5 +1,8 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models;
 
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeAlignment;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDistance;
+
 public class MarkerDetection {
     private String id;
     private final double[] cameraPosition = new double[3];
@@ -40,6 +43,3 @@ public class MarkerDetection {
     }
 }
 
-enum RelativeDirection {
-    AHEAD, AT_RIGHT, BEHIND, AT_LEFT, UNDEFINED
-}

@@ -15,3 +15,5 @@
  */
 
 include 'topnav_driving_strategies'
+include 'topnav_navigator'
+include 'topnav_shared'

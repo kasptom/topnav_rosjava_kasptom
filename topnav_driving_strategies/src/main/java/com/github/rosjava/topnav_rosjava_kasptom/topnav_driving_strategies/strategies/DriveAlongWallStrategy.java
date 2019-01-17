@@ -1,11 +1,11 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.HoughCell;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.HoughUtils;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.MathUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.HoughAcc;
@@ -29,6 +29,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     private static final double AHEAD_THE_WALL = 180;
 
     private WheelsVelocitiesChangeListener listener;
+    private HeadRotationListener headRotationListener;
 
     private int lineDetectionThreshold = 8;
 
@@ -115,4 +116,10 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
         this.listener = listener;
     }
+
+    @Override
+    public void setHeadRotationListener(HeadRotationListener listener) {
+        this.headRotationListener = listener;
+    }
+
 }

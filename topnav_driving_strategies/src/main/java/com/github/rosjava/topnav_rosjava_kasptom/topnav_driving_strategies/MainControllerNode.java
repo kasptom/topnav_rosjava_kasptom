@@ -1,13 +1,16 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navigation.MarkerMessageHandler;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
 import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
+import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import topnav_msgs.FeedbackMsg;
+import topnav_msgs.GuidelineMsg;
 import topnav_msgs.MarkersMsg;
 
 //import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.HoughLineTestStrategy;
@@ -19,6 +22,7 @@ public class MainControllerNode extends AbstractNodeMain {
 
     private WheelsController wheelsController;
     private Subscriber<MarkersMsg> markersMsgSubscriber;
+    private Publisher<FeedbackMsg> feedbackPublisher;
 
     @Override
     public GraphName getDefaultNodeName() {
@@ -28,10 +32,11 @@ public class MainControllerNode extends AbstractNodeMain {
     @Override
     public void onStart(ConnectedNode connectedNode) {
         Log log = connectedNode.getLog();
-        IDrivingStrategy drivingStrategy = new DriveAlongWallStrategy(log);
-        wheelsController = new WheelsController(drivingStrategy, connectedNode);
+        wheelsController = new WheelsController(connectedNode);
+
+        feedbackPublisher = connectedNode.newPublisher("topnav/feedback", FeedbackMsg._TYPE);
         markersMsgSubscriber = connectedNode.newSubscriber("capo/camera/aruco", MarkersMsg._TYPE);
-        markersMsgSubscriber.addMessageListener(new MarkerMessageHandler());
+        markersMsgSubscriber.addMessageListener(new MarkerMessageHandler(feedbackPublisher));
     }
 
     @Override
