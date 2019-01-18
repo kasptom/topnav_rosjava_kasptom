@@ -2,6 +2,7 @@ package com.github.topnav_rosjava_kasptom.topnav_shared.constants;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 public class DrivingStrategy {
     public static final String DRIVING_STRATEGY_IDLE = "DS_IDLE";
@@ -15,9 +16,14 @@ public class DrivingStrategy {
             DRIVING_STRATEGY_PASS_THROUGH_DOOR));
 
     class ThroughDoor {
-        public static final String KEY_FRONT_LEFT_MARKER_ID = "DS_KEY_PASS_THROUGH_DOOR_FRONT_LEFT_MARKER_ID";
-        public static final String KEY_FRONT_RIGHT_MARKER_ID = "DS_KEY_PASS_THROUGH_DOOR_FRONT_RIGHT_MARKER_ID";
-        public static final String KEY_BACK_LEFT_MARKER_ID = "DS_KEY_PASS_THROUGH_DOOR_BACK_LEFT_MARKER_ID";
-        public static final String KEY_BACK_RIGHT_MARKER_ID = "DS_KEY_PASS_THROUGH_DOOR_BACK_RIGHT_MARKER_ID";
+        public static final String KEY_FRONT_LEFT_MARKER_ID = "DS_PARAM_FRONT_LEFT_MARKER_ID";
+        public static final String KEY_FRONT_RIGHT_MARKER_ID = "DS_PARAM_FRONT_RIGHT_MARKER_ID";
+        public static final String KEY_BACK_LEFT_MARKER_ID = "DS_PARAM_BACK_LEFT_MARKER_ID";
+        public static final String KEY_BACK_RIGHT_MARKER_ID = "DS_PARAM_BACK_RIGHT_MARKER_ID";
     }
+
+    public static final List<String> PARAM_NAMES = Arrays.asList(ThroughDoor.KEY_FRONT_LEFT_MARKER_ID,
+            ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID,
+            ThroughDoor.KEY_BACK_LEFT_MARKER_ID,
+            ThroughDoor.KEY_BACK_RIGHT_MARKER_ID);
 }

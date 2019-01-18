@@ -4,15 +4,20 @@ import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter.GuidelinePresenter;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter.IGuidelinePresenter;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class GuidelineView implements IGuidelineView, Initializable {
 
@@ -38,6 +43,12 @@ public class GuidelineView implements IGuidelineView, Initializable {
 
     @FXML
     public Button buttonLookRight;
+
+    @FXML
+    public VBox strategyParamsContainer;
+
+    @FXML
+    public ChoiceBox<String> parametersSelector;
 
     public GuidelineView() {
         this.presenter = new GuidelinePresenter(this);
@@ -73,6 +84,10 @@ public class GuidelineView implements IGuidelineView, Initializable {
         strategiesSelector.getItems()
                 .addAll(DrivingStrategy.DRIVING_STRATEGIES);
         strategiesSelector.getSelectionModel().selectFirst();
+
+        parametersSelector.getItems()
+                .addAll(DrivingStrategy.PARAM_NAMES);
+        parametersSelector.getSelectionModel().selectFirst();
     }
 
     @Override
@@ -91,13 +106,51 @@ public class GuidelineView implements IGuidelineView, Initializable {
     }
 
     @Override
-    public void onAddParam(String name) {
+    public void onAddParam() {
+        HBox paramEntryBox = new HBox();
+        TextField nameTextField = new TextField("Name");
+        TextField valueTextField = new TextField("Value");
 
+        String paramName = parametersSelector.getValue();
+        nameTextField.setText(paramName);
+        nameTextField.setEditable(false);
+
+        nameTextField.setPrefWidth(100);
+        valueTextField.setPrefWidth(100);
+
+        paramEntryBox.getChildren()
+                .add(nameTextField);
+        paramEntryBox.getChildren()
+                .add(valueTextField);
+
+        strategyParamsContainer
+                .getChildren()
+                .add(paramEntryBox);
     }
 
     @Override
-    public void onRemoveParam(String name) {
+    public void onRemoveParam() {
+        if (strategyParamsContainer.getChildren().isEmpty()) {
+            return;
+        }
 
+        strategyParamsContainer.getChildren()
+                .remove(strategyParamsContainer.getChildren().size() - 1);
+    }
+
+    @Override
+    public List<GuidelineParam> getGuidelineParams() {
+        return strategyParamsContainer
+                .getChildren()
+                .stream()
+                .map(hBox -> {
+                    String paramName = ((TextField) ((HBox) hBox).getChildren()
+                            .get(0)).getText();
+                    String paramValue = ((TextField) ((HBox) hBox).getChildren()
+                            .get(1)).getText();
+                    return new GuidelineParam(paramName, paramValue, "String");
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -114,5 +167,15 @@ public class GuidelineView implements IGuidelineView, Initializable {
         String optionName = this.strategiesSelector.getSelectionModel().getSelectedItem();
         System.out.println(optionName);
         onSelectStrategy(optionName);
+    }
+
+    @FXML
+    public void onAddClicked() {
+        onAddParam();
+    }
+
+    @FXML
+    public void onRemoveClicked() {
+        onRemoveParam();
     }
 }

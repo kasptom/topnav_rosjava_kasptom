@@ -22,4 +22,14 @@ public class GuidelineUtils {
         guidelineParamsMap.clear();
         paramToValue.forEach(param -> guidelineParamsMap.put(param.getName(), param));
     }
+
+    public static List<String> convertToStrings(List<GuidelineParam> guideLineParams) {
+        return guideLineParams
+                .stream()
+                .map(guidelineParam -> String.format("%s;%s;%s",
+                        guidelineParam.getName(),
+                        guidelineParam.getValue(),
+                        guidelineParam.getType()))
+                .collect(Collectors.toList());
+    }
 }

@@ -10,11 +10,8 @@
         <Insets top="25" right="25" bottom="10" left="25"/>
     </padding>
 
-    <TextField
-            fx:id="commandInput"
-            GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
     <HBox spacing="10"
+          alignment="CENTER"
           GridPane.columnIndex="1"
           GridPane.rowIndex="2">
         <Button text="Look ahead"
@@ -47,6 +44,28 @@
 
     <HBox spacing="10" alignment="bottom_center"
           GridPane.columnIndex="1" GridPane.rowIndex="5">
+        <Label text="Strategy parameters">
+        </Label>
+        <Button onAction="#onAddClicked">+</Button>
+        <Button onAction="#onRemoveClicked">-</Button>
+    </HBox>
+
+    <ChoiceBox
+            GridPane.columnIndex="1" GridPane.rowIndex="6"
+            fx:id="parametersSelector">
+        <items>
+            <FXCollections
+                    fx:factory="observableArrayList">
+            </FXCollections>
+        </items>
+    </ChoiceBox>
+
+    <VBox GridPane.columnIndex="1" GridPane.rowIndex="7"
+          fx:id="strategyParamsContainer">
+    </VBox>
+
+    <HBox spacing="10" alignment="bottom_center"
+          GridPane.columnIndex="1" GridPane.rowIndex="8">
         <Button text="Start strategy"
                 fx:id="buttonStartStrategy"
                 onAction="#onStartStrategy"/>

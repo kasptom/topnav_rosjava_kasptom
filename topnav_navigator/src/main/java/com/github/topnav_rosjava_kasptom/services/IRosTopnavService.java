@@ -1,12 +1,15 @@
 package com.github.topnav_rosjava_kasptom.services;
 
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
+
+import java.util.List;
 
 public interface IRosTopnavService {
     void onInit();
     void onDestroy();
 
-    void startStrategy(String strategyName);
+    void startStrategy(String strategyName, List<GuidelineParam> guidelineParams);
 
     void stopStrategy(String strategyName);
 
