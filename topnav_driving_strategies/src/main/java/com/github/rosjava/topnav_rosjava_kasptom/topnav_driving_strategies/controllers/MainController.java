@@ -2,7 +2,7 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.PassThroughDoorStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
@@ -10,6 +10,7 @@ import org.ros.node.topic.Subscriber;
 import topnav_msgs.*;
 
 import java.util.HashMap;
+import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.*;
 
@@ -42,9 +43,9 @@ public class MainController implements IMainController {
         guidelineSubscriber = connectedNode.newSubscriber("topnav/guidelines", GuidelineMsg._TYPE);
 
         initializeDrivingStrategies(this.drivingStrategies);
-        selectStrategy(DRIVING_STRATEGY_IDLE);
+        selectStrategy(DRIVING_STRATEGY_IDLE, null);
 
-        guidelineSubscriber.addMessageListener(guidelineMsg -> this.selectStrategy(guidelineMsg.getGuidelineType()));
+        guidelineSubscriber.addMessageListener(guidelineMsg -> this.selectStrategy(guidelineMsg.getGuidelineType(), guidelineMsg.getParameters()));
     }
 
     private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies) {
@@ -62,9 +63,10 @@ public class MainController implements IMainController {
         wheelsController.setVelocities(new WheelsVelocities(0.0, 0.0, 0.0, 0.0));
     }
 
-    private void setUpDrivingStrategy(IDrivingStrategy drivingStrategy) {
+    private void setUpDrivingStrategy(IDrivingStrategy drivingStrategy, List<String> parameters) {
         drivingStrategy.setWheelsVelocitiesListener(wheelsController::setVelocities);
         drivingStrategy.setHeadRotationChangeListener(headController::handleNavigationHeadRotationChange);
+        drivingStrategy.setGuidelineParameters(parameters);
 
         configMsgSubscriber.addMessageListener(drivingStrategy::handleConfigMessage);
         angleRangesMsgSubscriber.addMessageListener(drivingStrategy::handleAngleRangeMessage);
@@ -72,7 +74,7 @@ public class MainController implements IMainController {
         markerDetectionSubscriber.addMessageListener(drivingStrategy::handleDetectionMessage);
     }
 
-    private void selectStrategy(String strategyName) {
+    private void selectStrategy(String strategyName, List<String> parameters) {
         tearDownDrivingStrategy();
         headController.onStrategyStatusChange(strategyName);
 
@@ -87,7 +89,7 @@ public class MainController implements IMainController {
             return;
         }
 
-        setUpDrivingStrategy(drivingStrategies.get(strategyName));
+        setUpDrivingStrategy(drivingStrategies.get(strategyName), parameters);
     }
 
     private void tearDownDrivingStrategy() {

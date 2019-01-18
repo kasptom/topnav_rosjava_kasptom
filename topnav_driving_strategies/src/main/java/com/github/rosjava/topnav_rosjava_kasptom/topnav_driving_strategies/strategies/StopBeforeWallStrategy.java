@@ -10,6 +10,8 @@ import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
+import java.util.List;
+
 public class StopBeforeWallStrategy implements IDrivingStrategy {
     private final Log log;
     private WheelsVelocitiesChangeListener listener;
@@ -54,5 +56,10 @@ public class StopBeforeWallStrategy implements IDrivingStrategy {
 
     @Override
     public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+    }
+
+    @Override
+    public void setGuidelineParameters(List<String> parameters) {
+
     }
 }

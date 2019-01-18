@@ -119,4 +119,8 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     @Override
     public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
     }
+
+    @Override
+    public void setGuidelineParameters(List<String> parameters) {
+    }
 }

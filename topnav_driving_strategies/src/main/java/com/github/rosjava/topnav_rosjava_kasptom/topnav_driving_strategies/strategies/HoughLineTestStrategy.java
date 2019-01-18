@@ -120,6 +120,11 @@ public class HoughLineTestStrategy implements IDrivingStrategy {
 
     }
 
+    @Override
+    public void setGuidelineParameters(List<String> parameters) {
+
+    }
+
     private void refreshRateCheck() {
         if (messageCounter == 0) {
             timeStamp = System.nanoTime();

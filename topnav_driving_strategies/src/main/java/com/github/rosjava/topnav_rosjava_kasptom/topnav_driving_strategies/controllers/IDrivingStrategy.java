@@ -5,6 +5,8 @@ import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
+import java.util.List;
+
 public interface IDrivingStrategy {
     void handleConfigMessage(TopNavConfigMsg configMsg);
 
@@ -17,4 +19,6 @@ public interface IDrivingStrategy {
     void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener);
 
     void setHeadRotationChangeListener(HeadRotationChangeListener listener);
+
+    void setGuidelineParameters(List<String> parameters);
 }

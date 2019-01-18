@@ -13,4 +13,11 @@ public class DrivingStrategy {
             DRIVING_STRATEGY_ALONG_WALL,
             DRIVING_STRATEGY_STOP_BEFORE_WALL,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR));
+
+    class ThroughDoor {
+        public static final String KEY_FRONT_LEFT_MARKER_ID = "DS_KEY_PASS_THROUGH_DOOR_FRONT_LEFT_MARKER_ID";
+        public static final String KEY_FRONT_RIGHT_MARKER_ID = "DS_KEY_PASS_THROUGH_DOOR_FRONT_RIGHT_MARKER_ID";
+        public static final String KEY_BACK_LEFT_MARKER_ID = "DS_KEY_PASS_THROUGH_DOOR_BACK_LEFT_MARKER_ID";
+        public static final String KEY_BACK_RIGHT_MARKER_ID = "DS_KEY_PASS_THROUGH_DOOR_BACK_RIGHT_MARKER_ID";
+    }
 }
