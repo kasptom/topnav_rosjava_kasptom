@@ -36,15 +36,6 @@ public class GuidelineView implements IGuidelineView, Initializable {
     public ChoiceBox<String> strategiesSelector;
 
     @FXML
-    public Button buttonLookAhead;
-
-    @FXML
-    public Button buttonLookLeft;
-
-    @FXML
-    public Button buttonLookRight;
-
-    @FXML
     public VBox strategyParamsContainer;
 
     @FXML
@@ -77,6 +68,11 @@ public class GuidelineView implements IGuidelineView, Initializable {
     @FXML
     public void onLookRight() {
         presenter.onChangeCameraDirection(RelativeDirection.AT_RIGHT);
+    }
+
+    @FXML
+    public void onLookBack() {
+        presenter.onChangeCameraDirection(RelativeDirection.BEHIND);
     }
 
     @Override
@@ -115,8 +111,8 @@ public class GuidelineView implements IGuidelineView, Initializable {
         nameTextField.setText(paramName);
         nameTextField.setEditable(false);
 
-        nameTextField.setPrefWidth(100);
-        valueTextField.setPrefWidth(100);
+        nameTextField.setPrefWidth(250);
+        valueTextField.setPrefWidth(50);
 
         paramEntryBox.getChildren()
                 .add(nameTextField);

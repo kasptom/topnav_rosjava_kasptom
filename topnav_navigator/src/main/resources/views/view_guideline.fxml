@@ -13,22 +13,27 @@
     <HBox spacing="10"
           alignment="CENTER"
           GridPane.columnIndex="1"
-          GridPane.rowIndex="2">
+          GridPane.rowIndex="1">
         <Button text="Look ahead"
-                fx:id="buttonLookAhead"
                 onAction="#onLookAhead"/>
     </HBox>
 
     <HBox spacing="10"
           GridPane.columnIndex="1"
-          GridPane.rowIndex="3">
+          GridPane.rowIndex="2">
         <Button text="Look left"
-                fx:id="buttonLookLeft"
                 onAction="#onLookLeft"/>
 
         <Button text="Look right"
-                fx:id="buttonLookRight"
                 onAction="#onLookRight"/>
+    </HBox>
+
+    <HBox spacing="10"
+          alignment="CENTER"
+          GridPane.columnIndex="1"
+          GridPane.rowIndex="3">
+        <Button text="Look back"
+                onAction="#onLookBack"/>
     </HBox>
 
     <ChoiceBox
@@ -42,23 +47,25 @@
         </items>
     </ChoiceBox>
 
-    <HBox spacing="10" alignment="bottom_center"
-          GridPane.columnIndex="1" GridPane.rowIndex="5">
-        <Label text="Strategy parameters">
-        </Label>
+    <HBox GridPane.columnIndex="1"
+          GridPane.rowIndex="6">
+        <ChoiceBox
+                fx:id="parametersSelector">
+            <items>
+                <FXCollections
+                        fx:factory="observableArrayList">
+                </FXCollections>
+            </items>
+        </ChoiceBox>
         <Button onAction="#onAddClicked">+</Button>
         <Button onAction="#onRemoveClicked">-</Button>
     </HBox>
 
-    <ChoiceBox
-            GridPane.columnIndex="1" GridPane.rowIndex="6"
-            fx:id="parametersSelector">
-        <items>
-            <FXCollections
-                    fx:factory="observableArrayList">
-            </FXCollections>
-        </items>
-    </ChoiceBox>
+    <HBox spacing="10" alignment="bottom_center"
+          GridPane.columnIndex="1" GridPane.rowIndex="5">
+        <Label text="Add parameters">
+        </Label>
+    </HBox>
 
     <VBox GridPane.columnIndex="1" GridPane.rowIndex="7"
           fx:id="strategyParamsContainer">
