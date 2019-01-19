@@ -8,6 +8,8 @@ import topnav_msgs.TopNavConfigMsg;
 import java.util.List;
 
 public interface IDrivingStrategy {
+    void startStrategy();
+
     void handleConfigMessage(TopNavConfigMsg configMsg);
 
     void handleHoughAccMessage(HoughAcc houghAcc);
@@ -16,9 +18,13 @@ public interface IDrivingStrategy {
 
     void handleDetectionMessage(FeedbackMsg feedbackMsg);
 
+    void handleHeadDirectionChange(std_msgs.String relativeDirectionMsg);
+
     void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener);
 
     void setHeadRotationChangeListener(HeadRotationChangeListener listener);
+
+    void setStrategyFinishedListener(StrategyFinishedListener listener);
 
     void setGuidelineParameters(List<String> parameters);
 }

@@ -2,9 +2,10 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.HoughUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
@@ -18,11 +19,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     private final Log log;
-    private static final WheelsVelocities ZERO_VELOCITY = new WheelsVelocities(0.0, 0.0, 0.0, 0.0);
 
     private WheelsVelocitiesChangeListener listener;
 
@@ -32,6 +33,11 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     public DriveAlongWallStrategy(Log log) {
         this.log = log;
+    }
+
+    @Override
+    public void startStrategy() {
+
     }
 
     @Override
@@ -112,12 +118,21 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     }
 
     @Override
+    public void handleHeadDirectionChange(std_msgs.String relativeDirectionMsg) {
+    }
+
+    @Override
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
         this.listener = listener;
     }
 
     @Override
     public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+    }
+
+    @Override
+    public void setStrategyFinishedListener(StrategyFinishedListener listener) {
+
     }
 
     @Override

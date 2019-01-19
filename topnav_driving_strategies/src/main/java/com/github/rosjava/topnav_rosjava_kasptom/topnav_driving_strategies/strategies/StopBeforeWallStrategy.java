@@ -2,8 +2,9 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
@@ -18,6 +19,11 @@ public class StopBeforeWallStrategy implements IDrivingStrategy {
 
     public StopBeforeWallStrategy(Log log) {
         this.log = log;
+    }
+
+    @Override
+    public void startStrategy() {
+
     }
 
     @Override
@@ -50,12 +56,21 @@ public class StopBeforeWallStrategy implements IDrivingStrategy {
     }
 
     @Override
+    public void handleHeadDirectionChange(std_msgs.String relativeDirectionMsg) {
+    }
+
+    @Override
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
         this.listener = listener;
     }
 
     @Override
     public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+    }
+
+    @Override
+    public void setStrategyFinishedListener(StrategyFinishedListener listener) {
+
     }
 
     @Override

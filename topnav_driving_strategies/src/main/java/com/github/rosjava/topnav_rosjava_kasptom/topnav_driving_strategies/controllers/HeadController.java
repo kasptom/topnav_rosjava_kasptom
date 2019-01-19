@@ -42,7 +42,7 @@ public class HeadController implements IHeadController {
 
 
         headRotationPublisher = connectedNode.newPublisher(HEAD_JOINT_TOPIC, Float64._TYPE);
-        relativeDirectionChangePublisher = connectedNode.newPublisher(HEAD_RELATIVE_DIRECTION_STATE_TOPIC, std_msgs.String._TYPE);
+        relativeDirectionChangePublisher = connectedNode.newPublisher(HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
     }
 
     @Override
@@ -97,5 +97,6 @@ public class HeadController implements IHeadController {
     @Override
     public void onStrategyStatusChange(String strategyName) {
         isIdle = DrivingStrategy.DRIVING_STRATEGY_IDLE.equals(strategyName);
+        publishHeadRotationChange(RelativeDirection.AHEAD);
     }
 }
