@@ -3,16 +3,16 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
+import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.Topology;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import org.apache.commons.logging.Log;
-import topnav_msgs.AngleRangesMsg;
-import topnav_msgs.FeedbackMsg;
-import topnav_msgs.HoughAcc;
-import topnav_msgs.TopNavConfigMsg;
+import topnav_msgs.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategy.ThroughDoorStage.*;
 
@@ -102,19 +102,30 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
     class RotateTheChassisSideTowardsDoorStrategy extends BaseThroughDoorSubStrategy {
 
+        boolean isMarkerVisible;
+
         @Override
         public void handleHoughAccMessage(HoughAcc houghAcc) {
-
+            if (!isMarkerVisible) {
+                return;
+            }
         }
 
         @Override
         public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-
         }
 
         @Override
         public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
+            String leftMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue();
+            String rightMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue();
 
+            List<TopologyMsg> expectedDoorMarkers = feedbackMsg.getTopologies()
+                    .stream()
+                    .filter(topologyMsg -> topologyMsg.getIdentity().equals(leftMarkerId)
+                            || topologyMsg.getIdentity().equals(rightMarkerId))
+                    .collect(Collectors.toList());
+            
         }
     }
 
