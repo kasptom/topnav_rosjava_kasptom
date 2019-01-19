@@ -48,6 +48,7 @@ public class HeadController implements IHeadController {
     @Override
     public void handleStrategyHeadRotationChange(RelativeDirection relativeDirection) {
         currentDirection = relativeDirection;
+        isDirectionChangeNotificationRequired = true;
         publishHeadRotationChange(relativeDirection);
     }
 

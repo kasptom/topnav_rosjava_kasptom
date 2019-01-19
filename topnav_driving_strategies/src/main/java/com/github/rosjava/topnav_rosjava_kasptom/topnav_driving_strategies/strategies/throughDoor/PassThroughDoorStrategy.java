@@ -37,9 +37,14 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
     public PassThroughDoorStrategy(Log log) {
         this.log = log;
-        this.currentStage = DETECTED_MARKER;
         guidelineParamsMap = new HashMap<>();
         substrategies = initializeSubstrategies();
+    }
+
+    private void setCurrentStage(ThroughDoorStage stage, RelativeDirection direction) {
+        currentStage = stage;
+        isHeadRotationInProgress = true;
+        headListener.onRotationChanged(direction);
     }
 
     private HashMap<ThroughDoorStage, IDrivingStrategy> initializeSubstrategies() {
@@ -53,8 +58,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
     @Override
     public void startStrategy() {
-        isHeadRotationInProgress = true;
-        headListener.onRotationChanged(AT_LEFT);
+        setCurrentStage(DETECTED_MARKER, AT_LEFT);
     }
 
     @Override
@@ -91,6 +95,8 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
     @Override
     public void handleHeadDirectionChange(std_msgs.String relativeDirectionMsg) {
+        String relativeDirection = relativeDirectionMsg.getData();
+        log.info(String.format("Head direction changed to %s", relativeDirection));
         isHeadRotationInProgress = false;
     }
 
@@ -150,7 +156,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
                 if (expectedDoorMarkers.size() > 0) {
                     wheelsListener.onWheelsVelocitiesChanged(WheelsVelocityConstants.ZERO_VELOCITY);
                     log.info("rotated side towards the door");
-                    currentStage = ROTATED_SIDE_TOWARDS_DOOR;
+                    setCurrentStage(ROTATED_SIDE_TOWARDS_DOOR, AT_LEFT);
                 } else {
                     wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.0, -1.0, 1.0, -1.0));
                 }
@@ -206,20 +212,20 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
             double velocity = 0.0;
             if (marker.getIdentity().equals(guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue())) {
                 if (marker.getRelativeAlignment().equals(RelativeAlignment.CENTER.name())
-                        || marker.getRelativeAlignment().equals(RelativeAlignment.LEFT.name())) {
+                        || marker.getRelativeAlignment().equals(RelativeAlignment.RIGHT.name())) {
                     velocity = 1.0;
                 }
             }
 
             if (marker.getIdentity().equals(guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue())) {
                 if (marker.getRelativeAlignment().equals(RelativeAlignment.CENTER.name())
-                        || marker.getRelativeAlignment().equals(RelativeAlignment.RIGHT.name())) {
+                        || marker.getRelativeAlignment().equals(RelativeAlignment.LEFT.name())) {
                     velocity = -1.0;
                 }
             }
 
             if (velocity == 0) {
-                currentStage = ALIGNED_WITH_DOOR;
+                setCurrentStage(ALIGNED_WITH_DOOR, AHEAD);
             }
 
             wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(velocity, velocity, velocity, velocity));
