@@ -7,6 +7,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeAlignment;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
@@ -143,19 +144,13 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
         @Override
         public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
-            String leftMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue();
-            String rightMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue();
-
-            List<TopologyMsg> expectedDoorMarkers = feedbackMsg.getTopologies()
-                    .stream()
-                    .filter(topologyMsg -> topologyMsg.getIdentity().equals(leftMarkerId)
-                            || topologyMsg.getIdentity().equals(rightMarkerId))
-                    .collect(Collectors.toList());
+            List<TopologyMsg> expectedDoorMarkers = findDoorFrontMakers(feedbackMsg);
 
             if (isChassisRotationInProgress) {
                 if (expectedDoorMarkers.size() > 0) {
                     wheelsListener.onWheelsVelocitiesChanged(WheelsVelocityConstants.ZERO_VELOCITY);
-                    strategyFinishedListener.onStrategyFinished(true);
+                    log.info("rotated side towards the door");
+                    currentStage = ROTATED_SIDE_TOWARDS_DOOR;
                 } else {
                     wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.0, -1.0, 1.0, -1.0));
                 }
@@ -165,15 +160,27 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
             if (expectedDoorMarkers.size() == 0) {
                 checkedDirection++;
                 isHeadRotationInProgress = true;
-                headListener.onRotationChanged(directionsToCheck.get(checkedDirection));
             } else {
                 isChassisRotationInProgress = true;
             }
 
             if (checkedDirection >= directionsToCheck.size()) {
                 strategyFinishedListener.onStrategyFinished(false);
+            } else {
+                headListener.onRotationChanged(directionsToCheck.get(checkedDirection));
             }
         }
+    }
+
+    private List<TopologyMsg> findDoorFrontMakers(FeedbackMsg feedbackMsg) {
+        String leftMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue();
+        String rightMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue();
+
+        return feedbackMsg.getTopologies()
+                .stream()
+                .filter(topologyMsg -> topologyMsg.getIdentity().equals(leftMarkerId)
+                        || topologyMsg.getIdentity().equals(rightMarkerId))
+                .collect(Collectors.toList());
     }
 
     class AlignBetweenDoorMarkersStrategy extends BaseThroughDoorSubStrategy {
@@ -184,10 +191,38 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
         @Override
         public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
+
         }
 
         @Override
         public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
+            List<TopologyMsg> expectedDoorMarkers = findDoorFrontMakers(feedbackMsg);
+            if (expectedDoorMarkers.size() == 0) {
+                strategyFinishedListener.onStrategyFinished(false);
+                return;
+            }
+
+            TopologyMsg marker = expectedDoorMarkers.get(0);
+            double velocity = 0.0;
+            if (marker.getIdentity().equals(guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue())) {
+                if (marker.getRelativeAlignment().equals(RelativeAlignment.CENTER.name())
+                        || marker.getRelativeAlignment().equals(RelativeAlignment.LEFT.name())) {
+                    velocity = 1.0;
+                }
+            }
+
+            if (marker.getIdentity().equals(guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue())) {
+                if (marker.getRelativeAlignment().equals(RelativeAlignment.CENTER.name())
+                        || marker.getRelativeAlignment().equals(RelativeAlignment.RIGHT.name())) {
+                    velocity = -1.0;
+                }
+            }
+
+            if (velocity == 0) {
+                currentStage = ALIGNED_WITH_DOOR;
+            }
+
+            wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(velocity, velocity, velocity, velocity));
         }
     }
 
