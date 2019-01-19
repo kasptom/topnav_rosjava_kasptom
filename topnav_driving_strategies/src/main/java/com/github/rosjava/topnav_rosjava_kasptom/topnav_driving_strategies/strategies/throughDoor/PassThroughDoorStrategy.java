@@ -208,7 +208,17 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
                 return;
             }
 
-            TopologyMsg marker = expectedDoorMarkers.get(0);
+            final double[] velocity = {0.0};
+            expectedDoorMarkers.forEach(marker -> velocity[0] = setVelocityAccordingToDoorPosition(marker));
+
+            if (velocity[0] == 0) {
+                setCurrentStage(ALIGNED_WITH_DOOR, AHEAD);
+            }
+
+            wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(velocity[0], velocity[0], velocity[0], velocity[0]));
+        }
+
+        private double setVelocityAccordingToDoorPosition(TopologyMsg marker) {
             double velocity = 0.0;
             if (marker.getIdentity().equals(guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue())) {
                 if (marker.getRelativeAlignment().equals(RelativeAlignment.CENTER.name())
@@ -223,12 +233,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
                     velocity = -1.0;
                 }
             }
-
-            if (velocity == 0) {
-                setCurrentStage(ALIGNED_WITH_DOOR, AHEAD);
-            }
-
-            wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(velocity, velocity, velocity, velocity));
+            return velocity;
         }
     }
 
