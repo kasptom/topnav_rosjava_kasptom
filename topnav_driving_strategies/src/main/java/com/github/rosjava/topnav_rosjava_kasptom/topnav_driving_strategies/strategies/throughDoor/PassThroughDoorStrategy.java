@@ -249,6 +249,23 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
         @Override
         public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
+            List<TopologyMsg> expectedDoorMarkers = findRightFrontMarker(feedbackMsg);
+            if (expectedDoorMarkers.size() > 0) {
+                wheelsListener.onWheelsVelocitiesChanged(WheelsVelocityConstants.ZERO_VELOCITY);
+                log.info("rotated front towards the door");
+                setCurrentStage(ROTATED_TOWARDS_DOOR, AHEAD);
+            } else {
+                wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.0, -1.0, 1.0, -1.0));
+            }
+        }
+
+        private List<TopologyMsg> findRightFrontMarker(FeedbackMsg feedbackMsg) {
+            String rightMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue();
+
+            return feedbackMsg.getTopologies()
+                    .stream()
+                    .filter(topologyMsg -> topologyMsg.getIdentity().equals(rightMarkerId))
+                    .collect(Collectors.toList());
         }
     }
 
