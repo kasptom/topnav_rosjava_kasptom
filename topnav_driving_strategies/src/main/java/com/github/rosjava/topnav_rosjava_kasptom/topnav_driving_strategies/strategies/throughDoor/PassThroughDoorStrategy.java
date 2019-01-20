@@ -4,6 +4,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.AngleRange;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
@@ -15,6 +16,7 @@ import org.apache.commons.logging.Log;
 import topnav_msgs.*;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -253,7 +255,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
             if (expectedDoorMarkers.size() > 0) {
                 wheelsListener.onWheelsVelocitiesChanged(WheelsVelocityConstants.ZERO_VELOCITY);
                 log.info("rotated front towards the door");
-                setCurrentStage(ROTATED_TOWARDS_DOOR, AHEAD);
+                setCurrentStage(ROTATED_TOWARDS_DOOR, BEHIND);
             } else {
                 wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.0, -1.0, 1.0, -1.0));
             }
@@ -271,16 +273,68 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
     class DriveThroughDoorStrategy extends BaseThroughDoorSubStrategy {
 
+        private boolean isBackMarkVisible = false;
+
         @Override
         public void handleHoughAccMessage(HoughAcc houghAcc) {
         }
 
         @Override
         public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
+            if (isBackMarkVisible) {
+                return;
+            }
+
+            List<AngleRange> angleRanges = AngleRange.messageToAngleRange(angleRangesMsg);
+            AngleRange closestOfTheRight = angleRanges
+                    .stream()
+                    .filter(angleRange -> angleRange.getAngleRad() >= 0)
+                    .min(Comparator.comparingDouble(AngleRange::getRange))
+                    .orElse(new AngleRange(0.0, Double.MAX_VALUE));
+
+            AngleRange closestOfTheLeft = angleRanges
+                    .stream()
+                    .filter(angleRange -> angleRange.getAngleRad() <= 0)
+                    .min(Comparator.comparingDouble(AngleRange::getRange))
+                    .orElse(new AngleRange(0.0, Double.MAX_VALUE));
+
+            double leftClosest = closestOfTheLeft.getRange();
+            double rightClosest = closestOfTheRight.getRange();
+            double avgClosest = (leftClosest + rightClosest) / 2.0;
+
+            double MAX_VELOCITY = 2.0;
+
+            double leftVelocity = leftClosest > avgClosest
+                    ? MAX_VELOCITY
+                    : (leftClosest / rightClosest) * MAX_VELOCITY;
+
+            double rightVelocity = rightClosest > avgClosest
+                    ? MAX_VELOCITY
+                    : (rightClosest / leftClosest) * MAX_VELOCITY;
+
+            wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(leftVelocity, rightVelocity, leftVelocity, rightVelocity));
         }
 
         @Override
         public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
+            if (isBackMarkVisible) {
+                strategyFinishedListener.onStrategyFinished(true);
+                return;
+            }
+
+            List<TopologyMsg> topologyMsgs = findDoorBackMarkers(feedbackMsg);
+            isBackMarkVisible = !topologyMsgs.isEmpty();
+        }
+
+        private List<TopologyMsg> findDoorBackMarkers(FeedbackMsg feedbackMsg) {
+            String leftBackMarker = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_BACK_LEFT_MARKER_ID).getValue();
+            String rightBackMarker = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_BACK_RIGHT_MARKER_ID).getValue();
+
+            return feedbackMsg.getTopologies()
+                    .stream()
+                    .filter(topologyMsg ->
+                        topologyMsg.getIdentity().equals(leftBackMarker) || topologyMsg.getIdentity().equals(rightBackMarker))
+                    .collect(Collectors.toList());
         }
     }
 }
