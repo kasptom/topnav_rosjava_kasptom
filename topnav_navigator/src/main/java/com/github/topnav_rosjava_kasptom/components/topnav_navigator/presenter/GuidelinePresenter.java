@@ -3,7 +3,10 @@ package com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.view.IGuidelineView;
 import com.github.topnav_rosjava_kasptom.services.IRosTopnavService;
 import com.github.topnav_rosjava_kasptom.services.RosTopNavService;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
+
+import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DRIVING_STRATEGY_IDLE;
 
@@ -36,7 +39,8 @@ public class GuidelinePresenter implements IGuidelinePresenter {
 
     @Override
     public void onStartStrategy() {
-        rosTopnavService.startStrategy(this.strategyName);
+        List<GuidelineParam> guidelineParams = view.getGuidelineParams();
+        rosTopnavService.startStrategy(this.strategyName, guidelineParams);
     }
 
     @Override

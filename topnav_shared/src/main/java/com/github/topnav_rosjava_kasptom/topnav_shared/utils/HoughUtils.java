@@ -1,6 +1,6 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils;
+package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.HoughCell;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import topnav_msgs.HoughAcc;
 
 import java.util.ArrayList;

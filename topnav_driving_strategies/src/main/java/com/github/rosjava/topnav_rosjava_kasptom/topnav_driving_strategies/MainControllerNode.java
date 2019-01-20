@@ -1,6 +1,8 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsController;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IHeadController;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IMainController;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.MainController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navigation.MarkerMessageHandler;
 import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
@@ -10,7 +12,6 @@ import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import topnav_msgs.FeedbackMsg;
-import topnav_msgs.GuidelineMsg;
 import topnav_msgs.MarkersMsg;
 
 //import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.HoughLineTestStrategy;
@@ -20,9 +21,10 @@ import topnav_msgs.MarkersMsg;
 @SuppressWarnings("unused")
 public class MainControllerNode extends AbstractNodeMain {
 
-    private WheelsController wheelsController;
+    private IMainController wheelsController;
     private Subscriber<MarkersMsg> markersMsgSubscriber;
     private Publisher<FeedbackMsg> feedbackPublisher;
+    private IHeadController headController;
 
     @Override
     public GraphName getDefaultNodeName() {
@@ -32,7 +34,7 @@ public class MainControllerNode extends AbstractNodeMain {
     @Override
     public void onStart(ConnectedNode connectedNode) {
         Log log = connectedNode.getLog();
-        wheelsController = new WheelsController(connectedNode);
+        wheelsController = new MainController(connectedNode);
 
         feedbackPublisher = connectedNode.newPublisher("topnav/feedback", FeedbackMsg._TYPE);
         markersMsgSubscriber = connectedNode.newSubscriber("capo/camera/aruco", MarkersMsg._TYPE);

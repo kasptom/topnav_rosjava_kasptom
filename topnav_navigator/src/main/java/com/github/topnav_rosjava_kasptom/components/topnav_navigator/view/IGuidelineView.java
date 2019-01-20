@@ -1,15 +1,20 @@
 package com.github.topnav_rosjava_kasptom.components.topnav_navigator.view;
 
 import com.github.topnav_rosjava_kasptom.components.IBaseView;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
+
+import java.util.List;
 
 public interface IGuidelineView extends IBaseView {
     void onShowOptions();
 
     void onSelectStrategy(String option);
 
-    void onAddParam(String name);
+    void onAddParam();
 
-    void onRemoveParam(String name);
+    void onRemoveParam();
+
+    List<GuidelineParam> getGuidelineParams();
 
     void onSendGuideline();
 

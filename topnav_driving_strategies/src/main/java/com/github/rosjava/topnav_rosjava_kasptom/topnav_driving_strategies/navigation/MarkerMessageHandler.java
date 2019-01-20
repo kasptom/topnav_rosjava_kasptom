@@ -1,7 +1,7 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navigation;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.MarkerDetection;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.utils.FeedbackUtils;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.FeedbackUtils;
 import org.ros.message.MessageListener;
 import org.ros.node.topic.Publisher;
 import topnav_msgs.FeedbackMsg;

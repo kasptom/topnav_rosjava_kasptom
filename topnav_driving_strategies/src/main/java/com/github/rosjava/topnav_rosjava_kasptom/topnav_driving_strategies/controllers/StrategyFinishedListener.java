@@ -1,5 +1,5 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
 
-public interface HeadRotationListener {
-    void onRotationChanged(double rotationDegrees);
+public interface StrategyFinishedListener {
+    void onStrategyFinished(boolean isSuccess);
 }

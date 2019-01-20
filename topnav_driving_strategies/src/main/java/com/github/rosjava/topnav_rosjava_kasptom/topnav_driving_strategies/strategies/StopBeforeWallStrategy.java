@@ -1,13 +1,17 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
+import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
+
+import java.util.List;
 
 public class StopBeforeWallStrategy implements IDrivingStrategy {
     private final Log log;
@@ -18,7 +22,14 @@ public class StopBeforeWallStrategy implements IDrivingStrategy {
     }
 
     @Override
-    public void handleConfigMessage(TopNavConfigMsg configMsg) {}
+    public void startStrategy() {
+
+    }
+
+    @Override
+    public void handleConfigMessage(TopNavConfigMsg configMsg) {
+
+    }
 
     @Override
     public void handleHoughAccMessage(HoughAcc houghAcc) {
@@ -41,12 +52,29 @@ public class StopBeforeWallStrategy implements IDrivingStrategy {
     }
 
     @Override
+    public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
+    }
+
+    @Override
+    public void handleHeadDirectionChange(std_msgs.String relativeDirectionMsg) {
+    }
+
+    @Override
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
         this.listener = listener;
     }
 
     @Override
-    public void setHeadRotationListener(HeadRotationListener listener) {
+    public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
     }
 
+    @Override
+    public void setStrategyFinishedListener(StrategyFinishedListener listener) {
+
+    }
+
+    @Override
+    public void setGuidelineParameters(List<String> parameters) {
+
+    }
 }

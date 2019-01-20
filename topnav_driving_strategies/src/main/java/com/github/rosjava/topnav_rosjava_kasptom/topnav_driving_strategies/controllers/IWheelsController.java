@@ -2,6 +2,6 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 
-public interface WheelsVelocitiesChangeListener {
-    void onWheelsVelocitiesChanged(final WheelsVelocities velocities);
+public interface IWheelsController {
+    void setVelocities(WheelsVelocities wheelsVelocities);
 }

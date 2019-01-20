@@ -1,7 +1,4 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models;
-
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeAlignment;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDistance;
+package com.github.topnav_rosjava_kasptom.topnav_shared.model;
 
 public class MarkerDetection {
     private String id;
