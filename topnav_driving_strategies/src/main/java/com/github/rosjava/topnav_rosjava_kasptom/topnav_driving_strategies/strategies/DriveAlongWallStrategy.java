@@ -5,6 +5,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.HoughUtils;
 import org.apache.commons.logging.Log;
@@ -30,6 +31,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     private int lineDetectionThreshold = 8;
 
     private boolean isObstacleToClose;
+    private HeadRotationChangeListener headListener;
 
     public DriveAlongWallStrategy(Log log) {
         this.log = log;
@@ -37,7 +39,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     @Override
     public void startStrategy() {
-
+        headListener.onRotationChanged(RelativeDirection.AT_LEFT);
     }
 
     @Override
@@ -128,6 +130,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     @Override
     public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+        headListener = listener;
     }
 
     @Override
