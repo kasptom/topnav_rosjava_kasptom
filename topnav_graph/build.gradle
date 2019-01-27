@@ -16,6 +16,9 @@
 
 /* This plugin is necessary for creating installDist tasks (i.e. executables) */
 
+plugins {
+  id 'net.ltgt.apt' version '0.10'
+}
 
 apply plugin: 'application'
 mainClassName = 'org.ros.RosRun'
@@ -44,5 +47,7 @@ dependencies {
   compile 'com.google.code.gson:gson:2.7'
   /* Example of a local subproject dependency */
   /* compile project(':sibling_gradle_project') */
+  compileOnly 'org.projectlombok:lombok:1.18.4'
+  apt 'org.projectlombok:lombok:1.18.4'
 }
 
