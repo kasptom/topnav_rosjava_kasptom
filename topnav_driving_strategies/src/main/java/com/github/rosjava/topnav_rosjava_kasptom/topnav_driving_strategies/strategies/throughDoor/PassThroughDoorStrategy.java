@@ -257,7 +257,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
                 log.info("rotated front towards the door");
                 setCurrentStage(ROTATED_TOWARDS_DOOR, BEHIND);
             } else {
-                wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.0, -1.0, 1.0, -1.0));
+                wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.5, -1.5, 1.5, -1.5));
             }
         }
 
