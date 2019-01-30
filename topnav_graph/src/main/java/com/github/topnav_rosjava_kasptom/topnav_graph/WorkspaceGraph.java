@@ -7,9 +7,11 @@ import org.graphstream.graph.implementations.SingleGraph;
 public class WorkspaceGraph {
 
     private Graph graph;
+    private static final String CUSTOM_NODE_STYLE = "url('file:src/main/resources/css/stylesheet.css')";
 
     public WorkspaceGraph(BuildingDto buildingDto) {
         graph = new SingleGraph("Building");
+        graph.addAttribute("ui.stylesheet", CUSTOM_NODE_STYLE);
         buildGraph(buildingDto);
     }
 
