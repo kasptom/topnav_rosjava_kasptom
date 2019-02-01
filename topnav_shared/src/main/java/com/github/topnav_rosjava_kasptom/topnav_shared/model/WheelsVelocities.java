@@ -28,4 +28,12 @@ public class WheelsVelocities {
     public double getRearRight() {
         return rearRight;
     }
+
+    public static WheelsVelocities addVelocities(WheelsVelocities firstVelocity, WheelsVelocities secondVelocity) {
+        double frontLeft = firstVelocity.getFrontLeft() + secondVelocity.getFrontLeft();
+        double frontRight = firstVelocity.getFrontRight() + secondVelocity.getFrontRight();
+        double rearLeft = firstVelocity.getRearLeft() + secondVelocity.getRearLeft();
+        double rearRight = firstVelocity.getRearRight() + secondVelocity.getRearRight();
+        return new WheelsVelocities(frontLeft, frontRight, rearLeft, rearRight);
+    }
 }

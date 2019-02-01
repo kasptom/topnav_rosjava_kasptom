@@ -7,6 +7,7 @@ import java.util.List;
 public class DrivingStrategy {
     public static final String DRIVING_STRATEGY_IDLE = "DS_IDLE";
     public static final String DRIVING_STRATEGY_ALONG_WALL = "DS_ALONG_WALL";
+    public static final String DRIVING_STRATEGY_ALONG_WALL_2 = "DS_ALONG_WALL_2";
     public static final String DRIVING_STRATEGY_STOP_BEFORE_WALL = "DS_STOP_WALL";
     public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR = "DS_PASS_THROUGH_DOOR";
     public static final HashSet<String> DRIVING_STRATEGIES = new HashSet<>(Arrays.asList(
