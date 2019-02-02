@@ -24,8 +24,15 @@ public class DrivingStrategy {
         public static final String KEY_BACK_RIGHT_MARKER_ID = "DS_PARAM_BACK_RIGHT_MARKER_ID";
     }
 
+    public class FollowWall {
+        public static final String KEY_TRACKED_WALL_ALIGNMENT = "DS_PARAM_TRACKED_WALL_ALIGNMENT";
+        public static final String VALUE_TRACKED_WALL_LEFT =  "LEFT";
+        public static final String VALUE_TRACKED_WALL_RIGHT =  "RIGHT";
+    }
+
     public static final List<String> PARAM_NAMES = Arrays.asList(ThroughDoor.KEY_FRONT_LEFT_MARKER_ID,
             ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID,
             ThroughDoor.KEY_BACK_LEFT_MARKER_ID,
-            ThroughDoor.KEY_BACK_RIGHT_MARKER_ID);
+            ThroughDoor.KEY_BACK_RIGHT_MARKER_ID,
+            FollowWall.KEY_TRACKED_WALL_ALIGNMENT);
 }
