@@ -29,19 +29,17 @@ public class PdVelocityCalculator {
 
     public static PdVelocityCalculator createDefaultPdVelocityCalculator() {
         double axisLength = CASE_WIDTH + WHEEL_WIDTH;
-        return new PdVelocityCalculator(5.0, 10.0, 2.0, 4.0, axisLength / 2.0);
+        return new PdVelocityCalculator(5.0, 20.0, 2.0, 4.0, axisLength / 2.0);
     }
 
     public WheelsVelocities calculateRotationSpeed(double angle, double range, long timestamp, double targetAngle, double targetRange) {
-        System.out.printf("Angle: %.2f, target %.2f\n", angle, targetAngle);
-        double angleVelocity = propCoefAngle * (angle - targetAngle)
-//                + propCoefDist * (targetRange - range)
-                + (1.0 / (timestamp - prevTimestamp))
-                * (derivCoefAngle * (angle - prevAngle)
-//                    + derivCoefDist * (range - prevRange)
-                    );
+        double angularVelocityAngle = calculateRotationSpeedForAngle(angle, timestamp, targetAngle);
+        double angularVelocityRange = calculateRotationSpeedForRange(range, timestamp, targetRange);
 
-        double linearVelocity = angleVelocity * (axisLength / 2.0);
+        System.out.printf("Angle: %.2f, target %.2f, distance: %.2f, target: %.2f\n", angle, targetAngle, range, targetRange);
+        System.out.printf("Angular velocities: angle=%.2f, range=%.2f\n", angularVelocityAngle, angularVelocityRange);
+
+        double linearVelocity = (angularVelocityAngle + angularVelocityRange) * (axisLength / 2.0);
         double halfLinearVelocity = linearVelocity / 2.0;
 
         prevTimestamp = timestamp;
@@ -49,5 +47,15 @@ public class PdVelocityCalculator {
         prevRange = range;
 
         return new WheelsVelocities(-halfLinearVelocity, halfLinearVelocity, -halfLinearVelocity, halfLinearVelocity);
+    }
+
+    private double calculateRotationSpeedForRange(double range, long timestamp, double targetRange) {
+        return propCoefDist * (targetRange - range)
+                + (1.0 / (timestamp - prevTimestamp)) * derivCoefDist * (range - prevRange);
+    }
+
+    private double calculateRotationSpeedForAngle(double angle, long timestamp, double targetAngle) {
+        return propCoefAngle * (angle - targetAngle)
+                + (1.0 / (timestamp - prevTimestamp)) * derivCoefAngle * (angle - prevAngle);
     }
 }
