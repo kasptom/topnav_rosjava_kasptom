@@ -13,6 +13,7 @@ public class DrivingStrategy {
     public static final HashSet<String> DRIVING_STRATEGIES = new HashSet<>(Arrays.asList(
             DRIVING_STRATEGY_IDLE,
             DRIVING_STRATEGY_ALONG_WALL,
+            DRIVING_STRATEGY_ALONG_WALL_2,
             DRIVING_STRATEGY_STOP_BEFORE_WALL,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR));
 

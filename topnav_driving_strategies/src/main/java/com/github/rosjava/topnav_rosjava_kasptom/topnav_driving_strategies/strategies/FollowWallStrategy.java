@@ -15,22 +15,22 @@ import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class FollowWallStrategy implements IDrivingStrategy {
 
     private final Log log;
 
-    private WheelsVelocitiesChangeListener listener;
+    private WheelsVelocitiesChangeListener wheelsListener;
 
+    private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
     private int lineDetectionThreshold = 8;
-    private double P = 1.0;
-    private double D = 1.0;
-    private double WALL_DISTANCE = 0.5;
-    private WheelsVelocities BASE_ROBOT_VELOCITY = new WheelsVelocities(2.0, 2.0, 2.0, 2.0);
+    private WheelsVelocities BASE_ROBOT_VELOCITY = new WheelsVelocities(4.0, 4.0, 4.0, 4.0);
 
     private boolean isObstacleToClose;
     private HeadRotationChangeListener headListener;
@@ -54,13 +54,13 @@ public class FollowWallStrategy implements IDrivingStrategy {
     public void handleHoughAccMessage(HoughAcc houghAcc) {
         if (isObstacleToClose) {
             log.info("obstacle is too close");
-            listener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
+            wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             return;
         }
 
         List<HoughCell> filteredHoughCells = HoughUtils.toFilteredList(houghAcc, lineDetectionThreshold);
         WheelsVelocities wheelsVelocities = computeVelocities(filteredHoughCells);
-        listener.onWheelsVelocitiesChanged(wheelsVelocities);
+        wheelsListener.onWheelsVelocitiesChanged(wheelsVelocities);
     }
 
     private WheelsVelocities computeVelocities(List<HoughCell> filteredHoughCells) {
@@ -78,14 +78,12 @@ public class FollowWallStrategy implements IDrivingStrategy {
     }
 
     private WheelsVelocities computeRotationComponent(HoughCell bestLine) {
-//        double omega = P * (bestLine.getRange() - WALL_DISTANCE) + D * bestLine.getAngleDegrees();
-//        WheelsVelocities angleComponent = pdControllerAngle.
-        return null;
+        return velocityCalculator.calculateRotationSpeed(bestLine.getAngleDegreesLidarRealm(), bestLine.getRange(), System.nanoTime(), -90, 0.5);
     }
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-
+        isObstacleToClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
     }
 
     @Override
@@ -100,12 +98,12 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
     @Override
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
-
+        wheelsListener = listener;
     }
 
     @Override
     public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
-
+        headListener = listener;
     }
 
     @Override

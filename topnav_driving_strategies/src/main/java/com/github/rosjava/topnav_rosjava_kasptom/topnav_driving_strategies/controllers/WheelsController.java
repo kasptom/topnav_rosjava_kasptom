@@ -40,7 +40,7 @@ public class WheelsController implements IWheelsController {
         };
 
         if (isVelocityChanged(wheelsVelocities, currentVelocity)) {
-            log.info(String.format("Setting velocities (%.2f, %.2f,%.2f, %.2f)",
+            log.debug(String.format("Setting velocities (%.2f, %.2f,%.2f, %.2f)",
                     velocities[0], velocities[1], velocities[2], velocities[3]));
         }
 
