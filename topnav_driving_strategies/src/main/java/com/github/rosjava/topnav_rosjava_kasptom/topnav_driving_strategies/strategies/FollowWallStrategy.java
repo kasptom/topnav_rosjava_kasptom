@@ -50,13 +50,18 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
     @Override
     public void startStrategy() {
-        // TODO camera direction according to the angle where the wall is detected
         headListener.onRotationChanged(RelativeDirection.AT_LEFT);
     }
 
     @Override
     public void handleConfigMessage(TopNavConfigMsg configMsg) {
+        updatePdCoefficients(configMsg.getPropCoeffAngle(),
+                configMsg.getDerivCoeffAngle(),
+                configMsg.getPropCoeffDist(),
+                configMsg.getDerivCoeffDist());
 
+        lineDetectionThreshold = configMsg.getLineDetectionThreshold();
+        log.info(String.format("Line detection threshold: %d", lineDetectionThreshold));
     }
 
     @Override
@@ -70,29 +75,6 @@ public class FollowWallStrategy implements IDrivingStrategy {
         List<HoughCell> filteredHoughCells = HoughUtils.toFilteredList(houghAcc, lineDetectionThreshold);
         WheelsVelocities wheelsVelocities = computeVelocities(filteredHoughCells);
         wheelsListener.onWheelsVelocitiesChanged(wheelsVelocities);
-    }
-
-    private WheelsVelocities computeVelocities(List<HoughCell> filteredHoughCells) {
-        HoughCell bestLine = filteredHoughCells.stream()
-                .min(Comparator.comparingDouble(HoughCell::getRange))
-                .orElse(null);
-
-        if (bestLine == null) {
-            return BASE_ROBOT_VELOCITY;
-        }
-
-        WheelsVelocities rotationVelocityComponent = computeRotationComponent(bestLine);
-
-        return WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, rotationVelocityComponent);
-    }
-
-    private WheelsVelocities computeRotationComponent(HoughCell bestLine) {
-        return velocityCalculator.calculateRotationSpeed(
-                bestLine.getAngleDegreesLidarRealm(),
-                bestLine.getRange(),
-                System.nanoTime(),
-                chosenWallAngle,
-                TARGET_WALL_RANGE);
     }
 
     @Override
@@ -140,5 +122,38 @@ public class FollowWallStrategy implements IDrivingStrategy {
         }
 
         log.info(String.format("Tracking wall at angle: %.2f", chosenWallAngle));
+
+        headListener.onRotationChanged(chosenWallAngle == LEFT_WALL_ANGLE
+                ? RelativeDirection.AT_LEFT
+                : RelativeDirection.AT_RIGHT);
+    }
+
+    private WheelsVelocities computeVelocities(List<HoughCell> filteredHoughCells) {
+        HoughCell bestLine = filteredHoughCells.stream()
+                .min(Comparator.comparingDouble(HoughCell::getRange))
+                .orElse(null);
+
+        if (bestLine == null) {
+            return BASE_ROBOT_VELOCITY;
+        }
+
+        WheelsVelocities rotationVelocityComponent = computeRotationComponent(bestLine);
+
+        return WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, rotationVelocityComponent);
+    }
+
+    private void updatePdCoefficients(double propCoeffAngle, double derivCoeffAngle, double propCoeffDist, double derivCoeffDist) {
+        log.info(String.format("Changing coefficients values K_p_ang = %.2f, K_d_ang = %.2f, K_p_dst = %.2f, K_d_dst = %.2f",
+                propCoeffAngle, derivCoeffAngle, propCoeffDist, derivCoeffDist));
+        velocityCalculator.updateCoefficients(propCoeffAngle, derivCoeffAngle, propCoeffDist, derivCoeffDist);
+    }
+
+    private WheelsVelocities computeRotationComponent(HoughCell bestLine) {
+        return velocityCalculator.calculateRotationSpeed(
+                bestLine.getAngleDegreesLidarRealm(),
+                bestLine.getRange(),
+                System.nanoTime(),
+                chosenWallAngle,
+                TARGET_WALL_RANGE);
     }
 }

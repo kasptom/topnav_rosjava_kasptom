@@ -10,12 +10,12 @@ public class PdVelocityCalculator {
     private double prevAngle;
     private double prevRange;
 
-    private final double propCoefAngle;
-    private final double propCoefDist;
-    private final double derivCoefAngle;
-    private final double derivCoefDist;
-    private final double axisLength;
+    private double propCoefAngle;
 
+    private double propCoefDist;
+    private double derivCoefAngle;
+    private double derivCoefDist;
+    private final double axisLength;
     public PdVelocityCalculator(double propCoefAngle, double propCoefDist, double derivCoefAngle, double derivCoefDist, double axisLength) {
         this.propCoefAngle = propCoefAngle;
         this.propCoefDist = propCoefDist;
@@ -29,15 +29,22 @@ public class PdVelocityCalculator {
 
     public static PdVelocityCalculator createDefaultPdVelocityCalculator() {
         double axisLength = CASE_WIDTH + WHEEL_WIDTH;
-        return new PdVelocityCalculator(5.0, 20.0, 2.0, 4.0, axisLength / 2.0);
+        return new PdVelocityCalculator(1.25, 25.0, 2.5, 10.0, axisLength / 2.0);
+    }
+
+    public void updateCoefficients(double propCoefAngle, double derivCoefAngle, double propCoefDist, double derivCoefDist) {
+        this.propCoefAngle = propCoefAngle;
+        this.derivCoefAngle = derivCoefAngle;
+        this.propCoefDist = propCoefDist;
+        this.derivCoefDist = derivCoefDist;
     }
 
     public WheelsVelocities calculateRotationSpeed(double angle, double range, long timestamp, double targetAngle, double targetRange) {
         double angularVelocityAngle = calculateRotationSpeedForAngle(angle, timestamp, targetAngle);
         double angularVelocityRange = calculateRotationSpeedForRange(range, timestamp, targetRange);
 
-        System.out.printf("Angle: %.2f, target %.2f, distance: %.2f, target: %.2f\n", angle, targetAngle, range, targetRange);
-        System.out.printf("Angular velocities: angle=%.2f, range=%.2f\n", angularVelocityAngle, angularVelocityRange);
+//        System.out.printf("Angle: %.2f, target %.2f, distance: %.2f, target: %.2f\n", angle, targetAngle, range, targetRange);
+//        System.out.printf("Angular velocities: angle=%.2f, range=%.2f\n", angularVelocityAngle, angularVelocityRange);
 
         double linearVelocity = (angularVelocityAngle + angularVelocityRange) * (axisLength / 2.0);
         double halfLinearVelocity = linearVelocity / 2.0;
