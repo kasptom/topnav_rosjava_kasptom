@@ -6,6 +6,6 @@ public class Limits {
     public static final double BASE_VELOCITY = 2.0;
     public static final double MAX_VELOCITY_DELTA = 2.0;
 
-    public static final double PARALLEL_TO_LEFT_WALL_ANGLE = 270;
-    public static final double AHEAD_THE_WALL = 180;
+    public static final double PARALLEL_TO_LEFT_WALL_ANGLE = 270; // Hough acc's realm
+    public static final double AHEAD_THE_WALL = 180; // Hough acc's realm
 }
