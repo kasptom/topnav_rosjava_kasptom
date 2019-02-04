@@ -17,7 +17,6 @@ import topnav_msgs.TopNavConfigMsg;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
@@ -30,7 +29,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     private int lineDetectionThreshold = 8;
 
-    private boolean isObstacleToClose;
+    private boolean isObstacleTooClose;
     private HeadRotationChangeListener headListener;
 
     public DriveAlongWallStrategy(Log log) {
@@ -60,7 +59,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
         HoughCell bestLine = filteredHoughCells.stream()
                 .min(Comparator.comparingDouble(HoughCell::getRange)).orElse(null);
 
-        if (isObstacleToClose) {
+        if (isObstacleTooClose) {
             log.info("obstacle is too close");
             return ZERO_VELOCITY;
         }
@@ -107,7 +106,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-        isObstacleToClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
+        isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
     }
 
     @Override

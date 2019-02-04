@@ -21,7 +21,7 @@ public class HoughCell implements Comparable<HoughCell> {
         return angleDeg;
     }
 
-    public double getAngleDegreesLidarRealm() {
+    public double getAngleDegreesLidarDomain() {
         return angleDeg <= 270
                 ? angleDeg - 90
                 : angleDeg - 450;

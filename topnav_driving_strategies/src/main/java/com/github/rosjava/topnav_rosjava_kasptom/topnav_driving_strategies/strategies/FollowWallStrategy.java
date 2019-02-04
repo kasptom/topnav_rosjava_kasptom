@@ -36,7 +36,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     private int lineDetectionThreshold = 8;
     private WheelsVelocities BASE_ROBOT_VELOCITY = new WheelsVelocities(4.0, 4.0, 4.0, 4.0);
 
-    private boolean isObstacleToClose;
+    private boolean isObstacleTooClose;
     private HeadRotationChangeListener headListener;
     private static final double RIGHT_WALL_ANGLE = -90;
     private static final double LEFT_WALL_ANGLE = 90;
@@ -66,7 +66,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
     @Override
     public void handleHoughAccMessage(HoughAcc houghAcc) {
-        if (isObstacleToClose) {
+        if (isObstacleTooClose) {
             log.info("obstacle is too close");
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             return;
@@ -79,7 +79,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-        isObstacleToClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
+        isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
     }
 
     @Override
@@ -150,7 +150,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
     private WheelsVelocities computeRotationComponent(HoughCell bestLine) {
         return velocityCalculator.calculateRotationSpeed(
-                bestLine.getAngleDegreesLidarRealm(),
+                bestLine.getAngleDegreesLidarDomain(),
                 bestLine.getRange(),
                 System.nanoTime(),
                 chosenWallAngle,
