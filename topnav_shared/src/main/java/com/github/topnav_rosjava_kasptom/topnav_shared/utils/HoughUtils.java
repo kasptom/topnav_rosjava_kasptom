@@ -5,6 +5,7 @@ import topnav_msgs.HoughAcc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HoughUtils {
     public static List<HoughCell> toList(HoughAcc houghAcc) {
@@ -36,5 +37,12 @@ public class HoughUtils {
         }
 
         return houghCells;
+    }
+
+    public static List<HoughCell> toFilteredList(HoughAcc houghAcc, int lineDetectionThreshold) {
+        List<HoughCell> houghCells = HoughUtils.toList(houghAcc);
+        return houghCells.stream()
+                .filter(cell -> cell.getVotes() >= lineDetectionThreshold)
+                .collect(Collectors.toList());
     }
 }
