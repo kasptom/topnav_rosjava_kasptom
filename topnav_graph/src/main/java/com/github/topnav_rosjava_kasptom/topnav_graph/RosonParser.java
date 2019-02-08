@@ -19,4 +19,3 @@ public class RosonParser {
         return gson.fromJson(json, BuildingDto.class);
     }
 }
-

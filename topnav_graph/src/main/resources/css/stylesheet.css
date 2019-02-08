@@ -1,0 +1,7 @@
+node.marker {
+    shape: box;
+    fill-mode: image-scaled;
+    size: 20px, 20px;
+    fill-image: url('file:marker.png');
+}
+
