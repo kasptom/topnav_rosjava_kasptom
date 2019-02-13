@@ -8,3 +8,18 @@ node.marker {
     size: 20px, 20px;
     fill-image: url('file:marker.png');
 }
+
+node.spaceNode {
+    shape: circle;
+    fill-color: green;
+}
+
+node.wallNode {
+    shape: box;
+    fill-color: blue;
+}
+
+node.gateNode {
+    shape: box;
+    fill-color: brown;
+}
