@@ -60,6 +60,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
     @Override
     public void startStrategy() {
+        initializeSubstrategies();
         setCurrentStage(DETECTED_MARKER, AT_LEFT); // TODO possiblity to set AT_RIGHT
     }
 
