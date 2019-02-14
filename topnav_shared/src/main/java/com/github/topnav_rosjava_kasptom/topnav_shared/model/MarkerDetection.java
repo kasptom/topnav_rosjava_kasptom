@@ -3,6 +3,7 @@ package com.github.topnav_rosjava_kasptom.topnav_shared.model;
 public class MarkerDetection {
     private String id;
     private final double[] cameraPosition = new double[3];
+    public static final double OFFSET_MARKER_CENTER_METERS = 0.1; // TODO topnav_config
 
     public static MarkerDetection createDetection(String id, double[] cameraPosition) {
         return new MarkerDetection(id, cameraPosition);
@@ -17,9 +18,9 @@ public class MarkerDetection {
     }
 
     public RelativeAlignment getRelativeAlignment() {
-        if (cameraPosition[0] < -0.5) {
+        if (cameraPosition[0] < -OFFSET_MARKER_CENTER_METERS) {
             return RelativeAlignment.RIGHT;
-        } else if (cameraPosition[0] > 0.5) {
+        } else if (cameraPosition[0] > OFFSET_MARKER_CENTER_METERS) {
             return RelativeAlignment.LEFT;
         }
         return RelativeAlignment.CENTER;

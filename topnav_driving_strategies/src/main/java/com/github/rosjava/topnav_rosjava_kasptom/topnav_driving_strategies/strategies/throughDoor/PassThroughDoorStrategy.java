@@ -60,7 +60,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
     @Override
     public void startStrategy() {
-        setCurrentStage(DETECTED_MARKER, AT_LEFT);
+        setCurrentStage(DETECTED_MARKER, AT_LEFT); // TODO possiblity to set AT_RIGHT
     }
 
     @Override
@@ -160,7 +160,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
                     log.info("rotated side towards the door");
                     setCurrentStage(ROTATED_SIDE_TOWARDS_DOOR, AT_LEFT);
                 } else {
-                    wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.0, -1.0, 1.0, -1.0));
+                    wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.5, -1.5, 1.5, -1.5));
                 }
                 return;
             }
@@ -221,6 +221,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
         }
 
         private double setVelocityAccordingToDoorPosition(TopologyMsg marker) {
+            // FIXME: what robot is comming from the leftwise side of the door?
             double velocity = 0.0;
             if (marker.getIdentity().equals(guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue())) {
                 if (marker.getRelativeAlignment().equals(RelativeAlignment.CENTER.name())
