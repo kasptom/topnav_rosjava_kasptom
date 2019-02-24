@@ -1,14 +1,14 @@
 package com.github.topnav_rosjava_kasptom.topnav_visualization;
 
 import org.apache.commons.logging.Log;
-import sensor_msgs.LaserScan;
+import topnav_msgs.AngleRangesMsg;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
-
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.LIDAR_MAX_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_HEIGHT;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_WIDTH;
 
@@ -18,6 +18,8 @@ public class HoughPreviewV2 implements IHoughPreview {
     private Frame mainFrame;
 
     private ArrayList<Point> points;
+    private ArrayList<Point> doorPoints;
+
     private static final long PREVIEW_UPDATE_INTERVAL_NANO_SECS = (long) (0.1 * 1e9);
     private long lastTimeStamp;
 
@@ -26,6 +28,7 @@ public class HoughPreviewV2 implements IHoughPreview {
         this.log = log;
         this.lastTimeStamp = System.nanoTime();
         points = new ArrayList<>();
+        doorPoints = new ArrayList<>();
         graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 
         printDeviceCapabilities();
@@ -38,27 +41,31 @@ public class HoughPreviewV2 implements IHoughPreview {
     }
 
     @Override
-    public void onLaserPointsUpdated(LaserScan scanMsg) {
+    public void onAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
         if (!isTimeToUpdate()) {
             return;
         }
 
-        points.clear();
-        double x, y, angle, range;
-        for (int i = 0; i < scanMsg.getRanges().length; i++) {
-            angle = scanMsg.getAngleMin() + scanMsg.getAngleIncrement() * i;
-            range = scanMsg.getRanges()[i];
+        updatePointsFromAngleRangeData(angleRangesMsg);
 
-            x = (range * Math.sin(angle) - scanMsg.getRangeMin()) / (scanMsg.getRangeMax() - scanMsg.getRangeMin()) * PREVIEW_HEIGHT / 2;
-            y = (range * Math.cos(angle) - scanMsg.getRangeMin()) / (scanMsg.getRangeMax() - scanMsg.getRangeMin()) * PREVIEW_WIDTH / 2;
+        renderPoints();
+    }
+
+    private void updatePointsFromAngleRangeData(AngleRangesMsg angleRangesMsg) {
+        points.clear();
+        double x, y, angleRad, range;
+        for (int i = 0; i < angleRangesMsg.getAngles().length; i++) {
+            angleRad= angleRangesMsg.getAngles()[i];
+            range = angleRangesMsg.getDistances()[i];
+
+            x = range * Math.sin(angleRad) / LIDAR_MAX_RANGE * (PREVIEW_HEIGHT / 2.0f);
+            y = range * Math.cos(angleRad) / LIDAR_MAX_RANGE * (PREVIEW_WIDTH / 2.0f);
 
             x = -x + PREVIEW_WIDTH / 2.0;
             y = -y + PREVIEW_HEIGHT / 2.0;
 
             points.add(new Point((int) x, (int) y));
         }
-
-        renderPoints();
     }
 
     private boolean isTimeToUpdate() {
@@ -82,7 +89,11 @@ public class HoughPreviewV2 implements IHoughPreview {
             graphics.fillRect(point.x, point.y, 5, 5);
 
         });
-        // Draw as appropriate using myGraphics
+        graphics.setColor(Color.green);
+        doorPoints.forEach(point -> {
+            graphics.fillOval(point.x, point.y, 5, 5);
+        });
+
         graphics.dispose();
     }
 

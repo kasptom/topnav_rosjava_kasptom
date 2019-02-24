@@ -1,7 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_visualization;
 
-import sensor_msgs.LaserScan;
+import topnav_msgs.AngleRangesMsg;
 
 public interface IHoughPreview {
-    void onLaserPointsUpdated(LaserScan scanMsg);
+    void onAngleRangeMessage(AngleRangesMsg angleRangesMsg);
 }

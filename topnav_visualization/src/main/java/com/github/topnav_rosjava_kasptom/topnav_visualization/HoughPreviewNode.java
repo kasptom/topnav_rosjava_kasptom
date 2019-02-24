@@ -5,14 +5,14 @@ import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
-import sensor_msgs.LaserScan;
+import topnav_msgs.AngleRangesMsg;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.GAZEBO_LASER_SCAN_TOPIC;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.TOPNAV_ANGLE_RANGE_TOPIC;
 
 @SuppressWarnings("unused")
 public class HoughPreviewNode extends AbstractNodeMain {
 
-    private Subscriber<LaserScan> hokuyoSubscriber;
+    private Subscriber<AngleRangesMsg> angleRangeSubscriber;
     private IHoughPreview preview;
 
     @Override
@@ -27,7 +27,7 @@ public class HoughPreviewNode extends AbstractNodeMain {
         Log log = connectedNode.getLog();
         preview = new HoughPreviewV2(log);
 
-        hokuyoSubscriber = connectedNode.newSubscriber(GAZEBO_LASER_SCAN_TOPIC, LaserScan._TYPE);
-        hokuyoSubscriber.addMessageListener(message -> preview.onLaserPointsUpdated(message));
+        angleRangeSubscriber = connectedNode.newSubscriber(TOPNAV_ANGLE_RANGE_TOPIC, AngleRangesMsg._TYPE);
+        angleRangeSubscriber.addMessageListener(message -> preview.onAngleRangeMessage(message));
     }
 }
