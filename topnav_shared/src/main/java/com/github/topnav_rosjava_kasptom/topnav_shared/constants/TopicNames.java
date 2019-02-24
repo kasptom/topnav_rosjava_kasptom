@@ -9,4 +9,9 @@ public class TopicNames {
     public static final String TOPNAV_STRATEGY_HEAD_DIRECTION_TOPIC = "/topnav/driving/relative_direction";
 
     public static final String CAPO_JOINT_STATES = "/joint_states";
+
+    public static final String TOPNAV_HOUGH_TOPIC = "/capo/laser/hough";
+    public static final String TOPNAV_ANGLE_RANGE_TOPIC = "/capo/laser/angle_range";
+
+    public static final String GAZEBO_LASER_SCAN_TOPIC = "/capo/laser/scan";
 }

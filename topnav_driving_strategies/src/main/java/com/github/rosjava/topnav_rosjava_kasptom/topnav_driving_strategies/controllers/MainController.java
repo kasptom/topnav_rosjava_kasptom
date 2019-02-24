@@ -39,7 +39,7 @@ public class MainController implements IMainController {
         wheelsController = new WheelsController(connectedNode);
 
         configMsgSubscriber = connectedNode.newSubscriber("topnav/config", TopNavConfigMsg._TYPE);
-        angleRangesMsgSubscriber = connectedNode.newSubscriber("capo/laser/angle_range", AngleRangesMsg._TYPE);
+        angleRangesMsgSubscriber = connectedNode.newSubscriber(TopicNames.TOPNAV_ANGLE_RANGE_TOPIC, AngleRangesMsg._TYPE);
         houghAccSubscriber = connectedNode.newSubscriber("capo/laser/hough", HoughAcc._TYPE);
         markerDetectionSubscriber = connectedNode.newSubscriber("topnav/feedback", FeedbackMsg._TYPE);
 
