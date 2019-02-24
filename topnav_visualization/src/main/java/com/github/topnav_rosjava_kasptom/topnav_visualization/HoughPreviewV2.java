@@ -14,14 +14,17 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.
 
 public class HoughPreviewV2 implements IHoughPreview {
     private final Log log;
-    GraphicsDevice graphicsDevice;
-    Frame mainFrame;
+    private GraphicsDevice graphicsDevice;
+    private Frame mainFrame;
 
     private ArrayList<Point> points;
+    private static final long PREVIEW_UPDATE_INTERVAL_NANO_SECS = (long) (0.1 * 1e9);
+    private long lastTimeStamp;
 
 
     public HoughPreviewV2(Log log) {
         this.log = log;
+        this.lastTimeStamp = System.nanoTime();
         points = new ArrayList<>();
         graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 
@@ -36,6 +39,10 @@ public class HoughPreviewV2 implements IHoughPreview {
 
     @Override
     public void onLaserPointsUpdated(LaserScan scanMsg) {
+        if (!isTimeToUpdate()) {
+            return;
+        }
+
         points.clear();
         double x, y, angle, range;
         for (int i = 0; i < scanMsg.getRanges().length; i++) {
@@ -52,11 +59,16 @@ public class HoughPreviewV2 implements IHoughPreview {
         }
 
         renderPoints();
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            log.error("Thread interrupted");
+    }
+
+    private boolean isTimeToUpdate() {
+        long currentTimeStamp = System.nanoTime();
+        if (currentTimeStamp - lastTimeStamp > PREVIEW_UPDATE_INTERVAL_NANO_SECS) {
+//            log.info("update time");
+            lastTimeStamp = currentTimeStamp;
+            return true;
         }
+        return false;
     }
 
     private void renderPoints() {
@@ -89,9 +101,9 @@ public class HoughPreviewV2 implements IHoughPreview {
     }
 
     private Frame createMainFrame() {
-        Frame frame = new Frame(graphicsDevice.getDefaultConfiguration());
+        Frame frame = new Frame("LIDAR preview (java)", graphicsDevice.getDefaultConfiguration());
         frame.setSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
-        frame.setUndecorated(true);
+//        frame.setUndecorated(true);
         frame.setIgnoreRepaint(true);
         frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
