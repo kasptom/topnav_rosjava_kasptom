@@ -4,7 +4,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models.AngleRange;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;

@@ -1,4 +1,4 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.models;
+package com.github.topnav_rosjava_kasptom.topnav_shared.model;
 
 import topnav_msgs.AngleRangesMsg;
 

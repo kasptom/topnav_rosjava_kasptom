@@ -1,24 +1,33 @@
 package com.github.topnav_rosjava_kasptom.topnav_visualization;
 
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
+import com.github.topnav_rosjava_kasptom.topnav_shared.services.DoorFinder;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.AngleRangeUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.LIDAR_MAX_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_HEIGHT;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_WIDTH;
 
 public class HoughPreviewV2 implements IHoughPreview {
     private final Log log;
+
+    private final DoorFinder doorFinder;
     private GraphicsDevice graphicsDevice;
     private Frame mainFrame;
 
     private ArrayList<Point> points;
-    private ArrayList<Point> doorPoints;
+    private ArrayList<Point> leftDoorPoints;
+    private ArrayList<Point> rightDoorPoints;
+
 
     private static final long PREVIEW_UPDATE_INTERVAL_NANO_SECS = (long) (0.1 * 1e9);
     private long lastTimeStamp;
@@ -27,8 +36,10 @@ public class HoughPreviewV2 implements IHoughPreview {
     public HoughPreviewV2(Log log) {
         this.log = log;
         this.lastTimeStamp = System.nanoTime();
+        this.doorFinder = new DoorFinder();
         points = new ArrayList<>();
-        doorPoints = new ArrayList<>();
+        leftDoorPoints = new ArrayList<>();
+        rightDoorPoints = new ArrayList<>();
         graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 
         printDeviceCapabilities();
@@ -53,18 +64,24 @@ public class HoughPreviewV2 implements IHoughPreview {
 
     private void updatePointsFromAngleRangeData(AngleRangesMsg angleRangesMsg) {
         points.clear();
-        double x, y, angleRad, range;
-        for (int i = 0; i < angleRangesMsg.getAngles().length; i++) {
-            angleRad= angleRangesMsg.getAngles()[i];
-            range = angleRangesMsg.getDistances()[i];
+        leftDoorPoints.clear();
+        rightDoorPoints.clear();
 
-            x = range * Math.sin(angleRad) / LIDAR_MAX_RANGE * (PREVIEW_HEIGHT / 2.0f);
-            y = range * Math.cos(angleRad) / LIDAR_MAX_RANGE * (PREVIEW_WIDTH / 2.0f);
+        ArrayList<Point2D> lidarPoints = AngleRangeUtils.angleRangeToPixels(angleRangesMsg);
+        List<List<AngleRange>> clusters = doorFinder.dividePointsToClusters(angleRangesMsg);
 
-            x = -x + PREVIEW_WIDTH / 2.0;
-            y = -y + PREVIEW_HEIGHT / 2.0;
 
-            points.add(new Point((int) x, (int) y));
+        points.addAll(lidarPoints.stream()
+                .map(point2D -> new Point((int) point2D.getX(), (int) point2D.getY()))
+                .collect(Collectors.toList()));
+
+        if (clusters.size() == 2) {
+            leftDoorPoints.addAll(AngleRangeUtils.angleRangeToPixels(clusters.get(0))
+                    .stream().map(point2D -> new Point((int) point2D.getX(), (int) point2D.getY()))
+                    .collect(Collectors.toList()));
+            rightDoorPoints.addAll(AngleRangeUtils.angleRangeToPixels(clusters.get(1))
+                    .stream().map(point2D -> new Point((int) point2D.getX(), (int) point2D.getY()))
+                    .collect(Collectors.toList()));
         }
     }
 
@@ -85,16 +102,19 @@ public class HoughPreviewV2 implements IHoughPreview {
         graphics.fillRect(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 
         graphics.setColor(Color.red);
-        points.forEach(point -> {
-            graphics.fillRect(point.x, point.y, 5, 5);
+        drawPoints(graphics, points);
 
-        });
         graphics.setColor(Color.green);
-        doorPoints.forEach(point -> {
-            graphics.fillOval(point.x, point.y, 5, 5);
-        });
+        drawPoints(graphics, leftDoorPoints);
+
+        graphics.setColor(Color.blue);
+        drawPoints(graphics, rightDoorPoints);
 
         graphics.dispose();
+    }
+
+    private void drawPoints(Graphics graphics, ArrayList<Point> points) {
+        points.forEach(point -> graphics.fillRect(point.x, point.y, 5, 5));
     }
 
     private void printDeviceCapabilities() {
