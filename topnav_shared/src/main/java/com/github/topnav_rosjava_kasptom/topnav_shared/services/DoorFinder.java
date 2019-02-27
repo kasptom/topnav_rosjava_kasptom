@@ -69,9 +69,31 @@ public class DoorFinder {
     }
 
 
+    public Point getClustersMidPoint() {
+        List<Point> firstCluster = this.clusters.get(centroids.get(0));
+        List<Point> secondCluster = this.clusters.get(centroids.get(1));
+        final Point[] firstClosest = {null};
+        final Point[] secondClosest = {null};
+        final double[] minDistance = {Double.POSITIVE_INFINITY};
+        final double[] distance = {0};
+        firstCluster.forEach(point -> {
+            secondCluster.forEach(otherPoint -> {
+                distance[0] = distanceTo(point, otherPoint);
+                if (distance[0] < minDistance[0]) {
+                    minDistance[0] = distance[0];
+                    firstClosest[0] = point;
+                    secondClosest[0] = otherPoint;
+                }
+            });
+        });
+
+        return new Point((firstClosest[0].x + secondClosest[0].x)/2, (firstClosest[0].y + secondClosest[0].y)/2);
+    }
+
     private void resetMeans(LinkedList<Point> closePoints) {
         centroids.clear();
-        centroids.addAll(closePoints.subList(0, MEANS_COUNT));
+        centroids.add(closePoints.get(0));
+        centroids.add(closePoints.get(closePoints.size() - 1));
     }
 
     private void recalculateMeans(List<Point> closePoints) {
@@ -110,6 +132,19 @@ public class DoorFinder {
         Point(AngleRange angleRange) {
             x = angleRange.getRange() * Math.sin(angleRange.getAngleRad());
             y = angleRange.getRange() * Math.cos(angleRange.getAngleRad());
+        }
+
+        Point(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public double getX() {
+            return x;
+        }
+
+        public double getY() {
+            return y;
         }
     }
 

@@ -1,6 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
+import com.github.topnav_rosjava_kasptom.topnav_shared.services.DoorFinder;
 import topnav_msgs.AngleRangesMsg;
 
 import java.awt.geom.Point2D;
@@ -50,5 +51,15 @@ public class AngleRangeUtils {
                     return new Point2D.Double(x, y);
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public static Point2D pointToPixelPoint(DoorFinder.Point point) {
+        double x = point.getX() / LIDAR_MAX_RANGE * (PREVIEW_HEIGHT / 2.0f);
+        double y = point.getY() / LIDAR_MAX_RANGE * (PREVIEW_HEIGHT / 2.0f);
+
+        x = -x + PREVIEW_WIDTH / 2.0;
+        y = -y + PREVIEW_HEIGHT / 2.0;
+
+        return new Point2D.Double(x, y);
     }
 }

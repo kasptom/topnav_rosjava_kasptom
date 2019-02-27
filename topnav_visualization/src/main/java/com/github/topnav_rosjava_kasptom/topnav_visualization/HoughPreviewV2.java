@@ -31,6 +31,7 @@ public class HoughPreviewV2 implements IHoughPreview {
 
     private static final long PREVIEW_UPDATE_INTERVAL_NANO_SECS = (long) (0.1 * 1e9);
     private long lastTimeStamp;
+    private Point2D midPoint;
 
 
     public HoughPreviewV2(Log log) {
@@ -70,6 +71,8 @@ public class HoughPreviewV2 implements IHoughPreview {
         ArrayList<Point2D> lidarPoints = AngleRangeUtils.angleRangeToPixels(angleRangesMsg);
         List<List<AngleRange>> clusters = doorFinder.dividePointsToClusters(angleRangesMsg);
 
+        DoorFinder.Point midPoint = doorFinder.getClustersMidPoint();
+        this.midPoint = AngleRangeUtils.pointToPixelPoint(midPoint);
 
         points.addAll(lidarPoints.stream()
                 .map(point2D -> new Point((int) point2D.getX(), (int) point2D.getY()))
@@ -109,6 +112,9 @@ public class HoughPreviewV2 implements IHoughPreview {
 
         graphics.setColor(Color.blue);
         drawPoints(graphics, rightDoorPoints);
+
+        graphics.setColor(Color.yellow);
+        graphics.fillRect((int)midPoint.getX(), (int)midPoint.getY(), 5, 5);
 
         graphics.dispose();
     }
