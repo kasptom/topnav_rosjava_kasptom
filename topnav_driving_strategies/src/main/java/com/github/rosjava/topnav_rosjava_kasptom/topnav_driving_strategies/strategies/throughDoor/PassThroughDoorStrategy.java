@@ -4,24 +4,25 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeAlignment;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.services.DoorFinder;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.*;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategy.ThroughDoorStage.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.DOOR_DETECTION_RANGE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MAX_VELOCITY_DELTA;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
 public class PassThroughDoorStrategy implements IDrivingStrategy {
@@ -128,7 +129,6 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
         ROTATED_SIDE_TOWARDS_DOOR,
         ALIGNED_WITH_DOOR,
         ROTATED_TOWARDS_DOOR,
-        BACK_MARKER_SPOTTED,
     }
 
 
@@ -141,9 +141,6 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
         @Override
         public void handleHoughAccMessage(HoughAcc houghAcc) {
-            if (!isChassisRotationInProgress) {
-                return;
-            }
         }
 
         @Override
@@ -276,6 +273,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
     class DriveThroughDoorStrategy extends BaseThroughDoorSubStrategy {
 
         private boolean isBackMarkVisible = false;
+        private DoorFinder doorFinder = new DoorFinder();
 
         @Override
         public void handleHoughAccMessage(HoughAcc houghAcc) {
@@ -287,32 +285,12 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
                 return;
             }
 
-            List<AngleRange> angleRanges = AngleRange.messageToAngleRange(angleRangesMsg);
-            AngleRange closestOfTheRight = angleRanges
-                    .stream()
-                    .filter(angleRange -> angleRange.getAngleRad() >= 0)
-                    .min(Comparator.comparingDouble(AngleRange::getRange))
-                    .orElse(new AngleRange(0.0, Double.MAX_VALUE));
-
-            AngleRange closestOfTheLeft = angleRanges
-                    .stream()
-                    .filter(angleRange -> angleRange.getAngleRad() <= 0)
-                    .min(Comparator.comparingDouble(AngleRange::getRange))
-                    .orElse(new AngleRange(0.0, Double.MAX_VALUE));
-
-            double leftClosest = closestOfTheLeft.getRange();
-            double rightClosest = closestOfTheRight.getRange();
-            double avgClosest = (leftClosest + rightClosest) / 2.0;
-
+            this.doorFinder.dividePointsToClusters(angleRangesMsg);
+            DoorFinder.Point midPoint = this.doorFinder.getClustersMidPoint();
             double MAX_VELOCITY = 2.0;
 
-            double leftVelocity = leftClosest > avgClosest
-                    ? MAX_VELOCITY
-                    : (leftClosest / rightClosest) * MAX_VELOCITY;
-
-            double rightVelocity = rightClosest > avgClosest
-                    ? MAX_VELOCITY
-                    : (rightClosest / leftClosest) * MAX_VELOCITY;
+            double leftVelocity = MAX_VELOCITY + MAX_VELOCITY_DELTA * (-midPoint.getX() / DOOR_DETECTION_RANGE);
+            double rightVelocity = MAX_VELOCITY + MAX_VELOCITY_DELTA * (midPoint.getX() / DOOR_DETECTION_RANGE);
 
             wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(leftVelocity, rightVelocity, leftVelocity, rightVelocity));
         }
