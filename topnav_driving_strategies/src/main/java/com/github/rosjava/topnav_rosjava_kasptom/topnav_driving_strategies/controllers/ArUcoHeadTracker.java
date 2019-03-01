@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.FIELD_OF_VIEW_DEGS;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.MAGIC_ANGLE_TO_PIXELS_CONSTANT;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_WIDTH;
 
 public class ArUcoHeadTracker implements IArUcoHeadTracker {
@@ -16,7 +16,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private boolean isEnabled;
     private AngleCorrectionListener listener;
 
-    public ArUcoHeadTracker() {
+    ArUcoHeadTracker() {
         this.trackedMarkerIds = new LinkedHashSet<>();
     }
 
@@ -25,6 +25,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         if (!isEnabled) {
             return;
         }
+        trackDoorMarker(markersMsg);
     }
 
     private void trackDoorMarker(MarkersMsg markersMsg) {
@@ -63,7 +64,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private void centerHeadOn(MarkerDetection marker) {
         double[] xCorners = marker.getXCorners();
         double averagePicturePosition = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0;
-        double headRotationCorrection = averagePicturePosition * FIELD_OF_VIEW_DEGS / PREVIEW_WIDTH;
+        double headRotationCorrection = -averagePicturePosition * MAGIC_ANGLE_TO_PIXELS_CONSTANT / PREVIEW_WIDTH;
         this.listener.onAngleCorrection(headRotationCorrection);
     }
 
