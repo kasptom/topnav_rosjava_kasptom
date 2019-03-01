@@ -12,6 +12,8 @@ public class TopicNames {
 
     public static final String TOPNAV_HOUGH_TOPIC = "/capo/laser/hough";
     public static final String TOPNAV_ANGLE_RANGE_TOPIC = "/capo/laser/angle_range";
+    public static final String TOPNAV_ARUCO_TOPIC = "/capo/camera/aruco";
+
 
     public static final String GAZEBO_LASER_SCAN_TOPIC = "/capo/laser/scan";
 }

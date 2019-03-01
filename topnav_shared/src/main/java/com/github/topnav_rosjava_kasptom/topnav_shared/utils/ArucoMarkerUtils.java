@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ArucoMarkerUtils {
-    static List<MarkerDetection> createMarkerDetections(MarkersMsg markersMsg) {
+    public static List<MarkerDetection> createMarkerDetections(MarkersMsg markersMsg) {
         return markersMsg.getMarkers()
                 .stream()
                 .map(ArucoMarkerUtils::createMarkerDetection)
@@ -16,6 +16,6 @@ public class ArucoMarkerUtils {
     }
 
     private static MarkerDetection createMarkerDetection(MarkerMsg marker) {
-        return MarkerDetection.createDetection(Integer.toString(marker.getId()), marker.getCameraPosition());
+        return MarkerDetection.createDetection(Integer.toString(marker.getId()), marker.getCameraPosition(), marker.getXCorners(), marker.getYCorners());
     }
 }

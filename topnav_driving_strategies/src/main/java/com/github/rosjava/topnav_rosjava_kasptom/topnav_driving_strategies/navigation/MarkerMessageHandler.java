@@ -29,7 +29,7 @@ public class MarkerMessageHandler implements MessageListener<MarkersMsg> {
 
     private void printMarkerMessage(MarkerMsg markerMsg) {
         double[] pos = markerMsg.getCameraPosition();
-        MarkerDetection detection = MarkerDetection.createDetection(Integer.toString(markerMsg.getId()), markerMsg.getCameraPosition());
+        MarkerDetection detection = MarkerDetection.createDetection(Integer.toString(markerMsg.getId()), markerMsg.getCameraPosition(), markerMsg.getXCorners(), markerMsg.getYCorners());
         Long currentTimeStamp = System.nanoTime();
 
         if (!previousTimeStamp.containsKey(detection.getId())

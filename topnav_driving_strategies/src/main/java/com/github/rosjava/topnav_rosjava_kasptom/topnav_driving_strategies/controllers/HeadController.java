@@ -53,6 +53,11 @@ public class HeadController implements IHeadController {
     }
 
     @Override
+    public void handleStrategyHeadRotationChange(double rotationDegrees) {
+        publishHeadRotationChange(rotationDegrees);
+    }
+
+    @Override
     public void handleNavigationHeadRotationChange(RelativeDirection relativeDirection) {
         if (!isIdle) {
             return;
@@ -64,6 +69,10 @@ public class HeadController implements IHeadController {
     @Override
     public void publishHeadRotationChange(RelativeDirection relativeDirection) {
         double rotationDegrees = RelativeDirectionUtils.toAngleDegrees(relativeDirection);
+        publishHeadRotationChange(rotationDegrees);
+    }
+
+    private void publishHeadRotationChange(double rotationDegrees) {
         double rotationRads = rotationDegrees * Math.PI / 180.0;
         Float64 rotationMsg = headRotationPublisher.newMessage();
         rotationMsg.setData(rotationRads);

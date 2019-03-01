@@ -1,15 +1,8 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.*;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeAlignment;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.*;
 import com.github.topnav_rosjava_kasptom.topnav_shared.services.DoorFinder;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import org.apache.commons.logging.Log;
@@ -21,12 +14,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategy.ThroughDoorStage.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.DOOR_DETECTION_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MAX_VELOCITY_DELTA;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
 public class PassThroughDoorStrategy implements IDrivingStrategy {
     private final Log log;
+    private final IArUcoHeadTracker arUcoHandler;
 
     private HeadRotationChangeListener headListener;
     private WheelsVelocitiesChangeListener wheelsListener;
@@ -38,16 +33,25 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
     private boolean isHeadRotationInProgress;
 
-    public PassThroughDoorStrategy(Log log) {
+    public PassThroughDoorStrategy(Log log, IArUcoHeadTracker arUcoHandler) {
         this.log = log;
+        this.arUcoHandler = arUcoHandler;
         guidelineParamsMap = new HashMap<>();
         substrategies = initializeSubstrategies();
     }
 
     private void setCurrentStage(ThroughDoorStage stage, RelativeDirection direction) {
+        log.info(String.format("Setting current stage to %s", stage));
         currentStage = stage;
-        isHeadRotationInProgress = true;
-        headListener.onRotationChanged(direction);
+
+        if (stage == ROTATED_SIDE_TOWARDS_DOOR) {
+            arUcoHandler.start();
+            isHeadRotationInProgress = false;
+        } else {
+            arUcoHandler.stop();
+            isHeadRotationInProgress = true;
+            headListener.onRotationChanged(direction);
+        }
     }
 
     private HashMap<ThroughDoorStage, IDrivingStrategy> initializeSubstrategies() {
@@ -62,6 +66,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
     @Override
     public void startStrategy() {
         initializeSubstrategies();
+        this.arUcoHandler.setTrackedMarkers(GuidelineUtils.asOrderedDoorMarkerIds(guidelineParamsMap));
         setCurrentStage(DETECTED_MARKER, AT_LEFT); // TODO possiblity to set AT_RIGHT
     }
 
@@ -179,8 +184,8 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
     }
 
     private List<TopologyMsg> findDoorFrontMakers(FeedbackMsg feedbackMsg) {
-        String leftMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue();
-        String rightMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue();
+        String leftMarkerId = guidelineParamsMap.get(KEY_FRONT_LEFT_MARKER_ID).getValue();
+        String rightMarkerId = guidelineParamsMap.get(KEY_FRONT_RIGHT_MARKER_ID).getValue();
 
         return feedbackMsg.getTopologies()
                 .stream()
@@ -221,14 +226,14 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
         private double setVelocityAccordingToDoorPosition(TopologyMsg marker) {
             // FIXME: what robot is comming from the leftwise side of the door?
             double velocity = 0.0;
-            if (marker.getIdentity().equals(guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue())) {
+            if (marker.getIdentity().equals(guidelineParamsMap.get(KEY_FRONT_LEFT_MARKER_ID).getValue())) {
                 if (marker.getRelativeAlignment().equals(RelativeAlignment.CENTER.name())
                         || marker.getRelativeAlignment().equals(RelativeAlignment.RIGHT.name())) {
                     velocity = 1.0;
                 }
             }
 
-            if (marker.getIdentity().equals(guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue())) {
+            if (marker.getIdentity().equals(guidelineParamsMap.get(KEY_FRONT_RIGHT_MARKER_ID).getValue())) {
                 if (marker.getRelativeAlignment().equals(RelativeAlignment.CENTER.name())
                         || marker.getRelativeAlignment().equals(RelativeAlignment.LEFT.name())) {
                     velocity = -1.0;
@@ -261,7 +266,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
         }
 
         private List<TopologyMsg> findRightFrontMarker(FeedbackMsg feedbackMsg) {
-            String rightMarkerId = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue();
+            String rightMarkerId = guidelineParamsMap.get(KEY_FRONT_RIGHT_MARKER_ID).getValue();
 
             return feedbackMsg.getTopologies()
                     .stream()
@@ -307,8 +312,8 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
         }
 
         private List<TopologyMsg> findDoorBackMarkers(FeedbackMsg feedbackMsg) {
-            String leftBackMarker = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_BACK_LEFT_MARKER_ID).getValue();
-            String rightBackMarker = guidelineParamsMap.get(DrivingStrategy.ThroughDoor.KEY_BACK_RIGHT_MARKER_ID).getValue();
+            String leftBackMarker = guidelineParamsMap.get(KEY_BACK_LEFT_MARKER_ID).getValue();
+            String rightBackMarker = guidelineParamsMap.get(KEY_BACK_RIGHT_MARKER_ID).getValue();
 
             return feedbackMsg.getTopologies()
                     .stream()

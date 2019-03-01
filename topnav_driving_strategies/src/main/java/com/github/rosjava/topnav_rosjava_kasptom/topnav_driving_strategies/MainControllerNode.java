@@ -14,6 +14,8 @@ import org.ros.node.topic.Subscriber;
 import topnav_msgs.FeedbackMsg;
 import topnav_msgs.MarkersMsg;
 
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.TOPNAV_ARUCO_TOPIC;
+
 //import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.HoughLineTestStrategy;
 //import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
 
@@ -36,8 +38,8 @@ public class MainControllerNode extends AbstractNodeMain {
         Log log = connectedNode.getLog();
         wheelsController = new MainController(connectedNode);
 
-        feedbackPublisher = connectedNode.newPublisher("topnav/feedback", FeedbackMsg._TYPE);
-        markersMsgSubscriber = connectedNode.newSubscriber("capo/camera/aruco", MarkersMsg._TYPE);
+        feedbackPublisher = connectedNode.newPublisher("/topnav/feedback", FeedbackMsg._TYPE);
+        markersMsgSubscriber = connectedNode.newSubscriber(TOPNAV_ARUCO_TOPIC, MarkersMsg._TYPE);
         markersMsgSubscriber.addMessageListener(new MarkerMessageHandler(feedbackPublisher));
     }
 
