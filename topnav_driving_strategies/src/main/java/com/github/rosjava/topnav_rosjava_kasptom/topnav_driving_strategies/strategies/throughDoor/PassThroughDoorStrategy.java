@@ -21,7 +21,6 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDire
 
 public class PassThroughDoorStrategy implements IDrivingStrategy {
     private final Log log;
-    private final IArUcoHeadTracker arUcoHandler;
 
     private HeadRotationChangeListener headListener;
     private WheelsVelocitiesChangeListener wheelsListener;
@@ -33,9 +32,8 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
 
     private boolean isHeadRotationInProgress;
 
-    public PassThroughDoorStrategy(Log log, IArUcoHeadTracker arUcoHandler) {
+    public PassThroughDoorStrategy(Log log) {
         this.log = log;
-        this.arUcoHandler = arUcoHandler;
         guidelineParamsMap = new HashMap<>();
         substrategies = initializeSubstrategies();
     }
@@ -44,14 +42,8 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
         log.info(String.format("Setting current stage to %s", stage));
         currentStage = stage;
 
-        if (stage == ROTATED_SIDE_TOWARDS_DOOR) {
-            arUcoHandler.start();
-            isHeadRotationInProgress = false;
-        } else {
-            arUcoHandler.stop();
-            isHeadRotationInProgress = true;
-            headListener.onRotationChanged(direction);
-        }
+        isHeadRotationInProgress = true;
+        headListener.onRotationChanged(direction);
     }
 
     private HashMap<ThroughDoorStage, IDrivingStrategy> initializeSubstrategies() {
@@ -66,7 +58,6 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
     @Override
     public void startStrategy() {
         initializeSubstrategies();
-        this.arUcoHandler.setTrackedMarkers(GuidelineUtils.asOrderedDoorMarkerIds(guidelineParamsMap));
         setCurrentStage(DETECTED_MARKER, AT_LEFT); // TODO possiblity to set AT_RIGHT
     }
 
@@ -318,7 +309,7 @@ public class PassThroughDoorStrategy implements IDrivingStrategy {
             return feedbackMsg.getTopologies()
                     .stream()
                     .filter(topologyMsg ->
-                        topologyMsg.getIdentity().equals(leftBackMarker) || topologyMsg.getIdentity().equals(rightBackMarker))
+                            topologyMsg.getIdentity().equals(leftBackMarker) || topologyMsg.getIdentity().equals(rightBackMarker))
                     .collect(Collectors.toList());
         }
     }

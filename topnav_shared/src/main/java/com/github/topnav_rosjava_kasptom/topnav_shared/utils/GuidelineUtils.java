@@ -1,11 +1,9 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
-import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,15 +31,5 @@ public class GuidelineUtils {
                         guidelineParam.getValue(),
                         guidelineParam.getType()))
                 .collect(Collectors.toList());
-    }
-
-
-    public static LinkedHashSet<String> asOrderedDoorMarkerIds(HashMap<String, GuidelineParam> guidelineParams) {
-        LinkedHashSet<String> doorMarkersOrdered = new LinkedHashSet<>(4);
-        doorMarkersOrdered.add(guidelineParams.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue());
-        doorMarkersOrdered.add(guidelineParams.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue());
-        doorMarkersOrdered.add(guidelineParams.get(DrivingStrategy.ThroughDoor.KEY_BACK_LEFT_MARKER_ID).getValue());
-        doorMarkersOrdered.add(guidelineParams.get(DrivingStrategy.ThroughDoor.KEY_BACK_RIGHT_MARKER_ID).getValue());
-        return doorMarkersOrdered;
     }
 }

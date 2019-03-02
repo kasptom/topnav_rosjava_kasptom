@@ -1,30 +1,30 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoorV2;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.*;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.PdVelocityCalculator;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
-import topnav_msgs.AngleRangesMsg;
-import topnav_msgs.FeedbackMsg;
-import topnav_msgs.HoughAcc;
-import topnav_msgs.TopNavConfigMsg;
+import topnav_msgs.*;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class AruCoTrackerTestStrategy implements IDrivingStrategy {
-
+public class PassThroughDoorStrategyV2 implements IDrivingStrategy {
     private final IArUcoHeadTracker arucoTracker;
-    private HashMap<String, GuidelineParam> guidelineParamsMap;
+    private HashMap<String, GuidelineParam> nameToParameter;
+    private WheelsVelocitiesChangeListener wheelsListener;
+    private PdVelocityCalculator velocityCalculator;
 
-    public AruCoTrackerTestStrategy(IArUcoHeadTracker arUcoTracker) {
-        this.guidelineParamsMap = new HashMap<>();
+    public PassThroughDoorStrategyV2(IArUcoHeadTracker arUcoTracker) {
         this.arucoTracker = arUcoTracker;
+        nameToParameter = new HashMap<>();
+        velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
     }
 
     @Override
     public void startStrategy() {
-        arucoTracker.setTrackedMarkers(ArucoMarkerUtils.asOrderedDoorMarkerIds(guidelineParamsMap));
+        arucoTracker.setTrackedMarkers(ArucoMarkerUtils.asOrderedDoorMarkerIds(nameToParameter));
         arucoTracker.start();
     }
 
@@ -55,7 +55,7 @@ public class AruCoTrackerTestStrategy implements IDrivingStrategy {
 
     @Override
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
-
+        this.wheelsListener = listener;
     }
 
     @Override
@@ -70,6 +70,6 @@ public class AruCoTrackerTestStrategy implements IDrivingStrategy {
 
     @Override
     public void setGuidelineParameters(List<String> parameters) {
-        GuidelineUtils.reloadParameters(parameters, guidelineParamsMap);
+        GuidelineUtils.reloadParameters(parameters, nameToParameter);
     }
 }
