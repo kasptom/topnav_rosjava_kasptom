@@ -20,7 +20,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy {
     protected final Log log;
     boolean isHeadRotationInProgress;
     HashMap<String, GuidelineParam> guidelineParamsMap;
-    HashMap<ThroughDoorStage, IDrivingStrategy> substrategies;
+    HashMap<ThroughDoorStage, IDrivingStrategy> subStrategies;
 
     ThroughDoorStage currentStage;
     HeadRotationChangeListener headListener;
@@ -30,13 +30,14 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy {
 
     BasePassThroughDoorStrategy(Log log) {
         this.log = log;
+        this.guidelineParamsMap = new HashMap<>();
     }
 
     @Override
     public void handleConfigMessage(TopNavConfigMsg configMsg) {
         BlockedMessageHandler.handleIfNotBlocked(
                 configMsg,
-                msg -> this.substrategies.get(currentStage).handleConfigMessage(msg),
+                msg -> this.subStrategies.get(currentStage).handleConfigMessage(msg),
                 isHeadRotationInProgress);
     }
 
@@ -44,7 +45,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy {
     public void handleHoughAccMessage(HoughAcc houghAcc) {
         BlockedMessageHandler.handleIfNotBlocked(
                 houghAcc,
-                msg -> this.substrategies.get(currentStage).handleHoughAccMessage(msg),
+                msg -> this.subStrategies.get(currentStage).handleHoughAccMessage(msg),
                 isHeadRotationInProgress);
     }
 
@@ -52,7 +53,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy {
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
         BlockedMessageHandler.handleIfNotBlocked(
                 angleRangesMsg,
-                msg -> this.substrategies.get(currentStage).handleAngleRangeMessage(msg),
+                msg -> this.subStrategies.get(currentStage).handleAngleRangeMessage(msg),
                 isHeadRotationInProgress);
     }
 
@@ -60,7 +61,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy {
     public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
         BlockedMessageHandler.handleIfNotBlocked(
                 feedbackMsg,
-                msg -> this.substrategies.get(currentStage).handleDetectionMessage(msg),
+                msg -> this.subStrategies.get(currentStage).handleDetectionMessage(msg),
                 isHeadRotationInProgress);
     }
 

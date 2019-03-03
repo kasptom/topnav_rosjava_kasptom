@@ -5,6 +5,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
@@ -14,16 +15,13 @@ import topnav_msgs.HoughAcc;
 import topnav_msgs.TopologyMsg;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.ALIGN_BETWEEN_DOOR;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
 public class RotateTheChassisSideTowardsDoorStrategy extends BaseSubStrategy {
-    private final WheelsVelocitiesChangeListener wheelsListener;
-    private final HeadRotationChangeListener headListener;
-    private final SubStrategyListener subStrategyListener;
-    private final StrategyFinishedListener finishListener;
     private List<RelativeDirection> directionsToCheck = Arrays.asList(AT_LEFT, AHEAD, AT_RIGHT, BEHIND);
     private int checkedDirection = 0;
 
@@ -33,11 +31,8 @@ public class RotateTheChassisSideTowardsDoorStrategy extends BaseSubStrategy {
     public RotateTheChassisSideTowardsDoorStrategy(WheelsVelocitiesChangeListener wheelsListener,
                                                    HeadRotationChangeListener headListener,
                                                    SubStrategyListener substrategyListener,
-                                                   StrategyFinishedListener finishListener, Log log) {
-        this.wheelsListener = wheelsListener;
-        this.headListener = headListener;
-        this.subStrategyListener = substrategyListener;
-        this.finishListener = finishListener;
+                                                   StrategyFinishedListener finishListener, Log log, HashMap<String, GuidelineParam> guidelineParamsMap) {
+        super(wheelsListener, headListener, substrategyListener, finishListener, guidelineParamsMap);
         this.log = log;
     }
 
@@ -52,7 +47,7 @@ public class RotateTheChassisSideTowardsDoorStrategy extends BaseSubStrategy {
 
     @Override
     public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
-        List<TopologyMsg> expectedDoorMarkers = PassThroughDoorUtils.findFrontDoorMarkers(feedbackMsg, guidelineParamHashMap);
+        List<TopologyMsg> expectedDoorMarkers = PassThroughDoorUtils.findFrontDoorMarkers(feedbackMsg, guidelineParamsMap);
 
         if (isChassisRotationInProgress) {
             if (expectedDoorMarkers.size() > 0) {

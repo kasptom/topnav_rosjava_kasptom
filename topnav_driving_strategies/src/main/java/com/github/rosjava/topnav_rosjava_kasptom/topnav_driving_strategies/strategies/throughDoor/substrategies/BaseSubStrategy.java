@@ -12,8 +12,20 @@ import java.util.HashMap;
 import java.util.List;
 
 public abstract class BaseSubStrategy implements IDrivingStrategy {
+    final WheelsVelocitiesChangeListener wheelsListener;
+    final HeadRotationChangeListener headListener;
+    final SubStrategyListener subStrategyListener;
+    final StrategyFinishedListener finishListener;
 
-    HashMap<String, GuidelineParam> guidelineParamHashMap;
+    final HashMap<String, GuidelineParam> guidelineParamsMap;
+
+    public BaseSubStrategy(WheelsVelocitiesChangeListener wheelsListener, HeadRotationChangeListener headListener, SubStrategyListener subStrategyListener, StrategyFinishedListener finishListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
+        this.wheelsListener = wheelsListener;
+        this.headListener = headListener;
+        this.subStrategyListener = subStrategyListener;
+        this.finishListener = finishListener;
+        this.guidelineParamsMap = guidelineParamsMap;
+    }
 
     @Override
     public void startStrategy() {
@@ -41,6 +53,6 @@ public abstract class BaseSubStrategy implements IDrivingStrategy {
 
     @Override
     public void setGuidelineParameters(List<String> parameters) {
-        GuidelineUtils.reloadParameters(parameters, guidelineParamHashMap);
+        GuidelineUtils.reloadParameters(parameters, guidelineParamsMap);
     }
 }

@@ -24,8 +24,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDire
 public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy implements IDrivingStrategy, SubStrategyListener {
     public PassThroughDoorStrategy(Log log) {
         super(log);
-        guidelineParamsMap = new HashMap<>();
-        substrategies = initializeSubStrategies();
+        subStrategies = initializeSubStrategies();
     }
 
     private void setCurrentStage(ThroughDoorStage stage, RelativeDirection direction) {
@@ -37,12 +36,12 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
     }
 
     private HashMap<ThroughDoorStage, IDrivingStrategy> initializeSubStrategies() {
-        this.substrategies = new HashMap<>();
-        this.substrategies.put(DETECT_MARKER, new RotateTheChassisSideTowardsDoorStrategy(wheelsListener, headListener, this, strategyFinishedListener, log));
-        this.substrategies.put(ALIGN_BETWEEN_DOOR, new AlignBetweenDoorMarkersStrategy());
-        this.substrategies.put(ROTATE_FRONT_AGAINST_DOOR, new RotateTheChassisFrontTowardsDoorStrategy());
-        this.substrategies.put(DRIVE_THROUGH_DOOR, new DriveStrategy());
-        return substrategies;
+        this.subStrategies = new HashMap<>();
+        this.subStrategies.put(DETECT_MARKER, new RotateTheChassisSideTowardsDoorStrategy(wheelsListener, headListener, this, strategyFinishedListener, log, guidelineParamsMap));
+        this.subStrategies.put(ALIGN_BETWEEN_DOOR, new AlignBetweenDoorMarkersStrategy());
+        this.subStrategies.put(ROTATE_FRONT_AGAINST_DOOR, new RotateTheChassisFrontTowardsDoorStrategy());
+        this.subStrategies.put(DRIVE_THROUGH_DOOR, new DriveStrategy());
+        return subStrategies;
     }
 
     @Override
@@ -62,6 +61,10 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
     }
 
     class AlignBetweenDoorMarkersStrategy extends BaseSubStrategy {
+
+        AlignBetweenDoorMarkersStrategy() {
+            super(wheelsListener, headListener, PassThroughDoorStrategy.this, strategyFinishedListener, guidelineParamsMap);
+        }
 
         @Override
         public void handleHoughAccMessage(HoughAcc houghAcc) {
@@ -112,6 +115,10 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
 
     class RotateTheChassisFrontTowardsDoorStrategy extends BaseSubStrategy {
 
+        RotateTheChassisFrontTowardsDoorStrategy() {
+            super(wheelsListener, headListener, PassThroughDoorStrategy.this, strategyFinishedListener, guidelineParamsMap);
+        }
+
         @Override
         public void handleHoughAccMessage(HoughAcc houghAcc) {
         }
@@ -146,6 +153,10 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
 
         private boolean isBackMarkVisible = false;
         private DoorFinder doorFinder = new DoorFinder();
+
+        DriveStrategy() {
+            super(wheelsListener, headListener, PassThroughDoorStrategy.this, strategyFinishedListener, guidelineParamsMap);
+        }
 
         @Override
         public void handleHoughAccMessage(HoughAcc houghAcc) {
