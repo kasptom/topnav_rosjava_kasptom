@@ -2,6 +2,7 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.AruCoTrackerTestStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.FollowWallStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoorV2.PassThroughDoorStrategyV2;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategy;
@@ -28,10 +29,11 @@ public class MainController implements IMainController {
     private final Subscriber<TopNavConfigMsg> configMsgSubscriber;
     private final Subscriber<AngleRangesMsg> angleRangesMsgSubscriber;
     private final Subscriber<HoughAcc> houghAccSubscriber;
-    private final Subscriber<MarkersMsg> arUcoSubscriber;
+    private final TopnavSubscriber<MarkersMsg> arUcoSubscriber;
     private final Subscriber<std_msgs.String> headDirectionChangeSubscriber;
 
     private final HashMap<String, IDrivingStrategy> drivingStrategies = new HashMap<>();
+    private final HashMap<String, ArUcoMessageListener> arUcoListeners = new HashMap<>();
 
     private Log log;
 
@@ -47,27 +49,28 @@ public class MainController implements IMainController {
         houghAccSubscriber = connectedNode.newSubscriber("/capo/laser/hough", HoughAcc._TYPE);
         markerDetectionSubscriber = connectedNode.newSubscriber("/topnav/feedback", FeedbackMsg._TYPE);
 
-        arUcoSubscriber = connectedNode.newSubscriber(TopicNames.TOPNAV_ARUCO_TOPIC, MarkersMsg._TYPE);
+        arUcoSubscriber = new TopnavSubscriber<>(connectedNode, TopicNames.TOPNAV_ARUCO_TOPIC, MarkersMsg._TYPE);
         arUcoHeadTracker.setAngleCorrectionListener(headController::handleStrategyHeadRotationChange);
 
         guidelineSubscriber = connectedNode.newSubscriber("/topnav/guidelines", GuidelineMsg._TYPE);
         headDirectionChangeSubscriber = connectedNode.newSubscriber(TopicNames.HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
 
-        initializeDrivingStrategies(drivingStrategies);
+        initializeDrivingStrategies(drivingStrategies, arUcoListeners);
         selectStrategy(DRIVING_STRATEGY_IDLE, null);
 
         guidelineSubscriber.addMessageListener(guidelineMsg -> selectStrategy(guidelineMsg.getGuidelineType(), guidelineMsg.getParameters()));
     }
 
-    private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies) {
+    private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies, HashMap<String, ArUcoMessageListener> arUcoListeners) {
         drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL, new DriveAlongWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL_2, new FollowWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_STOP_BEFORE_WALL, new StopBeforeWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR, new PassThroughDoorStrategy(log));
+        drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, new PassThroughDoorStrategyV2(arUcoHeadTracker));
         drivingStrategies.put(DRIVING_STRATEGY_TRACK_ARUCOS, new AruCoTrackerTestStrategy(arUcoHeadTracker));
         drivingStrategies.values().forEach(strategy -> strategy.setWheelsVelocitiesListener(wheelsController::setVelocities));
 
-        arUcoSubscriber.addMessageListener(arUcoHeadTracker::handleArUcoMessage);
+        arUcoListeners.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, (PassThroughDoorStrategyV2) drivingStrategies.get(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2));
     }
 
     public void emergencyStop() {
@@ -80,6 +83,7 @@ public class MainController implements IMainController {
 
     private void selectStrategy(String strategyName, List<String> parameters) {
         tearDownDrivingStrategy();
+        tearDownArUcoListeners();
         headController.onStrategyStatusChange(strategyName);
 
         if (DRIVING_STRATEGY_IDLE.equals(strategyName)) {
@@ -94,7 +98,12 @@ public class MainController implements IMainController {
         }
 
         setUpDrivingStrategy(drivingStrategies.get(strategyName), parameters);
+
+        if (arUcoListeners.containsKey(strategyName)) {
+            setUpArUcoListeners(arUcoListeners.get(strategyName));
+        }
     }
+
 
     private void setUpDrivingStrategy(IDrivingStrategy drivingStrategy, List<String> parameters) {
         drivingStrategy.setWheelsVelocitiesListener(wheelsController::setVelocities);
@@ -109,15 +118,23 @@ public class MainController implements IMainController {
         houghAccSubscriber.addMessageListener(drivingStrategy::handleHoughAccMessage);
         markerDetectionSubscriber.addMessageListener(drivingStrategy::handleDetectionMessage);
         headDirectionChangeSubscriber.addMessageListener(drivingStrategy::handleHeadDirectionChange);
-
     }
 
     private void tearDownDrivingStrategy() {
-        this.configMsgSubscriber.removeAllMessageListeners();
-        this.angleRangesMsgSubscriber.removeAllMessageListeners();
-        this.houghAccSubscriber.removeAllMessageListeners();
-        this.markerDetectionSubscriber.removeAllMessageListeners();
-        this.headDirectionChangeSubscriber.removeAllMessageListeners();
-        this.arUcoHeadTracker.stop();
+        configMsgSubscriber.removeAllMessageListeners();
+        angleRangesMsgSubscriber.removeAllMessageListeners();
+        houghAccSubscriber.removeAllMessageListeners();
+        markerDetectionSubscriber.removeAllMessageListeners();
+        headDirectionChangeSubscriber.removeAllMessageListeners();
+        arUcoHeadTracker.stop();
+    }
+
+    private void tearDownArUcoListeners() {
+        arUcoSubscriber.removeAllLocalMessageListeners();
+    }
+
+    private void setUpArUcoListeners(ArUcoMessageListener arUcoMessageListener) {
+        arUcoSubscriber.addMessageListener(arUcoMessageListener::handleArUcoMessage);
+        arUcoSubscriber.addMessageListener(arUcoHeadTracker::handleArUcoMessage);
     }
 }

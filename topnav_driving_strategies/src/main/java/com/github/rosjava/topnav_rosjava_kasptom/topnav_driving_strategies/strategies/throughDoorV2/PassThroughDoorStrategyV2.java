@@ -10,7 +10,7 @@ import topnav_msgs.*;
 import java.util.HashMap;
 import java.util.List;
 
-public class PassThroughDoorStrategyV2 implements IDrivingStrategy {
+public class PassThroughDoorStrategyV2 implements IDrivingStrategy, ArUcoMessageListener {
     private final IArUcoHeadTracker arucoTracker;
     private HashMap<String, GuidelineParam> nameToParameter;
     private WheelsVelocitiesChangeListener wheelsListener;
@@ -71,5 +71,10 @@ public class PassThroughDoorStrategyV2 implements IDrivingStrategy {
     @Override
     public void setGuidelineParameters(List<String> parameters) {
         GuidelineUtils.reloadParameters(parameters, nameToParameter);
+    }
+
+    @Override
+    public void handleArUcoMessage(MarkersMsg message) {
+
     }
 }
