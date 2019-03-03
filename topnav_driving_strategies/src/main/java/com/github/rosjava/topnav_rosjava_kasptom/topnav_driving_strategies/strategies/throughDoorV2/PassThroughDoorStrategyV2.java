@@ -25,7 +25,7 @@ public class PassThroughDoorStrategyV2 implements IDrivingStrategy, ArUcoMessage
     @Override
     public void startStrategy() {
         arucoTracker.setTrackedMarkers(ArucoMarkerUtils.asOrderedDoorMarkerIds(nameToParameter));
-        arucoTracker.start();
+        arucoTracker.start(0);
     }
 
     @Override

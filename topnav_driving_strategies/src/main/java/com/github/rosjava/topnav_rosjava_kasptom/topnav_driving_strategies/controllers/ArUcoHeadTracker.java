@@ -8,13 +8,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.MAGIC_ANGLE_TO_PIXELS_CONSTANT;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_WIDTH;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_FOV_DEGREES;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_PREVIEW_WIDTH;
 
 public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private final LinkedHashSet<String> trackedMarkerIds;
     private boolean isEnabled;
     private AngleCorrectionListener listener;
+    private double angleDegrees;
 
     ArUcoHeadTracker() {
         this.trackedMarkerIds = new LinkedHashSet<>();
@@ -63,13 +64,16 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
 
     private void centerHeadOn(MarkerDetection marker) {
         double[] xCorners = marker.getXCorners();
-        double averagePicturePosition = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0;
-        double headRotationCorrection = -averagePicturePosition * MAGIC_ANGLE_TO_PIXELS_CONSTANT / PREVIEW_WIDTH;
-        this.listener.onAngleCorrection(headRotationCorrection);
+        double averagePicturePosition = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0 - CAM_PREVIEW_WIDTH / 2.0;    // 0 is the middle of the picture
+        double headRotationCorrection = -averagePicturePosition * CAM_FOV_DEGREES / CAM_PREVIEW_WIDTH;
+
+        angleDegrees += headRotationCorrection;
+        listener.onAngleCorrection(angleDegrees);
     }
 
     @Override
-    public void start() {
+    public void start(double initialAngleDegrees) {
+        angleDegrees = initialAngleDegrees;
         isEnabled = true;
     }
 

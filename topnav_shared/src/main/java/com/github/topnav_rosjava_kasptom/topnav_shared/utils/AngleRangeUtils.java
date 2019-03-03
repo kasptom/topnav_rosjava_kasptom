@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.LIDAR_MAX_RANGE;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_HEIGHT;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_WIDTH;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.LIDAR_PREVIEW_HEIGHT;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.LIDAR_PREVIEW_WIDTH;
 
 public class AngleRangeUtils {
     public static ArrayList<Point2D> angleRangeToPixels(AngleRangesMsg angleRangesMsg) {
@@ -25,11 +25,11 @@ public class AngleRangeUtils {
 
             if (range > LIDAR_MAX_RANGE) continue;
 
-            x = range * Math.sin(angleRad) / LIDAR_MAX_RANGE * (PREVIEW_HEIGHT / 2.0f);
-            y = range * Math.cos(angleRad) / LIDAR_MAX_RANGE * (PREVIEW_WIDTH / 2.0f);
+            x = range * Math.sin(angleRad) / LIDAR_MAX_RANGE * (LIDAR_PREVIEW_HEIGHT / 2.0f);
+            y = range * Math.cos(angleRad) / LIDAR_MAX_RANGE * (LIDAR_PREVIEW_WIDTH / 2.0f);
 
-            x = -x + PREVIEW_WIDTH / 2.0;
-            y = -y + PREVIEW_HEIGHT / 2.0;
+            x = -x + LIDAR_PREVIEW_WIDTH / 2.0;
+            y = -y + LIDAR_PREVIEW_HEIGHT / 2.0;
 
             points.add(new Point2D.Double(x, y));
         }
@@ -43,22 +43,22 @@ public class AngleRangeUtils {
                     double angleRad = angleRange.getAngleRad();
                     double range = angleRange.getRange();
 
-                    double x = range * Math.sin(angleRad) / LIDAR_MAX_RANGE * (PREVIEW_HEIGHT / 2.0f);
-                    double y = range * Math.cos(angleRad) / LIDAR_MAX_RANGE * (PREVIEW_WIDTH / 2.0f);
+                    double x = range * Math.sin(angleRad) / LIDAR_MAX_RANGE * (LIDAR_PREVIEW_HEIGHT / 2.0f);
+                    double y = range * Math.cos(angleRad) / LIDAR_MAX_RANGE * (LIDAR_PREVIEW_WIDTH / 2.0f);
 
-                    x = -x + PREVIEW_WIDTH / 2.0;
-                    y = -y + PREVIEW_HEIGHT / 2.0;
+                    x = -x + LIDAR_PREVIEW_WIDTH / 2.0;
+                    y = -y + LIDAR_PREVIEW_HEIGHT / 2.0;
                     return new Point2D.Double(x, y);
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public static Point2D pointToPixelPoint(DoorFinder.Point point) {
-        double x = point.getX() / LIDAR_MAX_RANGE * (PREVIEW_HEIGHT / 2.0f);
-        double y = point.getY() / LIDAR_MAX_RANGE * (PREVIEW_HEIGHT / 2.0f);
+        double x = point.getX() / LIDAR_MAX_RANGE * (LIDAR_PREVIEW_HEIGHT / 2.0f);
+        double y = point.getY() / LIDAR_MAX_RANGE * (LIDAR_PREVIEW_HEIGHT / 2.0f);
 
-        x = -x + PREVIEW_WIDTH / 2.0;
-        y = -y + PREVIEW_HEIGHT / 2.0;
+        x = -x + LIDAR_PREVIEW_WIDTH / 2.0;
+        y = -y + LIDAR_PREVIEW_HEIGHT / 2.0;
 
         return new Point2D.Double(x, y);
     }

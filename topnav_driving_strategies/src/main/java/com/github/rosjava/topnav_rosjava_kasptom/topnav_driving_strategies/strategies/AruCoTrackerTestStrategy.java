@@ -25,7 +25,7 @@ public class AruCoTrackerTestStrategy implements IDrivingStrategy {
     @Override
     public void startStrategy() {
         arucoTracker.setTrackedMarkers(ArucoMarkerUtils.asOrderedDoorMarkerIds(guidelineParamsMap));
-        arucoTracker.start();
+        arucoTracker.start(0);
     }
 
     @Override

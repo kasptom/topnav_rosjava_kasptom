@@ -7,7 +7,7 @@ import java.util.LinkedHashSet;
 public interface IArUcoHeadTracker {
     void handleArUcoMessage(MarkersMsg markersMsg);
 
-    void start();
+    void start(double initialAngleDegrees);
 
     void stop();
 

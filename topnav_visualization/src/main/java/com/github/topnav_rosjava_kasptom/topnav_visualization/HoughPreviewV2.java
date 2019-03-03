@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_HEIGHT;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.PREVIEW_WIDTH;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.LIDAR_PREVIEW_HEIGHT;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.LIDAR_PREVIEW_WIDTH;
 
 public class HoughPreviewV2 implements IHoughPreview {
     private final Log log;
@@ -102,7 +102,7 @@ public class HoughPreviewV2 implements IHoughPreview {
         Graphics graphics = mainFrame.getGraphics();
 
         graphics.setColor(Color.black);
-        graphics.fillRect(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+        graphics.fillRect(0, 0, LIDAR_PREVIEW_WIDTH, LIDAR_PREVIEW_HEIGHT);
 
         graphics.setColor(Color.red);
         drawPoints(graphics, points);
@@ -139,7 +139,7 @@ public class HoughPreviewV2 implements IHoughPreview {
 
     private Frame createMainFrame() {
         Frame frame = new Frame("LIDAR preview (java)", graphicsDevice.getDefaultConfiguration());
-        frame.setSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
+        frame.setSize(LIDAR_PREVIEW_WIDTH, LIDAR_PREVIEW_HEIGHT);
 //        frame.setUndecorated(true);
         frame.setIgnoreRepaint(true);
         frame.addWindowListener(new WindowAdapter() {
