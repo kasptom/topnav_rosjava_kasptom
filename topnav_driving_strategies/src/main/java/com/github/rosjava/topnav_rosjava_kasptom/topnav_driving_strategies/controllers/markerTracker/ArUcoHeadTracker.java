@@ -1,5 +1,6 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import topnav_msgs.MarkersMsg;
@@ -14,10 +15,11 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.
 public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private final LinkedHashSet<String> trackedMarkerIds;
     private boolean isEnabled;
-    private AngleCorrectionListener listener;
+    private AngleCorrectionListener angleCorrectionListener;
+    private TrackedMarkerListener trackedMarkerListener;
     private double angleDegrees;
 
-    ArUcoHeadTracker() {
+    public ArUcoHeadTracker() {
         this.trackedMarkerIds = new LinkedHashSet<>();
     }
 
@@ -68,7 +70,8 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         double headRotationCorrection = -averagePicturePosition * CAM_FOV_DEGREES / CAM_PREVIEW_WIDTH;
 
         angleDegrees += headRotationCorrection;
-        listener.onAngleCorrection(angleDegrees);
+        angleCorrectionListener.onAngleCorrection(angleDegrees);
+        trackedMarkerListener.onTrackedMarkerUpdate(marker, angleDegrees);
     }
 
     @Override
@@ -94,6 +97,11 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
 
     @Override
     public void setAngleCorrectionListener(AngleCorrectionListener listener) {
-        this.listener = listener;
+        angleCorrectionListener = listener;
+    }
+
+    @Override
+    public void setTrackedMarkerListener(TrackedMarkerListener listener) {
+        trackedMarkerListener = listener;
     }
 }

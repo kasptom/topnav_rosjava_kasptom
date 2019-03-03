@@ -2,7 +2,6 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.*;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
-import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
@@ -24,7 +23,7 @@ public class AruCoTrackerTestStrategy implements IDrivingStrategy {
 
     @Override
     public void startStrategy() {
-        arucoTracker.setTrackedMarkers(ArucoMarkerUtils.asOrderedDoorMarkerIds(guidelineParamsMap));
+        arucoTracker.setTrackedMarkers(GuidelineUtils.asOrderedDoorMarkerIds(guidelineParamsMap));
         arucoTracker.start(0);
     }
 

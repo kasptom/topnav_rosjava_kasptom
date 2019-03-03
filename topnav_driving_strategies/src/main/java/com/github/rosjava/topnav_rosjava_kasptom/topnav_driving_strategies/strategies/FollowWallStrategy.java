@@ -50,7 +50,8 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
     @Override
     public void startStrategy() {
-        headListener.onRotationChanged(RelativeDirection.AT_LEFT);
+        RelativeDirection initialRelativeDirection = getInitialRelativeDirection(guidelineParamsMap);
+        headListener.onRotationChanged(initialRelativeDirection);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     @Override
     public void handleHoughAccMessage(HoughAcc houghAcc) {
         if (isObstacleTooClose) {
-            log.info("obstacle is too close");
+            log.info("obstacle is too close"); // TODO move back
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             return;
         }
@@ -126,6 +127,16 @@ public class FollowWallStrategy implements IDrivingStrategy {
         headListener.onRotationChanged(chosenWallAngle == LEFT_WALL_ANGLE
                 ? RelativeDirection.AT_LEFT
                 : RelativeDirection.AT_RIGHT);
+    }
+
+    private RelativeDirection getInitialRelativeDirection(HashMap<String, GuidelineParam> guidelineParamsMap) {
+        String alignment = null;
+        if (guidelineParamsMap.containsKey(KEY_TRACKED_WALL_ALIGNMENT)) {
+            alignment = guidelineParamsMap.get(KEY_TRACKED_WALL_ALIGNMENT).getValue();
+        }
+        return alignment != null && alignment.equalsIgnoreCase(VALUE_TRACKED_WALL_RIGHT)
+                ? RelativeDirection.AT_RIGHT
+                : RelativeDirection.AT_LEFT;
     }
 
     private WheelsVelocities computeVelocities(List<HoughCell> filteredHoughCells) {

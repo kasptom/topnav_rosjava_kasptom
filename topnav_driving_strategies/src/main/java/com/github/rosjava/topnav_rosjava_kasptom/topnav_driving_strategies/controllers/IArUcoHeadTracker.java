@@ -1,5 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
 
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import topnav_msgs.MarkersMsg;
 
 import java.util.LinkedHashSet;
@@ -22,7 +23,13 @@ public interface IArUcoHeadTracker {
 
     void setAngleCorrectionListener(AngleCorrectionListener listener);
 
+    void setTrackedMarkerListener(TrackedMarkerListener listener);
+
     interface AngleCorrectionListener {
         void onAngleCorrection(double angleDegrees);
+    }
+
+    interface TrackedMarkerListener {
+        void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation);
     }
 }
