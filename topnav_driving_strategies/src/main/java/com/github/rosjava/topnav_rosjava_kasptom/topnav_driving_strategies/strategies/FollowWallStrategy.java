@@ -23,6 +23,7 @@ import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.FollowWall.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.BASE_ROBOT_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class FollowWallStrategy implements IDrivingStrategy {
@@ -34,7 +35,6 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
     private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
     private int lineDetectionThreshold = 8;
-    private WheelsVelocities BASE_ROBOT_VELOCITY = new WheelsVelocities(4.0, 4.0, 4.0, 4.0);
 
     private boolean isObstacleTooClose;
     private HeadRotationChangeListener headListener;

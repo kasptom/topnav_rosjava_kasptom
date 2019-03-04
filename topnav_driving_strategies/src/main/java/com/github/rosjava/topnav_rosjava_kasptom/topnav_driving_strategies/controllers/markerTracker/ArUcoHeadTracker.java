@@ -2,6 +2,7 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import topnav_msgs.MarkersMsg;
 
@@ -35,7 +36,10 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         List<MarkerDetection> detections = ArucoMarkerUtils.createMarkerDetections(markersMsg);
         MarkerDetection trackedDetection = getMarkerDetection(detections);
 
-        if (trackedDetection == null) return; // TODO warn / error / handling
+        if (trackedDetection == null) {
+            trackedMarkerListener.onTrackedMarkerUpdate(MarkerDetection.emptyDetection(), 0.0);
+            return; // TODO warn / error / handling
+        }
 
         centerHeadOn(trackedDetection);
     }
@@ -103,5 +107,10 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
     @Override
     public void setTrackedMarkerListener(TrackedMarkerListener listener) {
         trackedMarkerListener = listener;
+    }
+
+    @Override
+    public void onRotationChanged(RelativeDirection relativeDirection) {
+        this.angleDegrees = relativeDirection.getRotationDegrees();
     }
 }

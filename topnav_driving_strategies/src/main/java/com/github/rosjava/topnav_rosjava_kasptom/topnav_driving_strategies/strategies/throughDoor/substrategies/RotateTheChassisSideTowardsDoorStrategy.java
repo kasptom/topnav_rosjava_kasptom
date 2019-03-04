@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.ALIGN_BETWEEN_DOOR;
+import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
 public class RotateTheChassisSideTowardsDoorStrategy extends BaseSubStrategy {
@@ -53,7 +53,7 @@ public class RotateTheChassisSideTowardsDoorStrategy extends BaseSubStrategy {
             if (expectedDoorMarkers.size() > 0) {
                 wheelsListener.onWheelsVelocitiesChanged(WheelsVelocityConstants.ZERO_VELOCITY);
                 log.info("rotated side towards the door");
-                subStrategyListener.onStageChanged(ALIGN_BETWEEN_DOOR, AT_LEFT);
+                subStrategyListener.onStageFinished(DETECT_MARKER, AT_LEFT);
             } else {
                 wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.5, -1.5, 1.5, -1.5));
             }

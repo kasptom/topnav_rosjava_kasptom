@@ -1,9 +1,9 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.BaseSubStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.RotateTheChassisSideTowardsDoorStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.SubStrategyListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.*;
@@ -21,48 +21,34 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.D
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MAX_VELOCITY_DELTA;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
-public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy implements IDrivingStrategy, SubStrategyListener {
+public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy implements IDrivingStrategy {
     public PassThroughDoorStrategy(Log log) {
         super(log);
-        subStrategies = initializeSubStrategies();
     }
 
-    private void setCurrentStage(ThroughDoorStage stage, RelativeDirection direction) {
-        log.info(String.format("Setting current stage to %s", stage));
-        currentStage = stage;
-
-        isHeadRotationInProgress = true;
-        headListener.onRotationChanged(direction);
-    }
-
-    private HashMap<ThroughDoorStage, IDrivingStrategy> initializeSubStrategies() {
+    @Override
+    void initializeSubStrategies() {
         this.subStrategies = new HashMap<>();
         this.subStrategies.put(DETECT_MARKER, new RotateTheChassisSideTowardsDoorStrategy(wheelsListener, headListener, this, strategyFinishedListener, log, guidelineParamsMap));
-        this.subStrategies.put(ALIGN_BETWEEN_DOOR, new AlignBetweenDoorMarkersStrategy());
-        this.subStrategies.put(ROTATE_FRONT_AGAINST_DOOR, new RotateTheChassisFrontTowardsDoorStrategy());
-        this.subStrategies.put(DRIVE_THROUGH_DOOR, new DriveStrategy());
-        return subStrategies;
+        this.subStrategies.put(ALIGN_BETWEEN_DOOR, new AlignBetweenDoorMarkersStrategy(wheelsListener, guidelineParamsMap));
+        this.subStrategies.put(ROTATE_FRONT_AGAINST_DOOR, new RotateTheChassisFrontTowardsDoorStrategy(wheelsListener, guidelineParamsMap));
+        this.subStrategies.put(DRIVE_THROUGH_DOOR, new DriveStrategy(wheelsListener, guidelineParamsMap));
+    }
+
+    @Override
+    ThroughDoorStage[] getSubStrategiesExecutionOrder() {
+        return new ThroughDoorStage[]{DETECT_MARKER, ALIGN_BETWEEN_DOOR, ROTATE_FRONT_AGAINST_DOOR, DRIVE_THROUGH_DOOR};
     }
 
     @Override
     public void startStrategy() {
         initializeSubStrategies();
-        setCurrentStage(DETECT_MARKER, AT_LEFT); // TODO possiblity to set AT_RIGHT
-    }
-
-    @Override
-    public void onStageChanged(ThroughDoorStage stage, RelativeDirection direction) {
-        setCurrentStage(stage, direction);
-    }
-
-    @Override
-    public void headRotationInProgress(boolean isInProgress) {
-        isHeadRotationInProgress = isInProgress;
+        switchToInitialStage(AT_LEFT); // TODO possiblity to set AT_RIGHT
     }
 
     class AlignBetweenDoorMarkersStrategy extends BaseSubStrategy {
 
-        AlignBetweenDoorMarkersStrategy() {
+        AlignBetweenDoorMarkersStrategy(WheelsVelocitiesChangeListener wheelsListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
             super(wheelsListener, headListener, PassThroughDoorStrategy.this, strategyFinishedListener, guidelineParamsMap);
         }
 
@@ -87,7 +73,7 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
             expectedDoorMarkers.forEach(marker -> velocity[0] = setVelocityAccordingToDoorPosition(marker));
 
             if (velocity[0] == 0) {
-                setCurrentStage(ROTATE_FRONT_AGAINST_DOOR, AHEAD);
+                subStrategyListener.onStageFinished(ALIGN_BETWEEN_DOOR, AHEAD);
             }
 
             wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(velocity[0], velocity[0], velocity[0], velocity[0]));
@@ -115,7 +101,7 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
 
     class RotateTheChassisFrontTowardsDoorStrategy extends BaseSubStrategy {
 
-        RotateTheChassisFrontTowardsDoorStrategy() {
+        RotateTheChassisFrontTowardsDoorStrategy(WheelsVelocitiesChangeListener wheelsListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
             super(wheelsListener, headListener, PassThroughDoorStrategy.this, strategyFinishedListener, guidelineParamsMap);
         }
 
@@ -133,7 +119,7 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
             if (expectedDoorMarkers.size() > 0) {
                 wheelsListener.onWheelsVelocitiesChanged(WheelsVelocityConstants.ZERO_VELOCITY);
                 log.info("rotated front towards the door");
-                setCurrentStage(DRIVE_THROUGH_DOOR, BEHIND);
+                subStrategyListener.onStageFinished(ROTATE_FRONT_AGAINST_DOOR, BEHIND);
             } else {
                 wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.5, -1.5, 1.5, -1.5));
             }
@@ -154,7 +140,7 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
         private boolean isBackMarkVisible = false;
         private DoorFinder doorFinder = new DoorFinder();
 
-        DriveStrategy() {
+        DriveStrategy(WheelsVelocitiesChangeListener wheelsListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
             super(wheelsListener, headListener, PassThroughDoorStrategy.this, strategyFinishedListener, guidelineParamsMap);
         }
 

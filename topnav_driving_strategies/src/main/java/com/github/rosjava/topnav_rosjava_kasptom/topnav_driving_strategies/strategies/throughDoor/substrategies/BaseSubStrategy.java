@@ -12,12 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public abstract class BaseSubStrategy implements IDrivingStrategy {
-    final WheelsVelocitiesChangeListener wheelsListener;
     final HeadRotationChangeListener headListener;
-    final SubStrategyListener subStrategyListener;
     final StrategyFinishedListener finishListener;
+    protected final WheelsVelocitiesChangeListener wheelsListener;
+    protected final SubStrategyListener subStrategyListener;
+    protected final HashMap<String, GuidelineParam> guidelineParamsMap;
 
-    final HashMap<String, GuidelineParam> guidelineParamsMap;
 
     public BaseSubStrategy(WheelsVelocitiesChangeListener wheelsListener, HeadRotationChangeListener headListener, SubStrategyListener subStrategyListener, StrategyFinishedListener finishListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
         this.wheelsListener = wheelsListener;

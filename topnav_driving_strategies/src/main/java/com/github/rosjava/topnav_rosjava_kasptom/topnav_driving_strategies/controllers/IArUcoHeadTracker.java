@@ -5,7 +5,7 @@ import topnav_msgs.MarkersMsg;
 
 import java.util.LinkedHashSet;
 
-public interface IArUcoHeadTracker {
+public interface IArUcoHeadTracker extends HeadRotationChangeListener {
     void handleArUcoMessage(MarkersMsg markersMsg);
 
     void start(double initialAngleDegrees);
