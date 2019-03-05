@@ -12,6 +12,7 @@ import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
+import std_msgs.Float64;
 import topnav_msgs.*;
 
 import java.util.HashMap;
@@ -32,6 +33,7 @@ public class MainController implements IMainController {
     private final Subscriber<HoughAcc> houghAccSubscriber;
     private final TopnavSubscriber<MarkersMsg> arUcoSubscriber;
     private final Subscriber<std_msgs.String> headDirectionChangeSubscriber;
+    private final Subscriber<Float64> headLinearDirectionChangeSubscriber;
 
     private final HashMap<String, IDrivingStrategy> drivingStrategies = new HashMap<>();
     private final HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners = new HashMap<>();
@@ -43,7 +45,7 @@ public class MainController implements IMainController {
 
         headController = new HeadController(connectedNode);
         wheelsController = new WheelsController(connectedNode);
-        arUcoHeadTracker = new ArUcoHeadTracker();
+        arUcoHeadTracker = new ArUcoHeadTracker(log);
 
         configMsgSubscriber = connectedNode.newSubscriber("/topnav/config", TopNavConfigMsg._TYPE);
         angleRangesMsgSubscriber = connectedNode.newSubscriber(TopicNames.TOPNAV_ANGLE_RANGE_TOPIC, AngleRangesMsg._TYPE);
@@ -51,10 +53,13 @@ public class MainController implements IMainController {
         markerDetectionSubscriber = connectedNode.newSubscriber("/topnav/feedback", FeedbackMsg._TYPE);
 
         arUcoSubscriber = new TopnavSubscriber<>(connectedNode, TopicNames.TOPNAV_ARUCO_TOPIC, MarkersMsg._TYPE);
-        arUcoHeadTracker.setAngleCorrectionListener(headController::handleStrategyHeadRotationChange);
+        arUcoHeadTracker.setAngleChangeListener(headController::handleStrategyHeadLinearRotationChange);
 
         guidelineSubscriber = connectedNode.newSubscriber("/topnav/guidelines", GuidelineMsg._TYPE);
         headDirectionChangeSubscriber = connectedNode.newSubscriber(TopicNames.HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
+
+        headLinearDirectionChangeSubscriber = connectedNode.newSubscriber(TopicNames.HEAD_LINЕАR_DIRECTION_CHANGE_TOPIC, std_msgs.Float64._TYPE);
+
 
         initializeDrivingStrategies(drivingStrategies, trackedMarkerListeners);
         selectStrategy(DRIVING_STRATEGY_IDLE, null);
@@ -72,6 +77,7 @@ public class MainController implements IMainController {
         drivingStrategies.values().forEach(strategy -> strategy.setWheelsVelocitiesListener(wheelsController::setVelocities));
 
         trackedMarkerListeners.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, (PassThroughDoorStrategyV2) drivingStrategies.get(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2));
+        trackedMarkerListeners.put(DRIVING_STRATEGY_TRACK_ARUCOS, (AruCoTrackerTestStrategy) drivingStrategies.get(DRIVING_STRATEGY_TRACK_ARUCOS));
     }
 
     public void emergencyStop() {
@@ -87,6 +93,7 @@ public class MainController implements IMainController {
         tearDownArUcoListeners();
         headController.onStrategyStatusChange(strategyName);
 
+        log.info(String.format("Selecting %s strategy", strategyName));
         if (DRIVING_STRATEGY_IDLE.equals(strategyName)) {
             log.info("Set to idle state");
             wheelsController.setVelocities(new WheelsVelocities(0.0, 0.0, 0.0, 0.0));
@@ -98,11 +105,11 @@ public class MainController implements IMainController {
             return;
         }
 
-        setUpDrivingStrategy(drivingStrategies.get(strategyName), parameters);
-
         if (trackedMarkerListeners.containsKey(strategyName)) {
             setUpArUcoListeners(trackedMarkerListeners.get(strategyName));
         }
+
+        setUpDrivingStrategy(drivingStrategies.get(strategyName), parameters);
     }
 
 
@@ -132,11 +139,15 @@ public class MainController implements IMainController {
 
     private void tearDownArUcoListeners() {
         arUcoSubscriber.removeAllLocalMessageListeners();
+        headLinearDirectionChangeSubscriber.removeAllMessageListeners();
         arUcoHeadTracker.setTrackedMarkerListener(null);
     }
 
     private void setUpArUcoListeners(IArUcoHeadTracker.TrackedMarkerListener arUcoMessageListener) {
         arUcoHeadTracker.setTrackedMarkerListener(arUcoMessageListener);
+        arUcoHeadTracker.setAngleChangeListener(headController::handleStrategyHeadLinearRotationChange);
+
         arUcoSubscriber.addMessageListener(arUcoHeadTracker::handleArUcoMessage);
+        headLinearDirectionChangeSubscriber.addMessageListener(arUcoHeadTracker::handleHeadRotationChange);
     }
 }

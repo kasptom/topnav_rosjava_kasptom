@@ -1,6 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
@@ -27,7 +27,7 @@ public class TrackMarkerStrategy extends BaseSubStrategy implements IArUcoHeadTr
     private PdVelocityCalculator velocityCalculator;
 
     TrackMarkerStrategy(WheelsVelocitiesChangeListener wheelsListener,
-                        HeadRotationChangeListener headListener,
+                        HeadRotationChangeRequestListener headListener,
                         SubStrategyListener subStrategyListener,
                         StrategyFinishedListener finishListener,
                         HashMap<String, GuidelineParam> guidelineParamsMap, Log log) {

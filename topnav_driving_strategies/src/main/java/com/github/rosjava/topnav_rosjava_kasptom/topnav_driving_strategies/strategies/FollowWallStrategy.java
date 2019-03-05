@@ -1,6 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
@@ -37,7 +37,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     private int lineDetectionThreshold = 8;
 
     private boolean isObstacleTooClose;
-    private HeadRotationChangeListener headListener;
+    private HeadRotationChangeRequestListener headListener;
     private static final double RIGHT_WALL_ANGLE = -90;
     private static final double LEFT_WALL_ANGLE = 90;
     private double chosenWallAngle = LEFT_WALL_ANGLE;
@@ -51,7 +51,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     @Override
     public void startStrategy() {
         RelativeDirection initialRelativeDirection = getInitialRelativeDirection(guidelineParamsMap);
-        headListener.onRotationChanged(initialRelativeDirection);
+        headListener.onRotationChangeRequest(initialRelativeDirection);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     }
 
     @Override
-    public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+    public void setHeadRotationChangeListener(HeadRotationChangeRequestListener listener) {
         headListener = listener;
     }
 
@@ -124,7 +124,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
         log.info(String.format("Tracking wall at angle: %.2f", chosenWallAngle));
 
-        headListener.onRotationChanged(chosenWallAngle == LEFT_WALL_ANGLE
+        headListener.onRotationChangeRequest(chosenWallAngle == LEFT_WALL_ANGLE
                 ? RelativeDirection.AT_LEFT
                 : RelativeDirection.AT_RIGHT);
     }

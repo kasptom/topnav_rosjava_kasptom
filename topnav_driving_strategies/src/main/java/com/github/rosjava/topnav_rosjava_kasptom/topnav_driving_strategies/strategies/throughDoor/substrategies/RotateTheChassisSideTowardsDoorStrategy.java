@@ -1,6 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorUtils;
@@ -29,7 +29,7 @@ public class RotateTheChassisSideTowardsDoorStrategy extends BaseSubStrategy {
     private Log log;
 
     public RotateTheChassisSideTowardsDoorStrategy(WheelsVelocitiesChangeListener wheelsListener,
-                                                   HeadRotationChangeListener headListener,
+                                                   HeadRotationChangeRequestListener headListener,
                                                    SubStrategyListener substrategyListener,
                                                    StrategyFinishedListener finishListener, Log log, HashMap<String, GuidelineParam> guidelineParamsMap) {
         super(wheelsListener, headListener, substrategyListener, finishListener, guidelineParamsMap);
@@ -70,7 +70,7 @@ public class RotateTheChassisSideTowardsDoorStrategy extends BaseSubStrategy {
         if (checkedDirection >= directionsToCheck.size()) {
             finishListener.onStrategyFinished(false);
         } else {
-            headListener.onRotationChanged(directionsToCheck.get(checkedDirection));
+            headListener.onRotationChangeRequest(directionsToCheck.get(checkedDirection));
         }
     }
 }

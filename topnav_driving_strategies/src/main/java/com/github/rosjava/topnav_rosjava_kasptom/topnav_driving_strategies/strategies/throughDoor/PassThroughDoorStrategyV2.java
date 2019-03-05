@@ -26,7 +26,7 @@ public class PassThroughDoorStrategyV2 extends BasePassThroughDoorStrategy imple
     @Override
     void initializeSubStrategies() {
         this.subStrategies = new HashMap<>();
-        this.subStrategies.put(DETECT_MARKER, new RotateTheChassisSideTowardsDoorStrategy(wheelsListener, headListener, this, strategyFinishedListener, log, guidelineParamsMap));
+        this.subStrategies.put(DETECT_MARKER, new DetectMarkerSubStrategy(wheelsListener, headListener, this, strategyFinishedListener, log, guidelineParamsMap));
         this.subStrategies.put(TRACK_MARKER, new TrackMarkerStrategy(wheelsListener, headListener, this, strategyFinishedListener, guidelineParamsMap, log));
     }
 
@@ -55,7 +55,7 @@ public class PassThroughDoorStrategyV2 extends BasePassThroughDoorStrategy imple
     public void onStageFinished(ThroughDoorStage finishedStage, RelativeDirection direction) {
         super.onStageFinished(finishedStage, direction);
         if (finishedStage.equals(DETECT_MARKER)) {
-            arUcoTracker.start(AT_LEFT.getRotationDegrees());
+            arUcoTracker.start();
         }
     }
 }

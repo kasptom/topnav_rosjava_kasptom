@@ -6,7 +6,7 @@ import com.google.common.math.DoubleMath;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.UNDEFINED;
 
 public class RelativeDirectionUtils {
-    private static final double ANGLE_TOLERANCE_RADS = 0.01;
+    static final double ANGLE_TOLERANCE_RADS = 0.01;
 
     public static RelativeDirection convertMessageToRelativeDirection(std_msgs.String relativeDirection) {
         String directionName = relativeDirection.getData();

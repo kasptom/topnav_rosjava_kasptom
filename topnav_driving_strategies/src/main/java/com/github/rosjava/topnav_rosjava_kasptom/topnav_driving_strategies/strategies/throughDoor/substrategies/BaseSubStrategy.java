@@ -1,6 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
@@ -12,14 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 
 public abstract class BaseSubStrategy implements IDrivingStrategy {
-    final HeadRotationChangeListener headListener;
+    final HeadRotationChangeRequestListener headListener;
     final StrategyFinishedListener finishListener;
     protected final WheelsVelocitiesChangeListener wheelsListener;
     protected final SubStrategyListener subStrategyListener;
     protected final HashMap<String, GuidelineParam> guidelineParamsMap;
 
 
-    public BaseSubStrategy(WheelsVelocitiesChangeListener wheelsListener, HeadRotationChangeListener headListener, SubStrategyListener subStrategyListener, StrategyFinishedListener finishListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
+    public BaseSubStrategy(WheelsVelocitiesChangeListener wheelsListener, HeadRotationChangeRequestListener headListener, SubStrategyListener subStrategyListener, StrategyFinishedListener finishListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
         this.wheelsListener = wheelsListener;
         this.headListener = headListener;
         this.subStrategyListener = subStrategyListener;
@@ -44,7 +44,7 @@ public abstract class BaseSubStrategy implements IDrivingStrategy {
     }
 
     @Override
-    public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+    public void setHeadRotationChangeListener(HeadRotationChangeRequestListener listener) {
     }
 
     @Override

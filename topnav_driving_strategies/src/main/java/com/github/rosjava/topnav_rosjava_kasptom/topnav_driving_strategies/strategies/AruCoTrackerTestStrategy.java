@@ -2,6 +2,7 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.*;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
@@ -11,7 +12,7 @@ import topnav_msgs.TopNavConfigMsg;
 import java.util.HashMap;
 import java.util.List;
 
-public class AruCoTrackerTestStrategy implements IDrivingStrategy {
+public class AruCoTrackerTestStrategy implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener {
 
     private final IArUcoHeadTracker arucoTracker;
     private HashMap<String, GuidelineParam> guidelineParamsMap;
@@ -24,7 +25,7 @@ public class AruCoTrackerTestStrategy implements IDrivingStrategy {
     @Override
     public void startStrategy() {
         arucoTracker.setTrackedMarkers(GuidelineUtils.asOrderedDoorMarkerIds(guidelineParamsMap));
-        arucoTracker.start(0);
+        arucoTracker.start();
     }
 
     @Override
@@ -58,7 +59,7 @@ public class AruCoTrackerTestStrategy implements IDrivingStrategy {
     }
 
     @Override
-    public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+    public void setHeadRotationChangeListener(HeadRotationChangeRequestListener listener) {
 
     }
 
@@ -70,5 +71,10 @@ public class AruCoTrackerTestStrategy implements IDrivingStrategy {
     @Override
     public void setGuidelineParameters(List<String> parameters) {
         GuidelineUtils.reloadParameters(parameters, guidelineParamsMap);
+    }
+
+    @Override
+    public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
+
     }
 }

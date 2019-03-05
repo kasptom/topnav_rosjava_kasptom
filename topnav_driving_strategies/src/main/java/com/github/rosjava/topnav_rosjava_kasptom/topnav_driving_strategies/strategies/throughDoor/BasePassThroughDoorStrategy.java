@@ -1,6 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
@@ -27,7 +27,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
     private List<ThroughDoorStage> subStrategiesOrdered;
 
     private ThroughDoorStage currentStage;
-    HeadRotationChangeListener headListener;
+    HeadRotationChangeRequestListener headListener;
     WheelsVelocitiesChangeListener wheelsListener;
     StrategyFinishedListener strategyFinishedListener;
 
@@ -88,7 +88,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
     }
 
     @Override
-    public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+    public void setHeadRotationChangeListener(HeadRotationChangeRequestListener listener) {
         headListener = listener;
     }
 
@@ -119,7 +119,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
     void switchToInitialStage(@SuppressWarnings("SameParameterValue") RelativeDirection direction) {
         currentStage = subStrategiesOrdered.get(0);
         isHeadRotationInProgress = true;
-        headListener.onRotationChanged(direction);
+        headListener.onRotationChangeRequest(direction);
         subStrategies.get(currentStage).startStrategy();
     }
 
@@ -140,7 +140,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
         }
 
         isHeadRotationInProgress = true;
-        headListener.onRotationChanged(direction);
+        headListener.onRotationChangeRequest(direction);
         subStrategies.get(currentStage).startStrategy();
     }
 }

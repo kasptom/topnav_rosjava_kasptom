@@ -19,7 +19,7 @@ public interface IDrivingStrategy {
 
     void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener);
 
-    void setHeadRotationChangeListener(HeadRotationChangeListener listener);
+    void setHeadRotationChangeListener(HeadRotationChangeRequestListener listener);
 
     void setStrategyFinishedListener(StrategyFinishedListener listener);
 

@@ -9,6 +9,8 @@ public class MarkerDetection {
     private final double[] yCorners = new double[4];
     private static final double OFFSET_MARKER_CENTER_METERS = 0.1; // TODO topnav_config
 
+    private double detectedAtAngle = 0.0;
+
     public static MarkerDetection createDetection(String id, double[] cameraPosition, double[] xCorners, double[] yCorners) {
         return new MarkerDetection(id, cameraPosition, xCorners, yCorners);
     }
@@ -51,6 +53,14 @@ public class MarkerDetection {
         return RelativeDistance.MIDDLE;
     }
 
+    public void setDetectedAtAngle(double angleDegrees) {
+        detectedAtAngle = angleDegrees;
+    }
+
+    public double getDetectedAtAngle() {
+        return detectedAtAngle;
+    }
+
     private MarkerDetection(String id, double[] cameraPosition, double[] xCorners, double[] yCorners) {
         this.id = id;
         System.arraycopy(cameraPosition, 0, this.cameraPosition, 0, this.cameraPosition.length);
@@ -60,6 +70,15 @@ public class MarkerDetection {
 
     private MarkerDetection(String id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object otherDetection) {
+        if (!(otherDetection instanceof MarkerDetection)) return false;
+
+        String detectionId = ((MarkerDetection) otherDetection).getId();
+        return detectionId == null && this.getId() == null
+                || ((MarkerDetection) otherDetection).getId().equals(this.getId());
     }
 }
 

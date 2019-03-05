@@ -1,14 +1,17 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
+import std_msgs.Float64;
 import topnav_msgs.MarkersMsg;
 
 import java.util.LinkedHashSet;
 
-public interface IArUcoHeadTracker extends HeadRotationChangeListener {
+public interface IArUcoHeadTracker {
     void handleArUcoMessage(MarkersMsg markersMsg);
 
-    void start(double initialAngleDegrees);
+    void handleHeadRotationChange(Float64 headRotationMessage);
+
+    void start();
 
     void stop();
 
@@ -21,13 +24,9 @@ public interface IArUcoHeadTracker extends HeadRotationChangeListener {
      */
     void setTrackedMarkers(LinkedHashSet<String> markerIds);
 
-    void setAngleCorrectionListener(AngleCorrectionListener listener);
+    void setAngleChangeListener(HeadLinearRotationChangeRequestListener listener);
 
     void setTrackedMarkerListener(TrackedMarkerListener listener);
-
-    interface AngleCorrectionListener {
-        void onAngleCorrection(double angleDegrees);
-    }
 
     interface TrackedMarkerListener {
         void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation);
