@@ -58,7 +58,6 @@ public class TrackMarkerStrategy extends BaseSubStrategy implements IArUcoHeadTr
 
     @Override
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
-        log.info(String.format("head rotation %.2f", headRotation));
         double range = Math.sqrt(Math.pow(detection.getCameraPosition()[0], 2) + Math.pow(detection.getCameraPosition()[2], 2));
         WheelsVelocities velocities;
         if (isDoorMarker(detection, KEY_FRONT_LEFT_MARKER_ID)) {

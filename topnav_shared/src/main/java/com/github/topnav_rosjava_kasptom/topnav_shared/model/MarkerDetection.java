@@ -71,14 +71,5 @@ public class MarkerDetection {
     private MarkerDetection(String id) {
         this.id = id;
     }
-
-    @Override
-    public boolean equals(Object otherDetection) {
-        if (!(otherDetection instanceof MarkerDetection)) return false;
-
-        String detectionId = ((MarkerDetection) otherDetection).getId();
-        return detectionId == null && this.getId() == null
-                || ((MarkerDetection) otherDetection).getId().equals(this.getId());
-    }
 }
 

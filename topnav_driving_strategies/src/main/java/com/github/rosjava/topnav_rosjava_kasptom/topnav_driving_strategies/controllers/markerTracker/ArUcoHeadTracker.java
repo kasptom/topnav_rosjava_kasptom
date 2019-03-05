@@ -48,12 +48,10 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         }
 
         if (isLookingForMarkers) {
-            log.info("looking for markers");
             lookAroundForMarkers(markersMsg);
             return;
         }
 
-        log.info("tracking door marker");
         trackDoorMarker(markersMsg);
     }
 
@@ -68,6 +66,10 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         foundMarkers.clear();
         angleDegrees = UNDEFINED_ANGLE;
         currentSearchAngle = MIN_SEARCH_ANGLE;
+
+        isHeadRotationInProgress = true;
+        headRotationChangeListener.onLinearRotationRequestChange(currentSearchAngle);
+
         isLookingForMarkers = true;
         isEnabled = true;
     }
@@ -105,9 +107,10 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         List<MarkerDetection> detections = ArucoMarkerUtils.createMarkerDetections(markersMsg);
         detections.stream()
                 .filter(detection -> trackedMarkerIds.contains(detection.getId())
-                        && !foundMarkers.contains(detection))
+                        && foundMarkers.stream().noneMatch(found -> found.getId().equals(detection.getId())))
                 .forEach(detection -> {
                     foundMarkers.add(detection);
+                    log.debug(String.format("detected: %s at angle %.2f", detection.getId(), currentSearchAngle));
                     detection.setDetectedAtAngle(currentSearchAngle);
                 });
 
@@ -128,7 +131,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         }
 
         currentSearchAngle += 5.0;
-        log.info(String.format("Looking for markers at angle: %.2f", currentSearchAngle));
+        log.debug(String.format("Looking for markers at angle: %.2f", currentSearchAngle));
         if (currentSearchAngle >= MAX_SEARCH_ANGLE) {
             currentSearchAngle = MAX_SEARCH_ANGLE;
         }
