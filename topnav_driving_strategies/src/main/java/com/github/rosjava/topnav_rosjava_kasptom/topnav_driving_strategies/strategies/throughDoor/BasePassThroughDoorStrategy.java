@@ -118,8 +118,12 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
 
     void switchToInitialStage(@SuppressWarnings("SameParameterValue") RelativeDirection direction) {
         currentStage = subStrategiesOrdered.get(0);
-        isHeadRotationInProgress = true;
-        headListener.onRotationChangeRequest(direction);
+
+        if (direction != RelativeDirection.UNDEFINED) {
+            isHeadRotationInProgress = true;
+            headListener.onRotationChangeRequest(direction);
+        }
+
         subStrategies.get(currentStage).startStrategy();
     }
 
@@ -139,8 +143,10 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
             return;
         }
 
-        isHeadRotationInProgress = true;
-        headListener.onRotationChangeRequest(direction);
+        if (direction != RelativeDirection.UNDEFINED) {
+            isHeadRotationInProgress = true;
+            headListener.onRotationChangeRequest(direction);
+        }
         subStrategies.get(currentStage).startStrategy();
     }
 }

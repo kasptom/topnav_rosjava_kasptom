@@ -1,7 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.model;
 
 public class MarkerDetection {
-    private static final String EMPTY_DETECTION_ID = "-1";
+    public static final String EMPTY_DETECTION_ID = "-1";
 
     private String id;
     private final double[] cameraPosition = new double[3];

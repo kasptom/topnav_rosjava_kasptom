@@ -13,7 +13,7 @@ import java.util.List;
 
 public abstract class BaseSubStrategy implements IDrivingStrategy {
     final HeadRotationChangeRequestListener headListener;
-    final StrategyFinishedListener finishListener;
+    protected final StrategyFinishedListener finishListener;
     protected final WheelsVelocitiesChangeListener wheelsListener;
     protected final SubStrategyListener subStrategyListener;
     protected final HashMap<String, GuidelineParam> guidelineParamsMap;
