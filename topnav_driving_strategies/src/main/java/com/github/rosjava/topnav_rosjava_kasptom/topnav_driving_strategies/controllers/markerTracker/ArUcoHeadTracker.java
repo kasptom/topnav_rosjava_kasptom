@@ -2,6 +2,8 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadLinearRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.detectionStrategy.ChooseClosestDetectionStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.detectionStrategy.IDetectionStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import org.apache.commons.logging.Log;
@@ -11,7 +13,6 @@ import topnav_msgs.MarkersMsg;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_FOV_DEGREES;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_PREVIEW_WIDTH;
@@ -24,6 +25,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private final LinkedHashSet<String> trackedMarkerIds;
     private final LinkedHashSet<MarkerDetection> foundMarkers;
     private final Log log;
+    private IDetectionStrategy detectionStrategy;
 
     private double currentSearchAngle;
     private boolean isEnabled;
@@ -67,6 +69,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         angleDegrees = UNDEFINED_ANGLE;
         currentSearchAngle = MIN_SEARCH_ANGLE;
 
+        detectionStrategy = new ChooseClosestDetectionStrategy(trackedMarkerIds);
         isHeadRotationInProgress = true;
         headRotationChangeListener.onLinearRotationRequestChange(currentSearchAngle);
 
@@ -119,8 +122,8 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
                 isEnabled = false;
                 log.info("Could not find any of the listed markers in the surroundings");
             } else {
-                log.info(String.format("Found %d/4 markers", foundMarkers.size()));
-                MarkerDetection firstDetection = getMarkerDetection(new ArrayList<>(foundMarkers));
+                log.info(String.format("Found %d/%d markers", foundMarkers.size(), trackedMarkerIds.size()));
+                MarkerDetection firstDetection = detectionStrategy.execute(new ArrayList<>(foundMarkers));
                 double angle = firstDetection == null ? 0 : firstDetection.getDetectedAtAngle();
                 angleDegrees = angle;
                 isHeadRotationInProgress = true;
@@ -146,7 +149,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         }
 
         List<MarkerDetection> detections = ArucoMarkerUtils.createMarkerDetections(markersMsg);
-        MarkerDetection trackedDetection = getMarkerDetection(detections);
+        MarkerDetection trackedDetection = detectionStrategy.execute(detections);
 
         if (trackedDetection == null) {
             trackedMarkerListener.onTrackedMarkerUpdate(MarkerDetection.emptyDetection(), 0.0);
@@ -154,30 +157,6 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         }
 
         centerHeadOn(trackedDetection);
-    }
-
-    private MarkerDetection getMarkerDetection(List<MarkerDetection> detections) {
-        MarkerDetection trackedDetection;
-        List<String> detectedMarkerIds = detections
-                .stream()
-                .map(MarkerDetection::getId)
-                .collect(Collectors.toList());
-
-        final String trackedMarkerId = trackedMarkerIds
-                .stream()
-                .filter(detectedMarkerIds::contains)
-                .findFirst()
-                .orElse(null);
-
-        if (trackedMarkerId == null) return null;
-
-        trackedDetection =
-                detections.stream()
-                        .filter(detection -> detection.getId().equals(trackedMarkerId))
-                        .findFirst()
-                        .orElse(null);
-
-        return trackedDetection;
     }
 
     private void centerHeadOn(MarkerDetection marker) {
@@ -189,4 +168,5 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         headRotationChangeListener.onLinearRotationRequestChange(angleDegrees);
         trackedMarkerListener.onTrackedMarkerUpdate(marker, angleDegrees);
     }
+
 }
