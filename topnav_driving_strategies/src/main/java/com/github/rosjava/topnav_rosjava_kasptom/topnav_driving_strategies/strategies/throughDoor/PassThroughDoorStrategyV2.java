@@ -59,8 +59,5 @@ public class PassThroughDoorStrategyV2 extends BasePassThroughDoorStrategy imple
     @Override
     public void onStageFinished(ThroughDoorStage finishedStage, RelativeDirection direction) {
         super.onStageFinished(finishedStage, direction);
-        if (finishedStage.equals(DETECT_MARKER)) {
-            arUcoTracker.start();
-        }
     }
 }
