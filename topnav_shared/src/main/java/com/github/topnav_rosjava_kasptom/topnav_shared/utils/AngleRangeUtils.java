@@ -1,7 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
-import com.github.topnav_rosjava_kasptom.topnav_shared.services.DoorFinder;
+import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.DoorFinder;
 import topnav_msgs.AngleRangesMsg;
 
 import java.awt.geom.Point2D;

@@ -6,22 +6,30 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strat
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.RotateTheChassisSideTowardsDoorStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.*;
-import com.github.topnav_rosjava_kasptom.topnav_shared.services.DoorFinder;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeAlignment;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.DoorFinder;
+import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.MyKMeansClustering;
 import org.apache.commons.logging.Log;
-import topnav_msgs.*;
+import topnav_msgs.AngleRangesMsg;
+import topnav_msgs.FeedbackMsg;
+import topnav_msgs.HoughAcc;
+import topnav_msgs.TopologyMsg;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.*;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.DOOR_DETECTION_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MAX_VELOCITY_DELTA;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
 public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy implements IDrivingStrategy {
+
     public PassThroughDoorStrategy(Log log) {
         super(log);
     }
@@ -138,7 +146,7 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
     class DriveStrategy extends BaseSubStrategy {
 
         private boolean isBackMarkVisible = false;
-        private DoorFinder doorFinder = new DoorFinder();
+        private DoorFinder doorFinder = new DoorFinder(new MyKMeansClustering(2, 6));
 
         DriveStrategy(WheelsVelocitiesChangeListener wheelsListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
             super(wheelsListener, headListener, PassThroughDoorStrategy.this, strategyFinishedListener, guidelineParamsMap);
@@ -154,8 +162,8 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
                 return;
             }
 
-            this.doorFinder.dividePointsToClusters(angleRangesMsg);
-            DoorFinder.Point midPoint = this.doorFinder.getClustersMidPoint();
+            doorFinder.dividePointsToClusters(angleRangesMsg);
+            DoorFinder.Point midPoint = doorFinder.getClustersMidPoint();
             double MAX_VELOCITY = 2.0;
 
             double leftVelocity = MAX_VELOCITY + MAX_VELOCITY_DELTA * (-midPoint.getX() / DOOR_DETECTION_RANGE);
