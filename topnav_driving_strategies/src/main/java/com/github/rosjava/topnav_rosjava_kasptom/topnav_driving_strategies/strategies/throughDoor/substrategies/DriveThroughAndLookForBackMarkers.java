@@ -55,18 +55,17 @@ public class DriveThroughAndLookForBackMarkers extends BaseSubStrategy {
                 log.info("Could not find the mid point");
             }
 
-            if (midPoint == null) {
-                wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
-                return;
+            WheelsVelocities velocities = ZERO_VELOCITY;
+
+            if (midPoint != null) {
+                double range = Math.sqrt(Math.pow(midPoint.getX(), 2) + Math.pow(midPoint.getY(), 2));
+                double angleRads = range != 0
+                        ? Math.asin(midPoint.getX() / range)
+                        : 0.0;
+                double angleDegrees = angleRads / 180.0 * Math.PI;
+                velocities = velocityCalculator.calculateRotationSpeed(angleDegrees, LIDAR_MIN_RANGE, System.nanoTime(), 0.0, LIDAR_MIN_RANGE);
             }
 
-            double range = Math.sqrt(Math.pow(midPoint.getX(), 2) + Math.pow(midPoint.getY(), 2));
-            double angleRads = range != 0
-                    ? Math.asin(midPoint.getX() / range)
-                    : 0.0;
-            double angleDegrees = angleRads / 180.0 * Math.PI;
-
-            WheelsVelocities velocities = velocityCalculator.calculateRotationSpeed(angleDegrees, LIDAR_MIN_RANGE, System.nanoTime(), 0.0, LIDAR_MIN_RANGE);
             velocities = WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, velocities);
 
             wheelsListener.onWheelsVelocitiesChanged(velocities);

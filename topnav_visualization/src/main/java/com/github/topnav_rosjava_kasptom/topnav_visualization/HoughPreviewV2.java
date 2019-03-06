@@ -70,12 +70,18 @@ public class HoughPreviewV2 implements IHoughPreview {
         ArrayList<Point2D> lidarPoints = AngleRangeUtils.angleRangeToPixels(angleRangesMsg);
         List<List<DoorFinder.Point>> clusters = doorFinder.dividePointsToClusters(angleRangesMsg);
 
-        DoorFinder.Point midPoint = doorFinder.getClustersMidPoint();
-        this.midPoint = AngleRangeUtils.pointToPixelPoint(midPoint);
-
         points.addAll(lidarPoints.stream()
                 .map(point2D -> new Point((int) point2D.getX(), (int) point2D.getY()))
                 .collect(Collectors.toList()));
+
+        DoorFinder.Point midPoint;
+        try {
+            midPoint = doorFinder.getClustersMidPoint();
+            this.midPoint = AngleRangeUtils.pointToPixelPoint(midPoint);
+        } catch (DoorFinder.PointNotFoundException pointNotFoundException) {
+            log.debug("Could not find the mid point");
+            this.midPoint = null;
+        }
 
         if (clusters.size() == 2) {
             leftDoorPoints.addAll(clusters.get(0)
@@ -116,8 +122,10 @@ public class HoughPreviewV2 implements IHoughPreview {
         graphics.setColor(Color.blue);
         drawPoints(graphics, rightDoorPoints);
 
-        graphics.setColor(Color.yellow);
-        graphics.fillRect((int)midPoint.getX(), (int)midPoint.getY(), 5, 5);
+        if (midPoint != null) {
+            graphics.setColor(Color.yellow);
+            graphics.fillRect((int)midPoint.getX(), (int)midPoint.getY(), 5, 5);
+        }
 
         graphics.dispose();
     }
