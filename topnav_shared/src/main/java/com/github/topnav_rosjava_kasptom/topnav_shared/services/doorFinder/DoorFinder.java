@@ -4,7 +4,6 @@ import com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
 import topnav_msgs.AngleRangesMsg;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,11 +12,10 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.D
 public class DoorFinder {
 
     private final IClusteringAlgorithm algorithm;
-    private HashMap<Point, AngleRange> pointToAngleRange;
 
-    public DoorFinder(IClusteringAlgorithm algorithm) {
-        this.algorithm = algorithm;
-        pointToAngleRange = new HashMap<>();
+    public DoorFinder() {
+        this.algorithm = new MyKMeansClustering(2, 6);
+//        this.algorithm = new ExpectationsMaximizationAdapter();
     }
 
     /**
@@ -34,11 +32,7 @@ public class DoorFinder {
                 .collect(Collectors.toList());
 
         List<Point> closeAngleRangesPoints = closeAngleRanges.stream()
-                .map(angleRange -> {
-                    Point point = new Point(angleRange);
-                    pointToAngleRange.put(point, angleRange);
-                    return point;
-                })
+                .map(Point::new)
                 .collect(Collectors.toList());
 
         return algorithm.computeClusters(closeAngleRangesPoints);
@@ -46,10 +40,6 @@ public class DoorFinder {
 
     public Point getClustersMidPoint() {
         return algorithm.getClustersMidPoint();
-    }
-
-    public AngleRange getAngleRangeFrom(Point point) {
-        return pointToAngleRange.get(point);
     }
 
     public static class Point {
