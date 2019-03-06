@@ -10,7 +10,7 @@ public class MyKMeansClustering implements IClusteringAlgorithm {
     private final int meansCount;
     private final int maxIterations;
 
-    public MyKMeansClustering(final int meansCount, final int maxIterations) {
+    MyKMeansClustering(final int meansCount, final int maxIterations) {
         this.meansCount = meansCount;
         this.maxIterations = maxIterations;
 
@@ -36,11 +36,7 @@ public class MyKMeansClustering implements IClusteringAlgorithm {
             recalculateMeans(closePoints);
         }
 
-        ArrayList<List<DoorFinder.Point>> angleRangeClusters = new ArrayList<>();
-        angleRangeClusters.add(clusters.get(centroids.get(0)));
-        angleRangeClusters.add(clusters.get(centroids.get(1)));
-
-        return angleRangeClusters;
+        return DoorFinder.Point.toClustersList(clusters, centroids);
     }
 
     private void resetMeans(LinkedList<DoorFinder.Point> closePoints) {
@@ -55,7 +51,7 @@ public class MyKMeansClustering implements IClusteringAlgorithm {
 
         closePoints.forEach(point -> {
             DoorFinder.Point closestCentroid = centroids.stream()
-                    .min(Comparator.comparingDouble(centroid -> distanceTo(point, centroid)))
+                    .min(Comparator.comparingDouble(centroid -> DoorFinder.Point.distanceTo(point, centroid)))
                     .orElse(null);
             clusters.get(closestCentroid).add(point);
         });
@@ -75,26 +71,7 @@ public class MyKMeansClustering implements IClusteringAlgorithm {
         });
     }
 
-    private double distanceTo(DoorFinder.Point first, DoorFinder.Point second) {
-        return Math.sqrt(Math.pow(first.x - second.x, 2) + Math.pow(first.y - second.y, 2));
-    }
-
     public DoorFinder.Point getClustersMidPoint() {
-        List<DoorFinder.Point> firstCluster = this.clusters.get(centroids.get(0));
-        List<DoorFinder.Point> secondCluster = this.clusters.get(centroids.get(1));
-        final DoorFinder.Point[] firstClosest = {null};
-        final DoorFinder.Point[] secondClosest = {null};
-        final double[] minDistance = {Double.POSITIVE_INFINITY};
-        final double[] distance = {0};
-        firstCluster.forEach(point -> secondCluster.forEach(otherPoint -> {
-            distance[0] = distanceTo(point, otherPoint);
-            if (distance[0] < minDistance[0]) {
-                minDistance[0] = distance[0];
-                firstClosest[0] = point;
-                secondClosest[0] = otherPoint;
-            }
-        }));
-
-        return new DoorFinder.Point((firstClosest[0].x + secondClosest[0].x) / 2, (firstClosest[0].y + secondClosest[0].y) / 2);
+        return DoorFinder.Point.getMidPoint(clusters, centroids);
     }
 }
