@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class MainController implements IMainController {
@@ -48,18 +49,18 @@ public class MainController implements IMainController {
         wheelsController = new WheelsController(connectedNode);
         arUcoHeadTracker = new ArUcoHeadTracker(log);
 
-        configMsgSubscriber = connectedNode.newSubscriber("/topnav/config", TopNavConfigMsg._TYPE);
-        angleRangesMsgSubscriber = connectedNode.newSubscriber(TopicNames.TOPNAV_ANGLE_RANGE_TOPIC, AngleRangesMsg._TYPE);
-        houghAccSubscriber = connectedNode.newSubscriber("/capo/laser/hough", HoughAcc._TYPE);
-        markerDetectionSubscriber = connectedNode.newSubscriber("/topnav/feedback", FeedbackMsg._TYPE);
+        configMsgSubscriber = connectedNode.newSubscriber(TOPNAV_CONFIG_TOPIC, TopNavConfigMsg._TYPE);
+        angleRangesMsgSubscriber = connectedNode.newSubscriber(TOPNAV_ANGLE_RANGE_TOPIC, AngleRangesMsg._TYPE);
+        houghAccSubscriber = connectedNode.newSubscriber(TOPNAV_HOUGH_TOPIC, HoughAcc._TYPE);
+        markerDetectionSubscriber = connectedNode.newSubscriber(TOPNAV_FEEDBACK_TOPIC, FeedbackMsg._TYPE);
 
-        arUcoSubscriber = new TopnavSubscriber<>(connectedNode, TopicNames.TOPNAV_ARUCO_TOPIC, MarkersMsg._TYPE);
+        arUcoSubscriber = new TopnavSubscriber<>(connectedNode, TOPNAV_ARUCO_TOPIC, MarkersMsg._TYPE);
         arUcoHeadTracker.setAngleChangeListener(headController::handleStrategyHeadLinearRotationChange);
 
-        guidelineSubscriber = connectedNode.newSubscriber("/topnav/guidelines", GuidelineMsg._TYPE);
+        guidelineSubscriber = connectedNode.newSubscriber(TOPNAV_GUIDELINES_TOPIC, GuidelineMsg._TYPE);
 
-        headDirectionChangeSubscriber = connectedNode.newSubscriber(TopicNames.HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
-        headLinearDirectionChangeSubscriber = connectedNode.newSubscriber(TopicNames.HEAD_LINЕАR_DIRECTION_CHANGE_TOPIC, std_msgs.Float64._TYPE);
+        headDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
+        headLinearDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_LINЕАR_DIRECTION_CHANGE_TOPIC, std_msgs.Float64._TYPE);
 
 
         initializeDrivingStrategies(drivingStrategies, trackedMarkerListeners);

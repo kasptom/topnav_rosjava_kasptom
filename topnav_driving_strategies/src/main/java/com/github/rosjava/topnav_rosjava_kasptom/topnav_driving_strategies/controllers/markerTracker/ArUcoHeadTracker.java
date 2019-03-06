@@ -21,6 +21,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private static final double UNDEFINED_ANGLE = -1000.0;
     private static final double MIN_SEARCH_ANGLE = -180.0;
     private static final double MAX_SEARCH_ANGLE = 180.0;
+    private static final double SEARCH_ANGLE_STEP_DEGREES = 5.0;
 
     private final LinkedHashSet<String> trackedMarkerIds;
     private final LinkedHashSet<MarkerDetection> foundMarkers;
@@ -84,12 +85,12 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
 
     @Override
     public void setTrackedMarkers(LinkedHashSet<String> markerIds) {
-        this.trackedMarkerIds.clear();
+        trackedMarkerIds.clear();
         if (markerIds == null || markerIds.isEmpty()) {
             return;
         }
 
-        this.trackedMarkerIds.addAll(markerIds);
+        trackedMarkerIds.addAll(markerIds);
     }
 
     @Override
@@ -133,7 +134,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
             return;
         }
 
-        currentSearchAngle += 5.0;
+        currentSearchAngle += SEARCH_ANGLE_STEP_DEGREES;
         log.debug(String.format("Looking for markers at angle: %.2f", currentSearchAngle));
         if (currentSearchAngle >= MAX_SEARCH_ANGLE) {
             currentSearchAngle = MAX_SEARCH_ANGLE;

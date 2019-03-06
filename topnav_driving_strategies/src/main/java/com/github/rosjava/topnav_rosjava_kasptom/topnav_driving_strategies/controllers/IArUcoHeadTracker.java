@@ -20,7 +20,7 @@ public interface IArUcoHeadTracker {
      *
      * @param markerIds ids of markers given in the priority of tracking. The earlier the marker is on the list
      *                  the higher priority of being tracked it has.
-     *                  Set null the
+     *                  If null, no tracking is done.
      */
     void setTrackedMarkers(LinkedHashSet<String> markerIds);
 

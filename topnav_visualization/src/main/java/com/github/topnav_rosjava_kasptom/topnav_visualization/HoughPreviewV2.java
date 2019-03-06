@@ -27,11 +27,9 @@ public class HoughPreviewV2 implements IHoughPreview {
     private ArrayList<Point> leftDoorPoints;
     private ArrayList<Point> rightDoorPoints;
 
-
     private static final long PREVIEW_UPDATE_INTERVAL_NANO_SECS = (long) (0.1 * 1e9);
     private long lastTimeStamp;
     private Point2D midPoint;
-
 
     public HoughPreviewV2(Log log) {
         this.log = log;

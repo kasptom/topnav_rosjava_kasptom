@@ -4,10 +4,8 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorUtils;
-import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
@@ -19,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ROTATE_CLOCKWISE_VELOCITY;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
 public class RotateTheChassisSideTowardsDoorStrategy extends BaseSubStrategy {
@@ -51,11 +51,11 @@ public class RotateTheChassisSideTowardsDoorStrategy extends BaseSubStrategy {
 
         if (isChassisRotationInProgress) {
             if (expectedDoorMarkers.size() > 0) {
-                wheelsListener.onWheelsVelocitiesChanged(WheelsVelocityConstants.ZERO_VELOCITY);
+                wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
                 log.info("rotated side towards the door");
                 subStrategyListener.onStageFinished(DETECT_MARKER, AT_LEFT);
             } else {
-                wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(1.5, -1.5, 1.5, -1.5));
+                wheelsListener.onWheelsVelocitiesChanged(ROTATE_CLOCKWISE_VELOCITY);
             }
             return;
         }

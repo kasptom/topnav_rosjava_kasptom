@@ -34,14 +34,14 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
 
     BasePassThroughDoorStrategy(Log log) {
         this.log = log;
-        this.guidelineParamsMap = new HashMap<>();
+        guidelineParamsMap = new HashMap<>();
         initializeSubStrategies();
         subStrategiesOrdered = Arrays.asList(getSubStrategiesExecutionOrder());
     }
 
     @Override
     public void handleConfigMessage(TopNavConfigMsg configMsg) {
-        IDrivingStrategy subStrategy = this.subStrategies.get(currentStage);
+        IDrivingStrategy subStrategy = subStrategies.get(currentStage);
         BlockedMessageHandler.handleIfNotBlocked(
                 configMsg,
                 subStrategy::handleConfigMessage,
@@ -50,7 +50,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
 
     @Override
     public void handleHoughAccMessage(HoughAcc houghAcc) {
-        IDrivingStrategy subStrategy = this.subStrategies.get(currentStage);
+        IDrivingStrategy subStrategy = subStrategies.get(currentStage);
         BlockedMessageHandler.handleIfNotBlocked(
                 houghAcc,
                 subStrategy::handleHoughAccMessage,
@@ -59,7 +59,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-        IDrivingStrategy subStrategy = this.subStrategies.get(currentStage);
+        IDrivingStrategy subStrategy = subStrategies.get(currentStage);
         BlockedMessageHandler.handleIfNotBlocked(
                 angleRangesMsg,
                 subStrategy::handleAngleRangeMessage,
@@ -68,7 +68,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
 
     @Override
     public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
-        IDrivingStrategy subStrategy = this.subStrategies.get(currentStage);
+        IDrivingStrategy subStrategy = subStrategies.get(currentStage);
         BlockedMessageHandler.handleIfNotBlocked(
                 feedbackMsg,
                 subStrategy::handleDetectionMessage,

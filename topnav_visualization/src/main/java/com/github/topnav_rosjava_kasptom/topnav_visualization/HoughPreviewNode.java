@@ -7,6 +7,7 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
 import topnav_msgs.AngleRangesMsg;
 
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.NodeNames.TOPNAV_LASER_SCAN_PREVIEW_JAVA_NODE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.TOPNAV_ANGLE_RANGE_TOPIC;
 
 @SuppressWarnings("unused")
@@ -17,9 +18,7 @@ public class HoughPreviewNode extends AbstractNodeMain {
 
     @Override
     public GraphName getDefaultNodeName() {
-        return GraphName.of("laser_scan_java_preview");
-
-
+        return GraphName.of(TOPNAV_LASER_SCAN_PREVIEW_JAVA_NODE);
     }
 
     @Override

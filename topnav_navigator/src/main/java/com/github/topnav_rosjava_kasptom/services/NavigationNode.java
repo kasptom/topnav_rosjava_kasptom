@@ -11,6 +11,7 @@ import std_msgs.Float64;
 import topnav_msgs.FeedbackMsg;
 import topnav_msgs.GuidelineMsg;
 
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.NodeNames.TOPNAV_NAVIGATOR_NODE_NAME;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.*;
 
 public class NavigationNode extends AbstractNodeMain implements INavigationNode {
@@ -21,13 +22,13 @@ public class NavigationNode extends AbstractNodeMain implements INavigationNode 
 
     @Override
     public GraphName getDefaultNodeName() {
-        return GraphName.of("/topnav/navigator");
+        return GraphName.of(TOPNAV_NAVIGATOR_NODE_NAME);
     }
 
     @Override
     public void onStart(ConnectedNode connectedNode) {
         Log log = connectedNode.getLog();
-        guidelinePublisher = connectedNode.newPublisher("/topnav/guidelines", GuidelineMsg._TYPE);
+        guidelinePublisher = connectedNode.newPublisher(TOPNAV_GUIDELINES_TOPIC, GuidelineMsg._TYPE);
         cameraDirectionPublisher = connectedNode.newPublisher(TOPNAV_NAVIGATION_HEAD_DIRECTION_TOPIC, std_msgs.String._TYPE);
 
         feedbackSubscriber = connectedNode.newSubscriber(TOPNAV_FEEDBACK_TOPIC, FeedbackMsg._TYPE);

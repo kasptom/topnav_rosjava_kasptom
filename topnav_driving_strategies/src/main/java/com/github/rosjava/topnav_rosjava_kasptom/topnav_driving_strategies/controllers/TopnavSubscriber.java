@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Class created in order to not unsubscribe subscribers not registered by the current instance
+ * @param <T> type of the message (ROS topic)
+ */
 public class TopnavSubscriber<T> implements Subscriber<T> {
     private final Subscriber<T> subscriber;
     private List<MessageListener<T>> messageListeners;
@@ -41,14 +45,18 @@ public class TopnavSubscriber<T> implements Subscriber<T> {
         subscriber.removeAllMessageListeners();
     }
 
+    /**
+     * Removes only the subscribers registered by the current instance of TopnavSubscriber class
+     * Use {@link TopnavSubscriber#removeAllMessageListeners()} in order to remove all of the listeners
+     */
     public void removeAllLocalMessageListeners() {
         messageListeners.forEach(subscriber::removeMessageListener);
         messageListeners.clear();
     }
 
     @Override
-    public void shutdown(long l, TimeUnit timeUnit) {
-        subscriber.shutdown(l, timeUnit);
+    public void shutdown(long time, TimeUnit timeUnit) {
+        subscriber.shutdown(time, timeUnit);
     }
 
     @Override
