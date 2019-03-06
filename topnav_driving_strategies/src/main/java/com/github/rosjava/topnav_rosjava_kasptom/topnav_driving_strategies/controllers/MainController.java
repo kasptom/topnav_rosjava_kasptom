@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class MainController implements IMainController {
 
@@ -56,8 +57,8 @@ public class MainController implements IMainController {
         arUcoHeadTracker.setAngleChangeListener(headController::handleStrategyHeadLinearRotationChange);
 
         guidelineSubscriber = connectedNode.newSubscriber("/topnav/guidelines", GuidelineMsg._TYPE);
-        headDirectionChangeSubscriber = connectedNode.newSubscriber(TopicNames.HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
 
+        headDirectionChangeSubscriber = connectedNode.newSubscriber(TopicNames.HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
         headLinearDirectionChangeSubscriber = connectedNode.newSubscriber(TopicNames.HEAD_LINЕАR_DIRECTION_CHANGE_TOPIC, std_msgs.Float64._TYPE);
 
 
@@ -85,7 +86,7 @@ public class MainController implements IMainController {
         tearDownDrivingStrategy();
 
         log.info("stopping the robot");
-        wheelsController.setVelocities(new WheelsVelocities(0.0, 0.0, 0.0, 0.0));
+        wheelsController.setVelocities(ZERO_VELOCITY);
     }
 
     private void selectStrategy(String strategyName, List<String> parameters) {
@@ -96,7 +97,7 @@ public class MainController implements IMainController {
         log.info(String.format("Selecting %s strategy", strategyName));
         if (DRIVING_STRATEGY_IDLE.equals(strategyName)) {
             log.info("Set to idle state");
-            wheelsController.setVelocities(new WheelsVelocities(0.0, 0.0, 0.0, 0.0));
+            wheelsController.setVelocities(ZERO_VELOCITY);
             return;
         }
 

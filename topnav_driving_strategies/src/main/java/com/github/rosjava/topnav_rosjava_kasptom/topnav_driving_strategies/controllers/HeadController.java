@@ -104,6 +104,7 @@ public class HeadController implements IHeadController {
         if (!RelativeDirectionUtils.isInPosition(headRotationRads, currentDirection)) {
             isDirectionChangeNotificationRequired = true;
         } else if (isDirectionChangeNotificationRequired) {
+            log.info(String.format("sending direction change notification: %s", currentDirection.name()));
             isDirectionChangeNotificationRequired = false;
             std_msgs.String directionMessage = relativeDirectionChangePublisher.newMessage();
             directionMessage.setData(currentDirection.name());

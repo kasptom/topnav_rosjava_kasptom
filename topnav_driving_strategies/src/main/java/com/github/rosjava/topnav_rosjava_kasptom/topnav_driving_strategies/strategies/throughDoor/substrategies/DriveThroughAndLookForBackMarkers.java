@@ -17,6 +17,7 @@ import topnav_msgs.TopologyMsg;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.LIDAR_MIN_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.BASE_ROBOT_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
@@ -65,7 +66,7 @@ public class DriveThroughAndLookForBackMarkers extends BaseSubStrategy {
                     : 0.0;
             double angleDegrees = angleRads / 180.0 * Math.PI;
 
-            WheelsVelocities velocities = velocityCalculator.calculateRotationSpeed(angleDegrees, 0.0, System.nanoTime(), 0.0, 0.0);
+            WheelsVelocities velocities = velocityCalculator.calculateRotationSpeed(angleDegrees, LIDAR_MIN_RANGE, System.nanoTime(), 0.0, LIDAR_MIN_RANGE);
             velocities = WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, velocities);
 
             wheelsListener.onWheelsVelocitiesChanged(velocities);

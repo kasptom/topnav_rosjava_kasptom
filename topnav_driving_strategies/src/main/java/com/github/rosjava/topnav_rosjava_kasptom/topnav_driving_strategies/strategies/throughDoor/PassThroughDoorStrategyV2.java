@@ -37,7 +37,7 @@ public class PassThroughDoorStrategyV2 extends BasePassThroughDoorStrategy imple
 
     @Override
     ThroughDoorStage[] getSubStrategiesExecutionOrder() {
-        return new ThroughDoorStage[]{DETECT_MARKER, TRACK_MARKER};
+        return new ThroughDoorStage[]{DETECT_MARKER, TRACK_MARKER, DRIVE_THROUGH_DOOR};
     }
 
     @Override
@@ -65,5 +65,8 @@ public class PassThroughDoorStrategyV2 extends BasePassThroughDoorStrategy imple
     @Override
     public void onStageFinished(ThroughDoorStage finishedStage, RelativeDirection direction) {
         super.onStageFinished(finishedStage, direction);
+        if (direction != UNDEFINED) {
+            this.arUcoTracker.stop();
+        }
     }
 }

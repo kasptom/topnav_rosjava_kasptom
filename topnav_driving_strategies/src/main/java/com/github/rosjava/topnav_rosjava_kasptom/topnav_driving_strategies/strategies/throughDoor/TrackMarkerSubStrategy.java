@@ -9,6 +9,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strat
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.SubStrategyListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
@@ -17,14 +18,18 @@ import topnav_msgs.HoughAcc;
 
 import java.util.HashMap;
 
+import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.TRACK_MARKER;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.BASE_ROBOT_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHeadTracker.TrackedMarkerListener {
+    private static final int NOT_DETECTED_LIMIT = 50;
+
     private final Log log;
     private PdVelocityCalculator velocityCalculator;
+    private int notDetectedCounter = 0;
 
     TrackMarkerSubStrategy(WheelsVelocitiesChangeListener wheelsListener,
                            HeadRotationChangeRequestListener headListener,
@@ -66,9 +71,15 @@ public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHea
             velocities = velocityCalculator.calculateRotationSpeed(headRotation, range, System.nanoTime(), -90, 0.3);
         } else {
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
+            notDetectedCounter++;
+            if (notDetectedCounter >= NOT_DETECTED_LIMIT) {
+                log.info("not detected counter reached its limit");
+                subStrategyListener.onStageFinished(TRACK_MARKER, RelativeDirection.BEHIND);
+            }
             return;
         }
 
+        notDetectedCounter = 0;
         velocities = WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, velocities);
         wheelsListener.onWheelsVelocitiesChanged(velocities);
     }
