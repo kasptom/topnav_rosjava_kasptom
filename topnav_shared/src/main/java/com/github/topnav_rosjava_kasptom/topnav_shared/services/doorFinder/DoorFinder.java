@@ -1,8 +1,8 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits;
+import com.github.topnav_rosjava_kasptom.topnav_shared.exceptions.PointNotFoundException;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
-import sun.plugin.dom.exception.InvalidStateException;
 import topnav_msgs.AngleRangesMsg;
 
 import java.util.ArrayList;
@@ -108,12 +108,6 @@ public class DoorFinder {
 
         public double getY() {
             return y;
-        }
-    }
-
-    public class PointNotFoundException extends InvalidStateException {
-        PointNotFoundException(String message) {
-            super(message);
         }
     }
 }

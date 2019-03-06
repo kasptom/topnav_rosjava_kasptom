@@ -5,6 +5,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.PdVelocityCalculator;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorUtils;
+import com.github.topnav_rosjava_kasptom.topnav_shared.exceptions.PointNotFoundException;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.DoorFinder;
@@ -25,60 +26,60 @@ public class DriveThroughAndLookForBackMarkers extends BaseSubStrategy {
 
     private final Log log;
     private boolean isBackMarkVisible = false;
-        private DoorFinder doorFinder = new DoorFinder();
-        private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
+    private DoorFinder doorFinder = new DoorFinder();
+    private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
 
-        public DriveThroughAndLookForBackMarkers(WheelsVelocitiesChangeListener wheelsListener,
-                                                 HeadRotationChangeRequestListener headListener,
-                                                 SubStrategyListener subStrategyListener,
-                                                 StrategyFinishedListener strategyFinishedListener,
-                                                 HashMap<String, GuidelineParam> guidelineParamsMap, Log log) {
-            super(wheelsListener, headListener, subStrategyListener, strategyFinishedListener, guidelineParamsMap);
-            this.log = log;
-        }
-
-        @Override
-        public void handleHoughAccMessage(HoughAcc houghAcc) {
-        }
-
-        @Override
-        public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-            if (isBackMarkVisible) {
-                return;
-            }
-
-            doorFinder.dividePointsToClusters(angleRangesMsg);
-            DoorFinder.Point midPoint = null;
-            try {
-                midPoint = doorFinder.getClustersMidPoint();
-            } catch (DoorFinder.PointNotFoundException pointNotFoundException) {
-                log.info("Could not find the mid point");
-            }
-
-            WheelsVelocities velocities = ZERO_VELOCITY;
-
-            if (midPoint != null) {
-                double range = Math.sqrt(Math.pow(midPoint.getX(), 2) + Math.pow(midPoint.getY(), 2));
-                double angleRads = range != 0
-                        ? Math.asin(midPoint.getX() / range)
-                        : 0.0;
-                double angleDegrees = angleRads / 180.0 * Math.PI;
-                velocities = velocityCalculator.calculateRotationSpeed(angleDegrees, LIDAR_MIN_RANGE, System.nanoTime(), 0.0, LIDAR_MIN_RANGE);
-            }
-
-            velocities = WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, velocities);
-
-            wheelsListener.onWheelsVelocitiesChanged(velocities);
-        }
-
-        @Override
-        public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
-            if (isBackMarkVisible) {
-                finishListener.onStrategyFinished(true);
-                return;
-            }
-
-            List<TopologyMsg> topologyMsgs = PassThroughDoorUtils.findBackDoorMarkers(feedbackMsg, guidelineParamsMap);
-            isBackMarkVisible = !topologyMsgs.isEmpty();
-        }
+    public DriveThroughAndLookForBackMarkers(WheelsVelocitiesChangeListener wheelsListener,
+                                             HeadRotationChangeRequestListener headListener,
+                                             SubStrategyListener subStrategyListener,
+                                             StrategyFinishedListener strategyFinishedListener,
+                                             HashMap<String, GuidelineParam> guidelineParamsMap, Log log) {
+        super(wheelsListener, headListener, subStrategyListener, strategyFinishedListener, guidelineParamsMap);
+        this.log = log;
     }
+
+    @Override
+    public void handleHoughAccMessage(HoughAcc houghAcc) {
+    }
+
+    @Override
+    public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
+        if (isBackMarkVisible) {
+            return;
+        }
+
+        doorFinder.dividePointsToClusters(angleRangesMsg);
+        DoorFinder.Point midPoint = null;
+        try {
+            midPoint = doorFinder.getClustersMidPoint();
+        } catch (PointNotFoundException pointNotFoundException) {
+            log.info("Could not find the mid point");
+        }
+
+        WheelsVelocities velocities = ZERO_VELOCITY;
+
+        if (midPoint != null) {
+            double range = Math.sqrt(Math.pow(midPoint.getX(), 2) + Math.pow(midPoint.getY(), 2));
+            double angleRads = range != 0
+                    ? Math.asin(midPoint.getX() / range)
+                    : 0.0;
+            double angleDegrees = angleRads / 180.0 * Math.PI;
+            velocities = velocityCalculator.calculateRotationSpeed(angleDegrees, LIDAR_MIN_RANGE, System.nanoTime(), 0.0, LIDAR_MIN_RANGE);
+        }
+
+        velocities = WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, velocities);
+
+        wheelsListener.onWheelsVelocitiesChanged(velocities);
+    }
+
+    @Override
+    public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
+        if (isBackMarkVisible) {
+            finishListener.onStrategyFinished(true);
+            return;
+        }
+
+        List<TopologyMsg> topologyMsgs = PassThroughDoorUtils.findBackDoorMarkers(feedbackMsg, guidelineParamsMap);
+        isBackMarkVisible = !topologyMsgs.isEmpty();
+    }
+}

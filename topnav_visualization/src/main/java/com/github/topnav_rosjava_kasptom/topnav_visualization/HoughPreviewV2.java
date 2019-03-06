@@ -1,5 +1,6 @@
 package com.github.topnav_rosjava_kasptom.topnav_visualization;
 
+import com.github.topnav_rosjava_kasptom.topnav_shared.exceptions.PointNotFoundException;
 import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.DoorFinder;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.AngleRangeUtils;
 import org.apache.commons.logging.Log;
@@ -31,7 +32,7 @@ public class HoughPreviewV2 implements IHoughPreview {
     private long lastTimeStamp;
     private Point2D midPoint;
 
-    public HoughPreviewV2(Log log) {
+    HoughPreviewV2(Log log) {
         this.log = log;
         this.lastTimeStamp = System.nanoTime();
         this.doorFinder = new DoorFinder();
@@ -76,7 +77,7 @@ public class HoughPreviewV2 implements IHoughPreview {
         try {
             midPoint = doorFinder.getClustersMidPoint();
             this.midPoint = AngleRangeUtils.pointToPixelPoint(midPoint);
-        } catch (DoorFinder.PointNotFoundException pointNotFoundException) {
+        } catch (PointNotFoundException pointNotFoundException) {
             log.debug("Could not find the mid point");
             this.midPoint = null;
         }
@@ -122,7 +123,7 @@ public class HoughPreviewV2 implements IHoughPreview {
 
         if (midPoint != null) {
             graphics.setColor(Color.yellow);
-            graphics.fillRect((int)midPoint.getX(), (int)midPoint.getY(), 5, 5);
+            graphics.fillRect((int) midPoint.getX(), (int) midPoint.getY(), 5, 5);
         }
 
         graphics.dispose();
