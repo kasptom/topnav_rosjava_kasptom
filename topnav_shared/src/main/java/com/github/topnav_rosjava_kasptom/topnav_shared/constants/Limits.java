@@ -3,7 +3,7 @@ package com.github.topnav_rosjava_kasptom.topnav_shared.constants;
 public class Limits {
     public static final int LIDAR_SAMPLES_COUNT = 61;
     public static double TOO_CLOSE_RANGE = 0.3;
-    public static double DOOR_DETECTION_RANGE = 0.75; // meters
+    public static double DOOR_DETECTION_RANGE = 1.0; // meters
 
     public static final double BASE_VELOCITY = 2.0;
     public static final double MAX_VELOCITY_DELTA = 2.0;
