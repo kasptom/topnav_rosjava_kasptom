@@ -2,6 +2,7 @@ package com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
+import sun.plugin.dom.exception.InvalidStateException;
 import topnav_msgs.AngleRangesMsg;
 
 import java.util.ArrayList;
@@ -41,8 +42,12 @@ public class DoorFinder {
         return algorithm.computeClusters(closeAngleRangesPoints);
     }
 
-    public Point getClustersMidPoint() {
-        return algorithm.getClustersMidPoint();
+    public Point getClustersMidPoint() throws PointNotFoundException {
+        Point point = algorithm.getClustersMidPoint();
+        if (point == null || point.getX() == Double.POSITIVE_INFINITY) {
+            throw new PointNotFoundException("could not found the mid point");
+        }
+        return point;
     }
 
     public static class Point {
@@ -103,6 +108,12 @@ public class DoorFinder {
 
         public double getY() {
             return y;
+        }
+    }
+
+    public class PointNotFoundException extends InvalidStateException {
+        PointNotFoundException(String message) {
+            super(message);
         }
     }
 }

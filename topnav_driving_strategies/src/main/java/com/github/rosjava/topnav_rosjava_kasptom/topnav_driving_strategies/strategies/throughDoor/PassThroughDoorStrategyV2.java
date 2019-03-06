@@ -2,6 +2,7 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.DriveThroughAndLookForBackMarkers;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
@@ -10,12 +11,12 @@ import org.apache.commons.logging.Log;
 
 import java.util.HashMap;
 
-import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.DETECT_MARKER;
-import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.TRACK_MARKER;
+import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.UNDEFINED;
 
 public class PassThroughDoorStrategyV2 extends BasePassThroughDoorStrategy implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener {
     private final IArUcoHeadTracker arUcoTracker;
+    private HashMap<ThroughDoorStage, IArUcoHeadTracker.TrackedMarkerListener> arUcoListeners;
 
     public PassThroughDoorStrategyV2(IArUcoHeadTracker arUcoTracker, Log log) {
         super(log);
@@ -24,9 +25,14 @@ public class PassThroughDoorStrategyV2 extends BasePassThroughDoorStrategy imple
 
     @Override
     void initializeSubStrategies() {
-        this.subStrategies = new HashMap<>();
-        this.subStrategies.put(DETECT_MARKER, new DetectMarkerSubStrategy(arUcoTracker, wheelsListener, headListener, this, strategyFinishedListener, log, guidelineParamsMap));
-        this.subStrategies.put(TRACK_MARKER, new TrackMarkerStrategy(wheelsListener, headListener, this, strategyFinishedListener, guidelineParamsMap, log));
+        subStrategies = new HashMap<>();
+        subStrategies.put(DETECT_MARKER, new DetectMarkerSubStrategy(arUcoTracker, wheelsListener, headListener, this, strategyFinishedListener, log, guidelineParamsMap));
+        subStrategies.put(TRACK_MARKER, new TrackMarkerSubStrategy(wheelsListener, headListener, this, strategyFinishedListener, guidelineParamsMap, log));
+        subStrategies.put(DRIVE_THROUGH_DOOR, new DriveThroughAndLookForBackMarkers(wheelsListener, headListener, this, strategyFinishedListener, guidelineParamsMap, log));
+
+        arUcoListeners = new HashMap<>();
+        arUcoListeners.put(DETECT_MARKER, (IArUcoHeadTracker.TrackedMarkerListener) subStrategies.get(DETECT_MARKER));
+        arUcoListeners.put(TRACK_MARKER, (IArUcoHeadTracker.TrackedMarkerListener) subStrategies.get(TRACK_MARKER));
     }
 
     @Override
@@ -52,7 +58,7 @@ public class PassThroughDoorStrategyV2 extends BasePassThroughDoorStrategy imple
         }
 
         if (getCurrentStage().equals(TRACK_MARKER)) {
-            ((TrackMarkerStrategy) this.subStrategies.get(getCurrentStage())).onTrackedMarkerUpdate(detection, headRotation);
+            ((TrackMarkerSubStrategy) this.subStrategies.get(getCurrentStage())).onTrackedMarkerUpdate(detection, headRotation);
         }
     }
 

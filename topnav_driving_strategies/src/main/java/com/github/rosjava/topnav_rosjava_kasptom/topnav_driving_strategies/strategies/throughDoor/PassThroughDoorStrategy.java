@@ -3,12 +3,12 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.BaseSubStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.DriveThroughAndLookForBackMarkers;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.RotateTheChassisSideTowardsDoorStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeAlignment;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
-import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.DoorFinder;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.DOOR_DETECTION_RANGE;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MAX_VELOCITY_DELTA;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
@@ -39,7 +37,7 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
         this.subStrategies.put(DETECT_MARKER, new RotateTheChassisSideTowardsDoorStrategy(wheelsListener, headListener, this, strategyFinishedListener, log, guidelineParamsMap));
         this.subStrategies.put(ALIGN_BETWEEN_DOOR, new AlignBetweenDoorMarkersStrategy(wheelsListener, guidelineParamsMap));
         this.subStrategies.put(ROTATE_FRONT_AGAINST_DOOR, new RotateTheChassisFrontTowardsDoorStrategy(wheelsListener, guidelineParamsMap));
-        this.subStrategies.put(DRIVE_THROUGH_DOOR, new DriveStrategy(wheelsListener, guidelineParamsMap));
+        this.subStrategies.put(DRIVE_THROUGH_DOOR, new DriveThroughAndLookForBackMarkers(wheelsListener, headListener, this, strategyFinishedListener, guidelineParamsMap, log));
     }
 
     @Override
@@ -139,53 +137,6 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
                     .stream()
                     .filter(topologyMsg -> topologyMsg.getIdentity().equals(rightMarkerId))
                     .collect(Collectors.toList());
-        }
-    }
-
-    class DriveStrategy extends BaseSubStrategy {
-
-        private boolean isBackMarkVisible = false;
-        private DoorFinder doorFinder = new DoorFinder();
-
-        DriveStrategy(WheelsVelocitiesChangeListener wheelsListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
-            super(wheelsListener, headListener, PassThroughDoorStrategy.this, strategyFinishedListener, guidelineParamsMap);
-        }
-
-        @Override
-        public void handleHoughAccMessage(HoughAcc houghAcc) {
-        }
-
-        @Override
-        public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-            if (isBackMarkVisible) {
-                return;
-            }
-
-            doorFinder.dividePointsToClusters(angleRangesMsg);
-            DoorFinder.Point midPoint = doorFinder.getClustersMidPoint();
-
-            if (midPoint == null) {
-                wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
-                return;
-            }
-
-            double MAX_VELOCITY = 2.0;
-
-            double leftVelocity = MAX_VELOCITY + MAX_VELOCITY_DELTA * (-midPoint.getX() / DOOR_DETECTION_RANGE);
-            double rightVelocity = MAX_VELOCITY + MAX_VELOCITY_DELTA * (midPoint.getX() / DOOR_DETECTION_RANGE);
-
-            wheelsListener.onWheelsVelocitiesChanged(new WheelsVelocities(leftVelocity, rightVelocity, leftVelocity, rightVelocity));
-        }
-
-        @Override
-        public void handleDetectionMessage(FeedbackMsg feedbackMsg) {
-            if (isBackMarkVisible) {
-                strategyFinishedListener.onStrategyFinished(true);
-                return;
-            }
-
-            List<TopologyMsg> topologyMsgs = PassThroughDoorUtils.findBackDoorMarkers(feedbackMsg, guidelineParamsMap);
-            isBackMarkVisible = !topologyMsgs.isEmpty();
         }
     }
 }

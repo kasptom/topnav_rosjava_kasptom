@@ -22,15 +22,15 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingS
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.BASE_ROBOT_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
-public class TrackMarkerStrategy extends BaseSubStrategy implements IArUcoHeadTracker.TrackedMarkerListener {
+public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHeadTracker.TrackedMarkerListener {
     private final Log log;
     private PdVelocityCalculator velocityCalculator;
 
-    TrackMarkerStrategy(WheelsVelocitiesChangeListener wheelsListener,
-                        HeadRotationChangeRequestListener headListener,
-                        SubStrategyListener subStrategyListener,
-                        StrategyFinishedListener finishListener,
-                        HashMap<String, GuidelineParam> guidelineParamsMap, Log log) {
+    TrackMarkerSubStrategy(WheelsVelocitiesChangeListener wheelsListener,
+                           HeadRotationChangeRequestListener headListener,
+                           SubStrategyListener subStrategyListener,
+                           StrategyFinishedListener finishListener,
+                           HashMap<String, GuidelineParam> guidelineParamsMap, Log log) {
         super(wheelsListener, headListener, subStrategyListener, finishListener, guidelineParamsMap);
         this.log = log;
         velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
