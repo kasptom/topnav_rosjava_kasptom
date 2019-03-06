@@ -2,10 +2,10 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 
-public class PdVelocityCalculator {
-    public static final double CASE_WIDTH = 0.2032;
-    public static final double WHEEL_WIDTH = 0.05;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.CASE_WIDTH;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.WHEEL_WIDTH;
 
+public class PdVelocityCalculator {
     private double prevTimestamp;
     private double prevAngle;
     private double prevRange;
@@ -17,7 +17,7 @@ public class PdVelocityCalculator {
     private double derivCoefDist;
     private final double axisLength;
 
-    public PdVelocityCalculator(double propCoefAngle, double propCoefDist, double derivCoefAngle, double derivCoefDist, double axisLength) {
+    private PdVelocityCalculator(double propCoefAngle, double propCoefDist, double derivCoefAngle, double derivCoefDist, double axisLength) {
         this.propCoefAngle = propCoefAngle;
         this.propCoefDist = propCoefDist;
         this.derivCoefAngle = derivCoefAngle;
@@ -33,14 +33,7 @@ public class PdVelocityCalculator {
         return new PdVelocityCalculator(0.5, 1.0, 1.0, 1.0, axisLength / 2.0);
     }
 
-    public void updateCoefficients(double propCoefAngle, double derivCoefAngle, double propCoefDist, double derivCoefDist) {
-        this.propCoefAngle = propCoefAngle;
-        this.derivCoefAngle = derivCoefAngle;
-        this.propCoefDist = propCoefDist;
-        this.derivCoefDist = derivCoefDist;
-    }
-
-    public WheelsVelocities calculateRotationSpeed(double angle, double range, long timestamp, double targetAngle, double targetRange) {
+    public WheelsVelocities calculateRotationSpeed(double angle, double range, long timestamp, double targetAngle, @SuppressWarnings("SameParameterValue") double targetRange) {
         double angularVelocityAngle = calculateRotationSpeedForAngle(angle, timestamp, targetAngle);
         double angularVelocityRange = calculateRotationSpeedForRange(range, timestamp, targetRange, angle, targetAngle);
 
@@ -55,6 +48,13 @@ public class PdVelocityCalculator {
         prevRange = range;
 
         return new WheelsVelocities(-halfLinearVelocity, halfLinearVelocity, -halfLinearVelocity, halfLinearVelocity);
+    }
+
+    void updateCoefficients(double propCoefAngle, double derivCoefAngle, double propCoefDist, double derivCoefDist) {
+        this.propCoefAngle = propCoefAngle;
+        this.derivCoefAngle = derivCoefAngle;
+        this.propCoefDist = propCoefDist;
+        this.derivCoefDist = derivCoefDist;
     }
 
     private double calculateRotationSpeedForRange(double range, long timestamp, double targetRange, double angle, double targetAngle) {

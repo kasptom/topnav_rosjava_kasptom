@@ -6,9 +6,9 @@ public interface IHeadController {
 
     void handleStrategyHeadRotationChange(RelativeDirection relativeDirection);
 
-    void handleNavigationHeadRotationChange(RelativeDirection relativeDirection);
+    void handleStrategyHeadLinearRotationChange(double rotationDegrees);
 
-    void publishHeadRotationChange(RelativeDirection relativeDirection);
+    void handleNavigationHeadRotationChange(RelativeDirection relativeDirection);
 
     void onStrategyStatusChange(String strategyName);
 }
