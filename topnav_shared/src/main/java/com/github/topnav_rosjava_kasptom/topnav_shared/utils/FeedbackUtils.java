@@ -17,7 +17,11 @@ public class FeedbackUtils {
     public static void fillInFeedbackMsg(FeedbackMsg feedbackMsg, MarkersMsg markersMsg, long timestamp) {
         List<MarkerDetection> detections = markersMsg.getMarkers()
                 .stream()
-                .map(markerMsg -> MarkerDetection.createDetection(Integer.toString(markerMsg.getId()), markerMsg.getCameraPosition()))
+                .map(markerMsg -> MarkerDetection
+                        .createDetection(Integer.toString(markerMsg.getId()),
+                                markerMsg.getCameraPosition(),
+                                markerMsg.getXCorners(),
+                                markerMsg.getYCorners()))
                 .collect(Collectors.toList());
 
         List<Topology> topologies = detections.stream()

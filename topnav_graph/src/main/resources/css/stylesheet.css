@@ -1,3 +1,7 @@
+node {
+    text-alignment: under;
+}
+
 node.marker {
     shape: box;
     fill-mode: image-scaled;
@@ -5,3 +9,17 @@ node.marker {
     fill-image: url('file:marker.png');
 }
 
+node.space {
+    shape: circle;
+    fill-color: green;
+}
+
+node.wall {
+    shape: box;
+    fill-color: blue;
+}
+
+node.gateNode {
+    shape: box;
+    fill-color: brown;
+}

@@ -1,6 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
@@ -23,6 +23,7 @@ import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.FollowWall.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.BASE_ROBOT_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class FollowWallStrategy implements IDrivingStrategy {
@@ -34,10 +35,9 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
     private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
     private int lineDetectionThreshold = 8;
-    private WheelsVelocities BASE_ROBOT_VELOCITY = new WheelsVelocities(4.0, 4.0, 4.0, 4.0);
 
     private boolean isObstacleTooClose;
-    private HeadRotationChangeListener headListener;
+    private HeadRotationChangeRequestListener headListener;
     private static final double RIGHT_WALL_ANGLE = -90;
     private static final double LEFT_WALL_ANGLE = 90;
     private double chosenWallAngle = LEFT_WALL_ANGLE;
@@ -50,7 +50,8 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
     @Override
     public void startStrategy() {
-        headListener.onRotationChanged(RelativeDirection.AT_LEFT);
+        RelativeDirection initialRelativeDirection = getInitialRelativeDirection(guidelineParamsMap);
+        headListener.onRotationChangeRequest(initialRelativeDirection);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     @Override
     public void handleHoughAccMessage(HoughAcc houghAcc) {
         if (isObstacleTooClose) {
-            log.info("obstacle is too close");
+            log.info("obstacle is too close"); // TODO move back
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             return;
         }
@@ -98,7 +99,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     }
 
     @Override
-    public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+    public void setHeadRotationChangeListener(HeadRotationChangeRequestListener listener) {
         headListener = listener;
     }
 
@@ -123,9 +124,19 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
         log.info(String.format("Tracking wall at angle: %.2f", chosenWallAngle));
 
-        headListener.onRotationChanged(chosenWallAngle == LEFT_WALL_ANGLE
+        headListener.onRotationChangeRequest(chosenWallAngle == LEFT_WALL_ANGLE
                 ? RelativeDirection.AT_LEFT
                 : RelativeDirection.AT_RIGHT);
+    }
+
+    private RelativeDirection getInitialRelativeDirection(HashMap<String, GuidelineParam> guidelineParamsMap) {
+        String alignment = null;
+        if (guidelineParamsMap.containsKey(KEY_TRACKED_WALL_ALIGNMENT)) {
+            alignment = guidelineParamsMap.get(KEY_TRACKED_WALL_ALIGNMENT).getValue();
+        }
+        return alignment != null && alignment.equalsIgnoreCase(VALUE_TRACKED_WALL_RIGHT)
+                ? RelativeDirection.AT_RIGHT
+                : RelativeDirection.AT_LEFT;
     }
 
     private WheelsVelocities computeVelocities(List<HoughCell> filteredHoughCells) {

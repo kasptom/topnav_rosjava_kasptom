@@ -1,6 +1,6 @@
 package com.github.topnav_rosjava_kasptom.topnav_graph;
 
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.BuildingDto;
+import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ public class App {
             return;
         }
 
-        BuildingDto buildingDto = parser.parse(args[0]);
+        RosonBuildingDto buildingDto = parser.parse(args[0]);
 
         WorkspaceGraph workspaceGraph = new WorkspaceGraph(buildingDto);
         workspaceGraph.showGraph();

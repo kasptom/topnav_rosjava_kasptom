@@ -1,6 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
@@ -30,7 +30,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     private int lineDetectionThreshold = 8;
 
     private boolean isObstacleTooClose;
-    private HeadRotationChangeListener headListener;
+    private HeadRotationChangeRequestListener headListener;
 
     public DriveAlongWallStrategy(Log log) {
         this.log = log;
@@ -38,7 +38,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     @Override
     public void startStrategy() {
-        headListener.onRotationChanged(RelativeDirection.AT_LEFT);
+        headListener.onRotationChangeRequest(RelativeDirection.AT_LEFT);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
     }
 
     @Override
-    public void setHeadRotationChangeListener(HeadRotationChangeListener listener) {
+    public void setHeadRotationChangeListener(HeadRotationChangeRequestListener listener) {
         headListener = listener;
     }
 
