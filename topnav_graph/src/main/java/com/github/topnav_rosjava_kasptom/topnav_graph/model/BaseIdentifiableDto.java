@@ -8,7 +8,4 @@ public class BaseIdentifiableDto {
 
     @Getter
     private String type;
-
-    @Getter
-    private String kind;
 }

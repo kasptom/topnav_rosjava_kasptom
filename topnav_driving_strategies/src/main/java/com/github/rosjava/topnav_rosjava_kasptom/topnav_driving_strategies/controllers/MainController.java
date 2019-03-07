@@ -7,8 +7,6 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strat
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategyV2;
-import com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
@@ -85,6 +83,7 @@ public class MainController implements IMainController {
     public void emergencyStop() {
         log.info("removing message handlers");
         tearDownDrivingStrategy();
+        tearDownArUcoListeners();
 
         log.info("stopping the robot");
         wheelsController.setVelocities(ZERO_VELOCITY);

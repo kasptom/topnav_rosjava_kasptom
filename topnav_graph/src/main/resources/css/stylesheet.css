@@ -9,12 +9,12 @@ node.marker {
     fill-image: url('file:marker.png');
 }
 
-node.spaceNode {
+node.space {
     shape: circle;
     fill-color: green;
 }
 
-node.wallNode {
+node.wall {
     shape: box;
     fill-color: blue;
 }
