@@ -1,6 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 
@@ -9,6 +10,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRoles.MARKER_ROLE_LEFT;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRoles.MARKER_ROLE_RIGHT;
 
 public class GuidelineUtils {
     public static void reloadParameters(List<String> guidelineParameters, HashMap<String, GuidelineParam> guidelineParamsMap) {

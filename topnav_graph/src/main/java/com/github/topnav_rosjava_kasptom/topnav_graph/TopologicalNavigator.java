@@ -4,14 +4,17 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.marker.MarkerDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.ResourceUtils;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.StyleConverter;
+import com.github.topnav_rosjava_kasptom.topnav_graph.utils.TopologicalNavigatorUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
 import org.graphstream.algorithm.networksimplex.DynamicOneToAllShortestPath;
+import org.graphstream.graph.Element;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import org.graphstream.graph.implementations.SingleGraph;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,40 +46,54 @@ class TopologicalNavigator {
     }
 
     List<Guideline> createGuidelines(String fromMarker, String toMarker) throws InvalidArUcoIdException {
-        String source = getMarkerNodeByArUcoId(fromMarker);
-        String destination = getMarkerNodeByArUcoId(toMarker);
+        Node source = getMarkerNodeByArUcoId(fromMarker);
+        Node destination = getMarkerNodeByArUcoId(toMarker).getNeighborNodeIterator().next();
 
-        algorithm.setSource(source);
+        algorithm.setSource(source.getId());
         algorithm.compute();
-        Path path = algorithm.getPath(graph.getNode(destination));
+        Path path = algorithm.getPath(destination);
 
         LinkedList<Guideline> guidelines = new LinkedList<>();
-        path.getNodeSet()
-                .forEach(node -> updateGuidelines(node.getId(), guidelines));
+        List<Node> pathNodes = new ArrayList<>(path.getNodeSet());
+        System.out.println(pathNodes.stream()
+                .map(Element::getId)
+                .reduce((pathStr, nodeId) -> String.format("%s -> %s", pathStr, nodeId))
+                .orElse("no path available"));
+
+        for (int i = 1; i < pathNodes.size(); i++) {
+            Node prevNode = pathNodes.get(i - 1);
+            Node node = pathNodes.get(i);
+
+            if (isGateEdgeWithMarkers(prevNode, node)) {
+                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(prevNode, node);
+                guidelines.add(guideline);
+            } else if (isWallEndingEdge(node)) {
+                Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline();
+                guidelines.add(guideline);
+            } else if (isMarkerEndingEdge(node)) {
+                Guideline guideline = TopologicalNavigatorUtils.createLookForMarkerGuideline(node);
+                guidelines.add(guideline);
+            }
+        }
         return guidelines;
     }
 
-    private void updateGuidelines(String nodeId, LinkedList<Guideline> guidelines) {
-
-        Node node = graph.getNode(nodeId);
-        String nodeType = node.getAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE);
-
-        System.out.printf("[%10s] %s\n", nodeId, nodeType);
-
-        if (hasMarkerNodeNeighbours(node)) {
-            //Guideline guideline =
-        }
+    private boolean isGateEdgeWithMarkers(Node prevNode, Node node) {
+        return prevNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_NODE_TYPE_GATE)
+                && node.getAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_NODE_TYPE_GATE)
+                && prevNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)
+                && node.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
 
-    private boolean hasMarkerNodeNeighbours(Node node) {
-        return node.getEdgeSet()
-                .stream()
-                .map(edge -> isMarkerNode(edge.getNode1()) || isMarkerNode(edge.getNode0()))
-                .reduce((areMarkerNeighbours, isMarkerNeighbour) -> areMarkerNeighbours || isMarkerNeighbour)
-                .orElse(false);
+    private boolean isWallEndingEdge(Node node) {
+        return node.getAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_NODE_TYPE_WALL);
     }
 
-    private String getMarkerNodeByArUcoId(String arUcoId) throws InvalidArUcoIdException {
+    private boolean isMarkerEndingEdge(Node node) {
+        return node.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+    }
+
+    private Node getMarkerNodeByArUcoId(String arUcoId) throws InvalidArUcoIdException {
         MarkerDto markerDto = buildingDto.getMarkers()
                 .stream()
                 .filter(marker -> marker.getAruco().getId().equals(arUcoId))
@@ -85,14 +102,6 @@ class TopologicalNavigator {
         if (markerDto == null)
             throw new InvalidArUcoIdException("ArUco with id %s does not exist in the building", arUcoId);
 
-        return markerDto.getId();
-    }
-
-    private boolean isMarkerNode(Node node) {
-        return node.getAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_NODE_TYPE_MARKER);
-    }
-
-    private boolean isSpaceNode(Node node) {
-        return node.getAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_NODE_TYPE_MARKER);
+        return graph.getNode(markerDto.getId());
     }
 }

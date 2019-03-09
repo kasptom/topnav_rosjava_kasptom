@@ -25,13 +25,17 @@ public class Guideline {
 
     @Override
     public String toString() {
-        return String.format("{ type: %s, parameters: %s }", guidelineType, parametersToString());
+        return String.format("{ type: %s,\n parameters: %s }", guidelineType, parametersToString());
     }
 
     private String parametersToString() {
-        return String.format("[%s]", parameters
-                .stream()
-                .map(GuidelineParam::toString)
-                .reduce((params, param) -> String.format("%s, %s", params, param)));
+        return parameters != null
+                ? String.format("[\n\t%s\n]",
+                parameters
+                        .stream()
+                        .map(GuidelineParam::toString)
+                        .reduce((params, param) -> String.format("%s,\n\t%s", params, param))
+                        .orElse("[]"))
+                : "null";
     }
 }

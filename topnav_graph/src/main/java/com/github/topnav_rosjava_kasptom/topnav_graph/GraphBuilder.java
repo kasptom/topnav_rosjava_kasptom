@@ -10,6 +10,8 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceN
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceWallRosonDto;
 import org.graphstream.graph.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.GraphStreamConstants.GS_UI_CLASS;
@@ -27,6 +29,7 @@ class GraphBuilder {
         addNodeNodeEdges(buildingDto, graph);
 
         replaceMarkerNodesWithMarkers(buildingDto, graph);
+        addMarkersMetadataToParentNodes(buildingDto, graph);
 
         addWallWallEdges(buildingDto, graph);
         addNodeSpaceEdges(buildingDto, graph);
@@ -53,9 +56,6 @@ class GraphBuilder {
         Node node = graph.addNode(markerDto.getId());
         node.addAttribute(GS_UI_LABEL, String.format("%s - %s", markerDto.getAruco().getId(), markerDto.getRole()));
         node.addAttribute(GS_UI_CLASS, markerDto.getType());
-
-        node.addAttribute(TOPNAV_ATTRIBUTE_KEY_ID, markerDto.getAruco().getId());
-        node.addAttribute(TOPNAV_ATTRIBUTE_KEY_ROLE, markerDto.getRole());
 
         node.addAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE, markerDto.getType());
     }
@@ -90,6 +90,20 @@ class GraphBuilder {
 
             graph.addEdge(directedEdgeName(marker.getId(), nodeToConnectDirectly.getId()), marker.getId(), nodeToConnectDirectly.getId(), true);
             graph.removeNode(markerNode);
+        });
+    }
+
+    private static void addMarkersMetadataToParentNodes(RosonBuildingDto buildingDto, Graph graph) {
+        List<MarkerDto> markersToAdd = buildingDto.getMarkers();
+        markersToAdd.forEach(marker -> {
+            Node markerNode = graph.getNode(marker.getId());
+            Node parentNode = markerNode.getNeighborNodeIterator().next();
+            if (!parentNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)) {
+                parentNode.addAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS, new ArrayList<MarkerDto>());
+            }
+
+            List<MarkerDto> markers = parentNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+            markers.add(marker);
         });
     }
 
