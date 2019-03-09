@@ -8,10 +8,7 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.Marker
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.NodeNodeRosonDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceNodeRosonDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceWallRosonDto;
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.EdgeRejectedException;
-import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
+import org.graphstream.graph.*;
 
 import java.util.List;
 
@@ -21,18 +18,16 @@ import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.RosonCons
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.*;
 
 class GraphBuilder {
-    private static int nextEdgeId = 1;
-
     static synchronized void buildGraph(RosonBuildingDto buildingDto, Graph graph) {
-        nextEdgeId = 1;
-
         buildingDto.getNodes().forEach(node -> addRosonNode(node, graph));
         buildingDto.getMarkers().forEach(markerDto -> addMarkers(markerDto, graph));
         buildingDto.getWalls().forEach(wall -> addWall(wall, graph));
         buildingDto.getSpaces().forEach(space -> addSpace(space, graph));
 
         addNodeNodeEdges(buildingDto, graph);
-        addMarkerNodeEdges(buildingDto, graph);
+
+        replaceMarkerNodesWithMarkers(buildingDto, graph);
+
         addWallWallEdges(buildingDto, graph);
         addNodeSpaceEdges(buildingDto, graph);
         addSpaceWallEdges(buildingDto, graph);
@@ -77,14 +72,43 @@ class GraphBuilder {
     private static void addNodeNodeEdges(RosonBuildingDto buildingDto, Graph graph) {
         List<NodeNodeRosonDto> nodeNodes = buildingDto.getNodeNodes();
         nodeNodes.forEach(nodeNode -> {
-            Edge edge = graph.addEdge(getNextEdgeId(), nodeNode.getNodeFromId(), nodeNode.getNodeToId(), true);
+            String fromId = nodeNode.getNodeFromId();
+            String toId = nodeNode.getNodeToId();
+            Edge edge = graph.addEdge(directedEdgeName(fromId, toId), fromId, toId, true);
             edge.addAttribute(TOPNAV_ATTRIBUTE_KEY_COST, 1.0);
         });
     }
 
-    private static void addMarkerNodeEdges(RosonBuildingDto buildingDto, Graph graph) {
-        List<MarkerNodeRosonDto> markerNodes = buildingDto.getMarkerNodes();
-        markerNodes.forEach(markerNode -> graph.addEdge(getNextEdgeId(), markerNode.getMarkerId(), markerNode.getNodeId()));
+    private static void replaceMarkerNodesWithMarkers(RosonBuildingDto buildingDto, Graph graph) {
+        List<MarkerNodeRosonDto> markerToNodes = buildingDto.getMarkerNodes();
+
+        markerToNodes.forEach(markerToNode -> {
+            Node markerNode = graph.getNode(markerToNode.getNodeId());
+            Node marker = graph.getNode(markerToNode.getMarkerId());
+
+            Node nodeToConnectDirectly = markerNode.getNeighborNodeIterator().next();
+
+            graph.addEdge(directedEdgeName(marker.getId(), nodeToConnectDirectly.getId()), marker.getId(), nodeToConnectDirectly.getId(), true);
+            graph.removeNode(markerNode);
+        });
+    }
+
+    private static String directedEdgeName(String fromNodeId, String toNodeId) {
+        return String.format("%s -> %s", fromNodeId, toNodeId);
+    }
+
+    private static String undirectedEdgeName(String nodeId, String otherNodeId) {
+        return nodeId.compareTo(otherNodeId) < 0
+                ? String.format("%s -- %s", nodeId, otherNodeId)
+                : String.format("%s -- %s", otherNodeId, nodeId);
+    }
+
+    private static Edge getDirectedEdge(Graph graph, String fromNodeId, String toNodeId) {
+        return graph.getEdge(directedEdgeName(fromNodeId, toNodeId));
+    }
+
+    private static Edge getUndirectedEdge(Graph graph, String nodeId, String otherNodeId) {
+        return graph.getEdge(undirectedEdgeName(nodeId, otherNodeId));
     }
 
     private static void addWallWallEdges(RosonBuildingDto buildingDto, Graph graph) {
@@ -95,8 +119,10 @@ class GraphBuilder {
 
             if (prevWall.getSpaceId().equals(currWall.getSpaceId())) {
                 try {
-                    graph.addEdge(getNextEdgeId(), prevWall.getWallId(), currWall.getWallId());
-                } catch (EdgeRejectedException ere) {
+                    String wallId = prevWall.getWallId();
+                    String otherWallId = currWall.getWallId();
+                    graph.addEdge(undirectedEdgeName(wallId, otherWallId), wallId, otherWallId);
+                } catch (EdgeRejectedException | IdAlreadyInUseException exc) {
                     System.out.printf("Edge %s %s already exists\n", prevWall.getWallId(), currWall.getWallId());
                 }
             }
@@ -105,15 +131,19 @@ class GraphBuilder {
 
     private static void addNodeSpaceEdges(RosonBuildingDto buildingDto, Graph graph) {
         List<SpaceNodeRosonDto> spaceNodes = buildingDto.getSpaceNodes();
-        spaceNodes.forEach(spaceNode -> graph.addEdge(getNextEdgeId(), spaceNode.getNodeId(), spaceNode.getSpaceId()));
+        spaceNodes.forEach(spaceNode -> {
+            String spaceId = spaceNode.getSpaceId();
+            String nodeId = spaceNode.getNodeId();
+            graph.addEdge(undirectedEdgeName(spaceId, nodeId), spaceId, nodeId);
+        });
     }
 
     private static void addSpaceWallEdges(RosonBuildingDto buildingDto, Graph graph) {
         List<SpaceWallRosonDto> spaceWalls = buildingDto.getSpaceWalls();
-        spaceWalls.forEach(spaceWall -> graph.addEdge(getNextEdgeId(), spaceWall.getWallId(), spaceWall.getSpaceId()));
-    }
-
-    private static String getNextEdgeId() {
-        return String.format("edge%d", ++nextEdgeId);
+        spaceWalls.forEach(spaceWall -> {
+            String spaceId = spaceWall.getSpaceId();
+            String wallId = spaceWall.getWallId();
+            graph.addEdge(undirectedEdgeName(spaceId, wallId), spaceId, wallId);
+        });
     }
 }
