@@ -46,6 +46,7 @@ class TopologicalNavigator {
     }
 
     List<Guideline> createGuidelines(String fromMarker, String toMarker) throws InvalidArUcoIdException {
+        // FIXME
         Node source = getMarkerNodeByArUcoId(fromMarker);
         Node destination = getMarkerNodeByArUcoId(toMarker).getNeighborNodeIterator().next();
 
