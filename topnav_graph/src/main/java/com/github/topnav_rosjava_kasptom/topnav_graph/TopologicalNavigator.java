@@ -1,5 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_graph;
 
+import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdException;
+import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.marker.MarkerDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.ResourceUtils;
@@ -30,7 +32,7 @@ class TopologicalNavigator {
     private static final String RENDERER_NAME = "org.graphstream.ui.j2dviewer.J2DGraphRenderer";
     private static final String CUSTOM_NODE_STYLE = "css/stylesheet.css";
 
-    TopologicalNavigator(RosonBuildingDto buildingDto) throws IOException {
+    TopologicalNavigator(RosonBuildingDto buildingDto) throws IOException, InvalidRosonNodeKindException {
         System.setProperty(RENDERER_KEY, RENDERER_NAME);
         graph = new SingleGraph("Building graph (roson)");
         graph.addAttribute(GS_UI_STYLESHEET, StyleConverter.convert(ResourceUtils.getFullPath(CUSTOM_NODE_STYLE)));

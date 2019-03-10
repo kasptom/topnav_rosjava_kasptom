@@ -1,14 +1,18 @@
 package com.github.topnav_rosjava_kasptom.topnav_graph;
 
 import com.github.topnav_rosjava_kasptom.topnav_graph.constants.RosonConstants;
+import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.BaseIdentifiableDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.NodeDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.PointDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.NodeNodeRosonDto;
+import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceGateRosonDto;
+import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceNodeRosonDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceWallRosonDto;
 import org.graphstream.graph.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,12 +24,18 @@ import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavCon
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.TOPNAV_ATTRIBUTE_KEY_NODE_TYPE;
 
 class GraphBuilder {
-    static synchronized void buildGraph(RosonBuildingDto buildingDto, Graph graph) {
+    static synchronized void buildGraph(RosonBuildingDto buildingDto, Graph graph) throws InvalidRosonNodeKindException {
         buildingDto.getNodes().forEach(node -> addRosonNode(node, graph));
         buildingDto.getWalls().forEach(wall -> addWall(wall, graph));
+        buildingDto.getGates().forEach(gate -> addWall(gate, graph));
 
         addNodeNodeEdges(buildingDto, graph);
-        addWallWallEdges(buildingDto, graph);
+
+        for (NodeDto node : buildingDto.getNodes()) {
+            if (node.getKind().equals(RosonConstants.NodeKind.SPACE_NODE)) {
+                addEdgesBetweenNeighbouringTopologies(getOrderedTopologyIdsForSpace(buildingDto, node), graph);
+            }
+        }
     }
 
     private static void addWall(BaseIdentifiableDto wall, Graph graph) {
@@ -48,6 +58,10 @@ class GraphBuilder {
             return;
         }
 
+        if (rosonNode.getKind().equals(RosonConstants.NodeKind.GATE_NODE)) {
+            return;
+        }
+
         Node node = graph.addNode(rosonNode.getId());
         node.addAttribute(GS_UI_LABEL, rosonNode.getId());
         node.addAttribute(GS_UI_CLASS, rosonNode.getType(), rosonNode.getKind());
@@ -65,9 +79,15 @@ class GraphBuilder {
                 .map(BaseIdentifiableDto::getId)
                 .collect(Collectors.toCollection(HashSet::new));
 
+        HashSet<String> gateNodeIds = buildingDto.getNodes()
+                .stream()
+                .filter(node -> node.getKind().equals(RosonConstants.NodeKind.GATE_NODE))
+                .map(BaseIdentifiableDto::getId)
+                .collect(Collectors.toCollection(HashSet::new));
+
         List<NodeNodeRosonDto> nodeNodes = buildingDto.getNodeNodes()
                 .stream()
-                .filter(nodeNode -> isNodeMarkerNodeEdge(markerNodeIds, nodeNode))
+                .filter(nodeNode -> !isEdgeWith(markerNodeIds, nodeNode) && !isEdgeWith(gateNodeIds, nodeNode))
                 .collect(Collectors.toList());
 
         nodeNodes
@@ -79,9 +99,9 @@ class GraphBuilder {
                 });
     }
 
-    private static boolean isNodeMarkerNodeEdge(HashSet<String> markerNodeIds, NodeNodeRosonDto nodeNode) {
-        return !markerNodeIds.contains(nodeNode.getNodeFromId())
-                && !markerNodeIds.contains(nodeNode.getNodeToId());
+    private static boolean isEdgeWith(HashSet<String> nodeIds, NodeNodeRosonDto nodeNode) {
+        return nodeIds.contains(nodeNode.getNodeFromId())
+                || nodeIds.contains(nodeNode.getNodeToId());
     }
 
     private static String directedEdgeName(String fromNodeId, String toNodeId) {
@@ -94,27 +114,82 @@ class GraphBuilder {
                 : String.format("%s -- %s", otherNodeId, nodeId);
     }
 
-    private static void addWallWallEdges(RosonBuildingDto buildingDto, Graph graph) {
-        List<SpaceWallRosonDto> spaceWalls = buildingDto.getSpaceWalls();
-
-        for (int i = 1; i < spaceWalls.size(); i++) {
-            SpaceWallRosonDto prevWall = spaceWalls.get(i - 1);
-            SpaceWallRosonDto currWall = spaceWalls.get(i);
-
-            if (prevWall.getSpaceId().equals(currWall.getSpaceId())) {
-                try {
-                    String wallId = prevWall.getWallId();
-                    String otherWallId = currWall.getWallId();
-                    graph.addEdge(undirectedEdgeName(wallId, otherWallId), wallId, otherWallId);
-                } catch (EdgeRejectedException | IdAlreadyInUseException exc) {
-                    System.out.printf("Edge %s %s already exists\n", prevWall.getWallId(), currWall.getWallId());
-                }
+    private static void addEdgesBetweenNeighbouringTopologies(List<String> sortedTopologies, Graph graph) {
+        for (int i = 1; i < sortedTopologies.size(); i++) {
+            String prevTopologyId = sortedTopologies.get(i - 1);
+            String topologyId = sortedTopologies.get(i);
+            try {
+                graph.addEdge(undirectedEdgeName(prevTopologyId, topologyId), prevTopologyId, topologyId);
+            } catch (EdgeRejectedException | IdAlreadyInUseException exc) {
+                System.out.printf("Edge %s %s already exists\n", prevTopologyId, topologyId);
             }
+        }
+
+        String prevTopologyId = sortedTopologies.get(sortedTopologies.size() - 1);
+        String topologyId = sortedTopologies.get(0);
+        try {
+            graph.addEdge(undirectedEdgeName(prevTopologyId, topologyId), prevTopologyId, topologyId);
+        } catch (EdgeRejectedException | IdAlreadyInUseException exc) {
+            System.out.printf("Edge %s %s already exists\n", prevTopologyId, topologyId);
         }
     }
 
     private static void positionNodeAt(Node node, double x, double y) {
         node.addAttribute("layout.frozen");
         node.addAttribute("xy", x, y);
+    }
+
+    /**
+     * @param buildingDto
+     * @param node
+     * @return
+     * @throws InvalidRosonNodeKindException
+     */
+    private static List<String> getOrderedTopologyIdsForSpace(RosonBuildingDto buildingDto, NodeDto node) throws InvalidRosonNodeKindException {
+        if (!node.getKind().equals(RosonConstants.NodeKind.SPACE_NODE)) {
+            throw new InvalidRosonNodeKindException(RosonConstants.NodeKind.SPACE_NODE, node.getKind());
+        }
+
+        String spaceId = getSpaceId(buildingDto, node);
+
+        HashSet<String> spaceWallIds = buildingDto.getSpaceWalls()
+                .stream()
+                .filter(spaceWall -> spaceWall.getSpaceId().equals(spaceId))
+                .map(SpaceWallRosonDto::getWallId)
+                .collect(Collectors.toCollection(HashSet::new));
+
+        HashSet<String> spaceGateIds = buildingDto.getSpaceGates()
+                .stream()
+                .filter(spaceGate -> spaceGate.getSpaceId().equals(spaceId))
+                .map(SpaceGateRosonDto::getGateId)
+                .collect(Collectors.toCollection(HashSet::new));
+
+        List<BaseIdentifiableDto> spaceTopologies = new ArrayList<>();
+
+        List<BaseIdentifiableDto> gates = buildingDto.getGates()
+                .stream()
+                .filter(gate -> spaceGateIds.contains(gate.getId()))
+                .collect(Collectors.toList());
+
+        List<BaseIdentifiableDto> walls = buildingDto.getWalls()
+                .stream()
+                .filter(wall -> spaceWallIds.contains(wall.getId()))
+                .collect(Collectors.toList());
+
+        spaceTopologies.addAll(gates);
+        spaceTopologies.addAll(walls);
+
+        spaceTopologies.sort(new TopologicalComparator(node));
+
+        return spaceTopologies.stream().map(BaseIdentifiableDto::getId).collect(Collectors.toList());
+    }
+
+    private static String getSpaceId(RosonBuildingDto buildingDto, NodeDto node) {
+        return buildingDto.getSpaceNodes()
+                .stream()
+                .filter(spaceNode -> spaceNode.getNodeId().equals(node.getId()))
+                .map(SpaceNodeRosonDto::getSpaceId)
+                .findFirst()
+                .orElse(null);
     }
 }

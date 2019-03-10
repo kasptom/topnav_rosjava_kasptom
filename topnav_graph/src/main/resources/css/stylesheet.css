@@ -19,7 +19,7 @@ node.wall {
     fill-color: blue;
 }
 
-node.gateNode {
+node.gate {
     shape: box;
     fill-mode: image-scaled;
     size: 10px, 20px;
