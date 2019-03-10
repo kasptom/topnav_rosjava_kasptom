@@ -4,19 +4,16 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.model.BaseIdentifiableDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.NodeDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.marker.MarkerDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.MarkerNodeRosonDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.NodeNodeRosonDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceNodeRosonDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceWallRosonDto;
+import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.*;
 import org.graphstream.graph.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.GraphStreamConstants.GS_UI_CLASS;
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.GraphStreamConstants.GS_UI_LABEL;
-import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.RosonConstants.ROSON_METADATA_TYPE;
+import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.RosonConstants.*;
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.*;
 
 class GraphBuilder {
@@ -25,15 +22,19 @@ class GraphBuilder {
         buildingDto.getMarkers().forEach(markerDto -> addMarkers(markerDto, graph));
         buildingDto.getWalls().forEach(wall -> addWall(wall, graph));
         buildingDto.getSpaces().forEach(space -> addSpace(space, graph));
+        buildingDto.getGates().forEach(gate -> addGate(gate, graph));
 
         addNodeNodeEdges(buildingDto, graph);
 
         replaceMarkerNodesWithMarkers(buildingDto, graph);
         addMarkersMetadataToParentNodes(buildingDto, graph);
 
-        addWallWallEdges(buildingDto, graph);
-        addNodeSpaceEdges(buildingDto, graph);
-        addSpaceWallEdges(buildingDto, graph);
+//        addNodeSpaceEdges(buildingDto, graph);
+
+        List<SpaceWallRosonDto> merged = addMergedSpaceWallAndSpaceGateEdges(buildingDto, graph);
+        addWallWallEdges(merged, graph);
+
+        addGateNodeEdges(buildingDto, graph);
     }
 
     private static void addSpace(NodeDto nodeDto, Graph graph) {
@@ -42,6 +43,10 @@ class GraphBuilder {
 
     private static void addWall(BaseIdentifiableDto baseIdentifiableDto, Graph graph) {
         addIdentifiable(baseIdentifiableDto.getId(), baseIdentifiableDto.getType(), graph);
+    }
+
+    private static void addGate(BaseIdentifiableDto gate, Graph graph) {
+        addIdentifiable(gate.getId(), gate.getType(), graph);
     }
 
     private static void addIdentifiable(String id, String type, Graph graph) {
@@ -90,6 +95,7 @@ class GraphBuilder {
 
             graph.addEdge(directedEdgeName(marker.getId(), nodeToConnectDirectly.getId()), marker.getId(), nodeToConnectDirectly.getId(), true);
             graph.removeNode(markerNode);
+            System.out.printf("removed node: %s\n", markerNode.getId());
         });
     }
 
@@ -125,11 +131,10 @@ class GraphBuilder {
         return graph.getEdge(undirectedEdgeName(nodeId, otherNodeId));
     }
 
-    private static void addWallWallEdges(RosonBuildingDto buildingDto, Graph graph) {
-        List<SpaceWallRosonDto> spaceWalls = buildingDto.getSpaceWalls();
-        for (int i = 1; i < spaceWalls.size(); i++) {
-            SpaceWallRosonDto prevWall = spaceWalls.get(i - 1);
-            SpaceWallRosonDto currWall = spaceWalls.get(i);
+    private static void addWallWallEdges(List<SpaceWallRosonDto> mergedWallsAndGates, Graph graph) {
+        for (int i = 1; i < mergedWallsAndGates.size(); i++) {
+            SpaceWallRosonDto prevWall = mergedWallsAndGates.get(i - 1);
+            SpaceWallRosonDto currWall = mergedWallsAndGates.get(i);
 
             if (prevWall.getSpaceId().equals(currWall.getSpaceId())) {
                 try {
@@ -152,12 +157,60 @@ class GraphBuilder {
         });
     }
 
-    private static void addSpaceWallEdges(RosonBuildingDto buildingDto, Graph graph) {
+    private static void addGateNodeEdges(RosonBuildingDto buildingDto, Graph graph) {
+        List<GateNodeRosonDto> gateNodes = buildingDto.getGateNodes();
+        gateNodes.forEach(gateNode -> {
+            String gateId = gateNode.getGateId();
+            String nodeId = gateNode.getNodeId();
+            graph.addEdge(undirectedEdgeName(gateId, nodeId), gateId, nodeId);
+        });
+    }
+
+    private static List<SpaceWallRosonDto> addMergedSpaceWallAndSpaceGateEdges(RosonBuildingDto buildingDto, Graph graph) {
         List<SpaceWallRosonDto> spaceWalls = buildingDto.getSpaceWalls();
+        List<SpaceGateRosonDto> spaceGates = buildingDto.getSpaceGates();
+
+        List<SpaceWallRosonDto> convertedGates = spaceGates.stream()
+                .map(spaceGate -> new SpaceWallRosonDto(spaceGate.getSpaceId(), spaceGate.getGateId(), spaceGate.getType()))
+                .collect(Collectors.toList());
+
+        convertedGates.forEach(gateAsWall -> {
+            int placementIndex = findGatePlacementIndex(gateAsWall.getSpaceId(), gateAsWall.getWallId(), spaceWalls);
+            placeGateBetweenFoundWalls(placementIndex, gateAsWall, spaceWalls);
+        });
+
+        // TODO possibly to remove
         spaceWalls.forEach(spaceWall -> {
             String spaceId = spaceWall.getSpaceId();
             String wallId = spaceWall.getWallId();
-            graph.addEdge(undirectedEdgeName(spaceId, wallId), spaceId, wallId);
+
+            graph.addEdge(directedEdgeName(wallId, spaceId), wallId, spaceId, true);
         });
+
+        return spaceWalls;
+    }
+
+    private static int findGatePlacementIndex(String spaceId, String wallId, List<SpaceWallRosonDto> spaceWalls) {
+        List<SpaceWallRosonDto> sameSpaceWalls = spaceWalls
+                .stream()
+                .filter(spaceWall -> spaceWall.getSpaceId().equals(spaceId))
+                .collect(Collectors.toList());
+
+        SpaceWallRosonDto wallWithGreaterId = sameSpaceWalls
+                .stream()
+                .filter(spaceWall -> spaceWall.getWallId().compareTo(wallId) > 0)
+                .findFirst()
+                .orElse(null);
+
+        SpaceWallRosonDto firstWallInSpace = sameSpaceWalls.get(0);
+        SpaceWallRosonDto lastWallInSpace = sameSpaceWalls.get(sameSpaceWalls.size() - 1);
+
+        return wallWithGreaterId == null
+                ? spaceWalls.indexOf(firstWallInSpace)
+                : spaceWalls.indexOf(wallWithGreaterId);
+    }
+
+    private static void placeGateBetweenFoundWalls(int placementIndex, SpaceWallRosonDto gateAsWall, List<SpaceWallRosonDto> merged) {
+        merged.add(placementIndex, gateAsWall);
     }
 }

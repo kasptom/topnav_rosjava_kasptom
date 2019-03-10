@@ -8,4 +8,7 @@ public class RosonConstants {
 
     public static final String ROSON_METADATA = "roson.metadata";
     public static final String ROSON_METADATA_TYPE = "roson.metadataType";
+
+    public static final String ROSON_RELATION_SPACE_GATE = "space-gate";
+    public static final String ROSON_RELATION_SPACE_WALL = "space-wall";
 }

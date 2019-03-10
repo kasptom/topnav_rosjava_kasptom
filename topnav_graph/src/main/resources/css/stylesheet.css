@@ -19,6 +19,13 @@ node.wall {
     fill-color: blue;
 }
 
+node.gate {
+    shape: box;
+    fill-mode: image-scaled;
+    size: 10px, 20px;
+    fill-image: url('file:gate.png');
+}
+
 node.gateNode {
     shape: box;
     fill-color: brown;
