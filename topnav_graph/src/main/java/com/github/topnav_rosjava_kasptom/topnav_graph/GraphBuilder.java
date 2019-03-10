@@ -29,7 +29,7 @@ class GraphBuilder {
         replaceMarkerNodesWithMarkers(buildingDto, graph);
         addMarkersMetadataToParentNodes(buildingDto, graph);
 
-//        addNodeSpaceEdges(buildingDto, graph);
+        addNodeSpaceEdges(buildingDto, graph);
 
         List<SpaceWallRosonDto> merged = addMergedSpaceWallAndSpaceGateEdges(buildingDto, graph);
         addWallWallEdges(merged, graph);
@@ -72,6 +72,8 @@ class GraphBuilder {
 
         node.addAttribute(ROSON_METADATA_TYPE, rosonNode.getType());
         node.addAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE, rosonNode.getKind());
+
+        positionNodeAt(node, rosonNode.getPosition().getX(), rosonNode.getPosition().getY());
     }
 
     private static void addNodeNodeEdges(RosonBuildingDto buildingDto, Graph graph) {
@@ -169,15 +171,15 @@ class GraphBuilder {
     private static List<SpaceWallRosonDto> addMergedSpaceWallAndSpaceGateEdges(RosonBuildingDto buildingDto, Graph graph) {
         List<SpaceWallRosonDto> spaceWalls = buildingDto.getSpaceWalls();
         List<SpaceGateRosonDto> spaceGates = buildingDto.getSpaceGates();
-
-        List<SpaceWallRosonDto> convertedGates = spaceGates.stream()
-                .map(spaceGate -> new SpaceWallRosonDto(spaceGate.getSpaceId(), spaceGate.getGateId(), spaceGate.getType()))
-                .collect(Collectors.toList());
-
-        convertedGates.forEach(gateAsWall -> {
-            int placementIndex = findGatePlacementIndex(gateAsWall.getSpaceId(), gateAsWall.getWallId(), spaceWalls);
-            placeGateBetweenFoundWalls(placementIndex, gateAsWall, spaceWalls);
-        });
+//FIXME
+//        List<SpaceWallRosonDto> convertedGates = spaceGates.stream()
+//                .map(spaceGate -> new SpaceWallRosonDto(spaceGate.getSpaceId(), spaceGate.getGateId(), spaceGate.getType()))
+//                .collect(Collectors.toList());
+//
+//        convertedGates.forEach(gateAsWall -> {
+//            int placementIndex = findGatePlacementIndex(gateAsWall.getSpaceId(), gateAsWall.getWallId(), spaceWalls);
+//            placeGateBetweenFoundWalls(placementIndex, gateAsWall, spaceWalls);
+//        });
 
         // TODO possibly to remove
         spaceWalls.forEach(spaceWall -> {
@@ -212,5 +214,10 @@ class GraphBuilder {
 
     private static void placeGateBetweenFoundWalls(int placementIndex, SpaceWallRosonDto gateAsWall, List<SpaceWallRosonDto> merged) {
         merged.add(placementIndex, gateAsWall);
+    }
+
+    private static void positionNodeAt(Node node, double x, double y) {
+        node.addAttribute("layout.frozen");
+        node.addAttribute("xy", x, y);
     }
 }

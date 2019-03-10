@@ -15,4 +15,9 @@ public class SpaceWallRosonDto extends BaseRosonRelationDto {
 
     @Getter
     private String wallId;
+
+    @Override
+    public String toString() {
+        return String.format("{%s -> %s, %s }", spaceId, wallId, type);
+    }
 }

@@ -8,4 +8,13 @@ public class BaseIdentifiableDto {
 
     @Getter
     private String type;
+
+    @Getter
+    private PointDto from;
+
+    @Getter
+    private PointDto to;
+
+    @Getter
+    private PointDto position;
 }
