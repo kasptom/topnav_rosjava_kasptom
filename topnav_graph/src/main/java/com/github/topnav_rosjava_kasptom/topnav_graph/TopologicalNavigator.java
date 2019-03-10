@@ -1,7 +1,10 @@
 package com.github.topnav_rosjava_kasptom.topnav_graph;
 
+import com.github.topnav_rosjava_kasptom.topnav_graph.constants.RosonConstants;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdException;
+import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeIdException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
+import com.github.topnav_rosjava_kasptom.topnav_graph.model.NodeDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.marker.MarkerDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.ResourceUtils;
@@ -32,7 +35,7 @@ class TopologicalNavigator {
     private static final String RENDERER_NAME = "org.graphstream.ui.j2dviewer.J2DGraphRenderer";
     private static final String CUSTOM_NODE_STYLE = "css/stylesheet.css";
 
-    TopologicalNavigator(RosonBuildingDto buildingDto) throws IOException, InvalidRosonNodeKindException {
+    TopologicalNavigator(RosonBuildingDto buildingDto) throws IOException, InvalidRosonNodeKindException, InvalidRosonNodeIdException {
         System.setProperty(RENDERER_KEY, RENDERER_NAME);
         graph = new SingleGraph("Building graph (roson)");
         graph.addAttribute(GS_UI_STYLESHEET, StyleConverter.convert(ResourceUtils.getFullPath(CUSTOM_NODE_STYLE)));
@@ -47,14 +50,11 @@ class TopologicalNavigator {
         graph.display();
     }
 
-    List<Guideline> createGuidelines(String fromMarker, String toMarker) throws InvalidArUcoIdException {
-        // FIXME
-        Node source = getMarkerNodeByArUcoId(fromMarker);
-        Node destination = getMarkerNodeByArUcoId(toMarker).getNeighborNodeIterator().next();
-
-        algorithm.setSource(source.getId());
+    List<Guideline> createGuidelines(String startArUcoId, String endArUcoId) throws InvalidArUcoIdException {
+        algorithm.setSource(getMarkerNodeByArUcoId(startArUcoId).getId());
         algorithm.compute();
-        Path path = algorithm.getPath(destination);
+
+        Path path = algorithm.getPath(getMarkerNodeByArUcoId(endArUcoId));
 
         LinkedList<Guideline> guidelines = new LinkedList<>();
         List<Node> pathNodes = new ArrayList<>(path.getNodeSet());
@@ -82,8 +82,8 @@ class TopologicalNavigator {
     }
 
     private boolean isGateEdgeWithMarkers(Node prevNode, Node node) {
-        return prevNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_NODE_TYPE_GATE)
-                && node.getAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_NODE_TYPE_GATE)
+        return prevNode.getAttribute(RosonConstants.ROSON_NODE_KIND).equals(RosonConstants.NodeKind.GATE_NODE)
+                && node.getAttribute(RosonConstants.ROSON_NODE_KIND).equals(RosonConstants.NodeKind.GATE_NODE)
                 && prevNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)
                 && node.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
@@ -105,6 +105,12 @@ class TopologicalNavigator {
         if (markerDto == null)
             throw new InvalidArUcoIdException("ArUco with id %s does not exist in the building", arUcoId);
 
-        return graph.getNode(markerDto.getId());
+        NodeDto markerNode = buildingDto.getNodes()
+                .stream()
+                .filter(node -> node.getId().equals(markerDto.getAttachedToNodeId()))
+                .findFirst()
+                .orElseThrow(() -> new InvalidArUcoIdException("ArUco with id %s does not exist in the building", arUcoId));
+
+        return graph.getNode(markerNode.getId());
     }
 }

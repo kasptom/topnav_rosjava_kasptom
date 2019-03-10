@@ -27,11 +27,10 @@ public class TopologicalComparator implements Comparator<BaseIdentifiableDto> {
                 : nodeCenter;
 
         double height = nodeCenter.getY() - spaceCenter.getY();
-        double width = nodeCenter.getX() - spaceCenter.getX() ;
+        double width = nodeCenter.getX() - spaceCenter.getX();
 
         if (width == 0) return Math.signum(height) * Math.PI / 2;
 
         return Math.atan2(height, width);
     }
 }
-

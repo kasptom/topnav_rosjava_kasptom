@@ -1,15 +1,14 @@
 package com.github.topnav_rosjava_kasptom.topnav_graph;
 
 import com.github.topnav_rosjava_kasptom.topnav_graph.constants.RosonConstants;
+import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeIdException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.BaseIdentifiableDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.NodeDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.PointDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.NodeNodeRosonDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceGateRosonDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceNodeRosonDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceWallRosonDto;
+import com.github.topnav_rosjava_kasptom.topnav_graph.model.marker.MarkerDto;
+import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.*;
 import org.graphstream.graph.*;
 
 import java.util.ArrayList;
@@ -20,16 +19,17 @@ import java.util.stream.Collectors;
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.GraphStreamConstants.GS_UI_CLASS;
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.GraphStreamConstants.GS_UI_LABEL;
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.RosonConstants.ROSON_NODE_KIND;
-import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.TOPNAV_ATTRIBUTE_KEY_COST;
-import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.TOPNAV_ATTRIBUTE_KEY_NODE_TYPE;
+import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.*;
 
 class GraphBuilder {
-    static synchronized void buildGraph(RosonBuildingDto buildingDto, Graph graph) throws InvalidRosonNodeKindException {
+    static synchronized void buildGraph(RosonBuildingDto buildingDto, Graph graph) throws InvalidRosonNodeKindException, InvalidRosonNodeIdException {
         buildingDto.getNodes().forEach(node -> addRosonNode(node, graph));
         buildingDto.getWalls().forEach(wall -> addWall(wall, graph));
         buildingDto.getGates().forEach(gate -> addWall(gate, graph));
 
+        addMarkers(buildingDto, graph);
         addNodeNodeEdges(buildingDto, graph);
+        addGateNodeEdges(buildingDto, graph);
 
         for (NodeDto node : buildingDto.getNodes()) {
             if (node.getKind().equals(RosonConstants.NodeKind.SPACE_NODE)) {
@@ -58,10 +58,6 @@ class GraphBuilder {
             return;
         }
 
-        if (rosonNode.getKind().equals(RosonConstants.NodeKind.GATE_NODE)) {
-            return;
-        }
-
         Node node = graph.addNode(rosonNode.getId());
         node.addAttribute(GS_UI_LABEL, rosonNode.getId());
         node.addAttribute(GS_UI_CLASS, rosonNode.getType(), rosonNode.getKind());
@@ -69,6 +65,9 @@ class GraphBuilder {
         node.addAttribute(ROSON_NODE_KIND, rosonNode.getKind());
         node.addAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE, rosonNode.getKind());
 
+        if (rosonNode.getKind().equals(RosonConstants.NodeKind.GATE_NODE)) {
+            return;
+        }
         positionNodeAt(node, rosonNode.getPosition().getX(), rosonNode.getPosition().getY());
     }
 
@@ -79,15 +78,9 @@ class GraphBuilder {
                 .map(BaseIdentifiableDto::getId)
                 .collect(Collectors.toCollection(HashSet::new));
 
-        HashSet<String> gateNodeIds = buildingDto.getNodes()
-                .stream()
-                .filter(node -> node.getKind().equals(RosonConstants.NodeKind.GATE_NODE))
-                .map(BaseIdentifiableDto::getId)
-                .collect(Collectors.toCollection(HashSet::new));
-
         List<NodeNodeRosonDto> nodeNodes = buildingDto.getNodeNodes()
                 .stream()
-                .filter(nodeNode -> !isEdgeWith(markerNodeIds, nodeNode) && !isEdgeWith(gateNodeIds, nodeNode))
+                .filter(nodeNode -> !isEdgeWith(markerNodeIds, nodeNode))
                 .collect(Collectors.toList());
 
         nodeNodes
@@ -97,6 +90,15 @@ class GraphBuilder {
                     Edge edge = graph.addEdge(directedEdgeName(fromId, toId), fromId, toId, true);
                     edge.addAttribute(TOPNAV_ATTRIBUTE_KEY_COST, 1.0);
                 });
+    }
+
+    private static void addGateNodeEdges(RosonBuildingDto buildingDto, Graph graph) {
+        List<GateNodeRosonDto> gateNodes = buildingDto.getGateNodes();
+        gateNodes.forEach(gateNode -> {
+            String gateId = gateNode.getGateId();
+            String nodeId = gateNode.getNodeId();
+            graph.addEdge(directedEdgeName(gateId, nodeId), gateId, nodeId, true);
+        });
     }
 
     private static boolean isEdgeWith(HashSet<String> nodeIds, NodeNodeRosonDto nodeNode) {
@@ -191,5 +193,52 @@ class GraphBuilder {
                 .map(SpaceNodeRosonDto::getSpaceId)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private static void addMarkers(RosonBuildingDto buildingDto, Graph graph) throws InvalidRosonNodeIdException {
+        List<MarkerDto> markers = buildingDto.getMarkers();
+
+        for (MarkerDto marker : markers) {
+            addMarkerToGraph(marker, graph);
+            attachMarkerToParentNode(marker, buildingDto, graph);
+        }
+    }
+
+    private static void addMarkerToGraph(MarkerDto marker, Graph graph) {
+        Node node = graph.addNode(marker.getAruco().getId());
+        node.addAttribute(GS_UI_LABEL, marker.getLabel());
+        node.addAttribute(GS_UI_CLASS, marker.getType());
+    }
+
+    private static void attachMarkerToParentNode(MarkerDto marker, RosonBuildingDto buildingDto, Graph graph) throws InvalidRosonNodeIdException {
+        MarkerNodeRosonDto markerNodeToAttach = buildingDto
+                .getMarkerNodes()
+                .stream()
+                .filter(markerNode -> markerNode.getMarkerId().equals(marker.getId()))
+                .findFirst()
+                .orElseThrow(() -> new InvalidRosonNodeIdException(marker.getId()));
+
+        NodeNodeRosonDto markerNodeToParentNode = buildingDto.getNodeNodes()
+                .stream()
+                .filter(nodeNode -> nodeNode.getNodeFromId().equals(markerNodeToAttach.getNodeId()))
+                .findFirst()
+                .orElseThrow(() -> new InvalidRosonNodeIdException(markerNodeToAttach.getNodeId()));
+
+        NodeDto parentNode = buildingDto.getNodes()
+                .stream()
+                .filter(node -> node.getId().equals(markerNodeToParentNode.getNodeToId()))
+                .findFirst()
+                .orElseThrow(() -> new InvalidRosonNodeIdException(markerNodeToParentNode.getNodeToId()));
+
+        Node parentGraphNode = graph.getNode(parentNode.getId());
+
+        if (!parentGraphNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)) {
+            parentGraphNode.addAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS, new ArrayList<MarkerDto>());
+        }
+
+        List<MarkerDto> parentNodeMarkers = parentGraphNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+        parentNodeMarkers.add(marker);
+
+        graph.addEdge(directedEdgeName(marker.getAruco().getId(), parentNode.getId()), marker.getAruco().getId(), parentNode.getId(), true);
     }
 }

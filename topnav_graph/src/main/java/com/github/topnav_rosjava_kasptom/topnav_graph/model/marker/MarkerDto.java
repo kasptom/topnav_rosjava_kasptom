@@ -12,4 +12,11 @@ public class MarkerDto extends BaseIdentifiableDto {
      */
     @Getter
     private String role;
+
+    @Getter
+    private String attachedToNodeId;
+
+    public String getLabel() {
+        return String.format("%s, %s", aruco.getId(), getRole());
+    }
 }

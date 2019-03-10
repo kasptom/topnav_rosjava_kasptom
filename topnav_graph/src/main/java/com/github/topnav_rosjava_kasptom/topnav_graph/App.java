@@ -1,6 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_graph;
 
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdException;
+import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeIdException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
@@ -12,7 +13,7 @@ import java.util.Scanner;
 
 public class App {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InvalidRosonNodeIdException {
         RosonParser parser = new RosonParser();
 
         if (args.length == 0) {
@@ -42,11 +43,9 @@ public class App {
 
             List<Guideline> guidelines = navigator.createGuidelines(firstMarkerId, secondMarkerId);
             guidelines.forEach(guideline -> System.out.println(guideline.toString() + "\n"));
-        } catch (InvalidArUcoIdException e) {
-            System.out.println(e.getMessage());
         } catch (InputMismatchException e) {
             System.out.println("Invalid ArUco ids");
-        } catch (InvalidRosonNodeKindException e) {
+        } catch (InvalidRosonNodeKindException | InvalidArUcoIdException e) {
             e.printStackTrace();
         }
     }
