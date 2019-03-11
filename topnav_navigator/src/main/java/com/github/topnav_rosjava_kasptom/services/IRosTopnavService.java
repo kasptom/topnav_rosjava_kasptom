@@ -15,5 +15,5 @@ public interface IRosTopnavService {
 
     void changeCameraDirection(RelativeDirection relativeDirection);
 
-    void setOnFeedbackChangeListener(OnFeedbackChangeListener listener);
+    void addOnFeedbackChangeListener(OnFeedbackChangeListener listener);
 }

@@ -52,7 +52,7 @@ public class FeedbackPresenter implements IFeedbackPresenter {
 
     @Override
     public void onInit() {
-        this.service.setOnFeedbackChangeListener(this::onFeedbackReceived);
+        this.service.addOnFeedbackChangeListener(this::onFeedbackReceived);
     }
 
     @Override
