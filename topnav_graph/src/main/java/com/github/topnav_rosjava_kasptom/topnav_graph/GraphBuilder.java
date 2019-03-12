@@ -138,7 +138,7 @@ class GraphBuilder {
 
     private static void positionNodeAt(Node node, double x, double y) {
         node.addAttribute("layout.frozen");
-        node.addAttribute("xy", x, y);
+        node.addAttribute("xy", x, -y);
     }
 
     /**
