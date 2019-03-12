@@ -5,7 +5,12 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <GridPane fx:controller="com.github.topnav_rosjava_kasptom.components.topnav_navigator.view.GuidelineView"
-          xmlns:fx="http://javafx.com/fxml" alignment="top_left" hgap="10" vgap="10">
+          xmlns:fx="http://javafx.com/fxml"
+          alignment="top_left"
+          prefWidth="480"
+          prefHeight="360"
+          hgap="10"
+          vgap="10">
     <padding>
         <Insets top="25" right="25" bottom="10" left="25"/>
     </padding>
@@ -14,17 +19,24 @@
           alignment="CENTER"
           GridPane.columnIndex="1"
           GridPane.rowIndex="1">
-        <Button text="Look ahead"
+        <Button minWidth="90"
+                textAlignment="CENTER"
+                text="Look ahead"
                 onAction="#onLookAhead"/>
     </HBox>
 
     <HBox spacing="10"
           GridPane.columnIndex="1"
-          GridPane.rowIndex="2">
-        <Button text="Look left"
+          GridPane.rowIndex="2"
+          alignment="CENTER">
+        <Button minWidth="90"
+                textAlignment="CENTER"
+                text="Look left"
                 onAction="#onLookLeft"/>
 
-        <Button text="Look right"
+        <Button minWidth="90"
+                textAlignment="CENTER"
+                text="Look right"
                 onAction="#onLookRight"/>
     </HBox>
 
@@ -32,7 +44,9 @@
           alignment="CENTER"
           GridPane.columnIndex="1"
           GridPane.rowIndex="3">
-        <Button text="Look back"
+        <Button minWidth="90"
+                textAlignment="CENTER"
+                text="Look back"
                 onAction="#onLookBack"/>
     </HBox>
 
@@ -63,15 +77,18 @@
 
     <HBox spacing="10" alignment="bottom_center"
           GridPane.columnIndex="1" GridPane.rowIndex="5">
-        <Label text="Add parameters">
+        <Label
+                textFill="white"
+                text="Add parameters">
         </Label>
     </HBox>
 
-    <VBox GridPane.columnIndex="1" GridPane.rowIndex="7"
+    <VBox GridPane.columnIndex="1"
+          GridPane.rowIndex="7"
           fx:id="strategyParamsContainer">
     </VBox>
 
-    <HBox spacing="10" alignment="bottom_center"
+    <HBox spacing="10" alignment="BOTTOM_CENTER"
           GridPane.columnIndex="1" GridPane.rowIndex="8">
         <Button text="Start strategy"
                 fx:id="buttonStartStrategy"

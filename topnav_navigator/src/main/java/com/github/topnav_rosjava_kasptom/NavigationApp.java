@@ -18,7 +18,7 @@ public class NavigationApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("views/view_container.fxml"));
         Parent root = loader.load();
-        Scene scene = new Scene(root, 640, 480);
+        Scene scene = new Scene(root, 720, 640);
 
         initPresenters(loader);
 
