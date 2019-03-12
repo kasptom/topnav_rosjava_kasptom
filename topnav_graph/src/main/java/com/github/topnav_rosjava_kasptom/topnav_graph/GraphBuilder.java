@@ -198,6 +198,11 @@ class GraphBuilder {
     private static void addMarkers(RosonBuildingDto buildingDto, Graph graph) throws InvalidRosonNodeIdException {
         List<MarkerDto> markers = buildingDto.getMarkers();
 
+        if (markers == null) {
+            System.out.println("Roson file has no markers(!)");
+            return;
+        }
+
         for (MarkerDto marker : markers) {
             addMarkerToGraph(marker, graph);
             attachMarkerToParentNode(marker, buildingDto, graph);
