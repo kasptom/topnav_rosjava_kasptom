@@ -11,8 +11,12 @@ import java.util.stream.Collectors;
 
 public class RosonParser {
     public RosonBuildingDto parse(String rosonFilePath) throws FileNotFoundException {
-        Gson gson = new Gson();
         String fullPath = Objects.requireNonNull(RosonParser.class.getClassLoader().getResource(rosonFilePath)).getPath();
+        return parseFullPathFile(fullPath);
+    }
+
+    public RosonBuildingDto parseFullPathFile(String fullPath) throws FileNotFoundException {
+        Gson gson = new Gson();
         FileReader reader = new FileReader(fullPath);
         BufferedReader bufferedReader = new BufferedReader(reader);
         String json = bufferedReader.lines().collect(Collectors.joining());

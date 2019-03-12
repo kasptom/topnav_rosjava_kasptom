@@ -17,6 +17,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.view.Viewer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.List;
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.GraphStreamConstants.GS_UI_STYLESHEET;
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.*;
 
-class TopologicalNavigator {
+public class TopologicalNavigator {
     private final DynamicOneToAllShortestPath algorithm;
     private Graph graph;
     private RosonBuildingDto buildingDto;
@@ -35,7 +36,7 @@ class TopologicalNavigator {
     private static final String RENDERER_NAME = "org.graphstream.ui.j2dviewer.J2DGraphRenderer";
     private static final String CUSTOM_NODE_STYLE = "css/stylesheet.css";
 
-    TopologicalNavigator(RosonBuildingDto buildingDto) throws IOException, InvalidRosonNodeKindException, InvalidRosonNodeIdException {
+    public TopologicalNavigator(RosonBuildingDto buildingDto) throws IOException, InvalidRosonNodeKindException, InvalidRosonNodeIdException {
         System.setProperty(RENDERER_KEY, RENDERER_NAME);
         graph = new SingleGraph("Building graph (roson)");
         graph.addAttribute(GS_UI_STYLESHEET, StyleConverter.convert(ResourceUtils.getFullPath(CUSTOM_NODE_STYLE)));
@@ -46,8 +47,8 @@ class TopologicalNavigator {
         algorithm.init(graph);
     }
 
-    void showGraph() {
-        graph.display();
+    public void showGraph() {
+        graph.display().setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
     }
 
     List<Guideline> createGuidelines(String startArUcoId, String endArUcoId) throws InvalidArUcoIdException {

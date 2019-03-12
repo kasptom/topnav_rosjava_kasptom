@@ -40,18 +40,28 @@
         </HBox>
     </VBox>
 
-    <HBox GridPane.columnIndex="3"
+    <VBox GridPane.columnIndex="3"
           GridPane.rowIndex="1"
           spacing="10">
-        <VBox spacing="10">
-            <Label textAlignment="CENTER"
-                   textFill="white">Current guideline
-            </Label>
-            <Button>Show graph</Button>
-        </VBox>
-        <TextArea fx:id="txtAreaCurrentGuideline"
-                  prefWidth="330"
-                  maxHeight="80">
-        </TextArea>
-    </HBox>
+        <HBox spacing="10">
+            <VBox>
+                <Label textAlignment="CENTER"
+                       textFill="white">Current guideline
+                </Label>
+                <Button fx:id="btnShowGraph"
+                        onAction="#onShowGraphClicked">Show graph
+                </Button>
+            </VBox>
+            <TextArea fx:id="txtAreaCurrentGuideline"
+                      prefWidth="330"
+                      prefHeight="70">
+            </TextArea>
+        </HBox>
+        <HBox spacing="35">
+            <Button onAction="#onLoadRosonClicked">Load roson</Button>
+            <TextField fx:id="txtAreaRosonFilePath"
+                       prefWidth="330">no *.roson file selected
+            </TextField>
+        </HBox>
+    </VBox>
 </GridPane>
