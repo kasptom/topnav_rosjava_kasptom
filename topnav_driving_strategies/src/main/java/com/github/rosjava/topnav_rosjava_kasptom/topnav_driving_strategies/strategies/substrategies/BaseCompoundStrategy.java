@@ -1,11 +1,12 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.SubStrategyListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.SubStrategyListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.BlockedMessageHandler;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.ThroughDoorStage;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
@@ -19,20 +20,21 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, SubStrategyListener {
+public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrategyListener {
+    public boolean isHeadRotationInProgress;
+    public HashMap<String, GuidelineParam> guidelineParamsMap;
+    public HashMap<ThroughDoorStage, IDrivingStrategy> subStrategies;
+    public WheelsVelocitiesChangeListener wheelsListener;
+    public HeadRotationChangeRequestListener headListener;
+    public StrategyFinishedListener strategyFinishedListener;
+
     protected final Log log;
-    boolean isHeadRotationInProgress;
-    HashMap<String, GuidelineParam> guidelineParamsMap;
-    HashMap<ThroughDoorStage, IDrivingStrategy> subStrategies;
+
     private List<ThroughDoorStage> subStrategiesOrdered;
-
     private ThroughDoorStage currentStage;
-    HeadRotationChangeRequestListener headListener;
-    WheelsVelocitiesChangeListener wheelsListener;
-    StrategyFinishedListener strategyFinishedListener;
 
 
-    BasePassThroughDoorStrategy(Log log) {
+    public BaseCompoundStrategy(Log log) {
         this.log = log;
         guidelineParamsMap = new HashMap<>();
         initializeSubStrategies();
@@ -112,11 +114,11 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
         isHeadRotationInProgress = isInProgress;
     }
 
-    abstract void initializeSubStrategies();
+    public abstract void initializeSubStrategies();
 
-    abstract ThroughDoorStage[] getSubStrategiesExecutionOrder();
+    public abstract ThroughDoorStage[] getSubStrategiesExecutionOrder();
 
-    void switchToInitialStage(@SuppressWarnings("SameParameterValue") RelativeDirection direction) {
+    protected void switchToInitialStage(@SuppressWarnings("SameParameterValue") RelativeDirection direction) {
         currentStage = subStrategiesOrdered.get(0);
 
         if (direction != RelativeDirection.UNDEFINED) {
@@ -127,7 +129,7 @@ public abstract class BasePassThroughDoorStrategy implements IDrivingStrategy, S
         subStrategies.get(currentStage).startStrategy();
     }
 
-    ThroughDoorStage getCurrentStage() {
+    protected ThroughDoorStage getCurrentStage() {
         return currentStage;
     }
 

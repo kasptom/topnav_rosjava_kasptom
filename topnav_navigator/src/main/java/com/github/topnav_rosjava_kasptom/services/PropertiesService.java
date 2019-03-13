@@ -1,7 +1,5 @@
 package com.github.topnav_rosjava_kasptom.services;
 
-import sun.plugin.dom.exception.InvalidStateException;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Objects;
@@ -25,7 +23,7 @@ public class PropertiesService implements IPropertiesService {
 
     public static IPropertiesService getInstance() {
         if (instance == null) {
-            throw new InvalidStateException("Call getInstance with the file path first");
+            throw new RuntimeException("Call getInstance with the file path first");
         }
         return instance;
     }

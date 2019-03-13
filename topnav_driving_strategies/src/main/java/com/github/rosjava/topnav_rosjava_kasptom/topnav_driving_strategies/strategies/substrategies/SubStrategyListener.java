@@ -1,5 +1,6 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.ThroughDoorStage;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 
 public interface SubStrategyListener {

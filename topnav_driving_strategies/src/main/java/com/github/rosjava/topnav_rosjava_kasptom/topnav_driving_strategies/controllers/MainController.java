@@ -7,6 +7,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strat
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategyV2;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.towardsMarker.DriveTowardsMarkerStrategy;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
@@ -73,6 +74,7 @@ public class MainController implements IMainController {
         drivingStrategies.put(DRIVING_STRATEGY_STOP_BEFORE_WALL, new StopBeforeWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR, new PassThroughDoorStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, new PassThroughDoorStrategyV2(arUcoHeadTracker, log));
+        drivingStrategies.put(DRIVING_STRATEGY_TOWARDS_MARKER, new DriveTowardsMarkerStrategy(arUcoHeadTracker, log));
         drivingStrategies.put(DRIVING_STRATEGY_TRACK_ARUCOS, new AruCoTrackerTestStrategy(arUcoHeadTracker));
         drivingStrategies.values().forEach(strategy -> strategy.setWheelsVelocitiesListener(wheelsController::setVelocities));
 

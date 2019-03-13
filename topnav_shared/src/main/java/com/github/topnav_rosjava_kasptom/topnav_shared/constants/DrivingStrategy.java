@@ -12,7 +12,7 @@ public class DrivingStrategy {
     public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR = "DS_PASS_THROUGH_DOOR";
     public static final String DRIVING_STRATEGY_TRACK_ARUCOS = "DS_TEST_TRACK_ARUCOS";
     public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR_2 = "DS_PASS_THROUGH_DOOR_2";
-    public static final String DRIVING_STRATEGY_LOOK_FOR_MARKER = "DS_LOOK_FOR_MARKER";     // TODO handle it
+    public static final String DRIVING_STRATEGY_TOWARDS_MARKER = "DS_TOWARDS_MARKER";
     public static final HashSet<String> DRIVING_STRATEGIES = new HashSet<>(Arrays.asList(
             DRIVING_STRATEGY_IDLE,
             DRIVING_STRATEGY_ALONG_WALL,
@@ -20,6 +20,7 @@ public class DrivingStrategy {
             DRIVING_STRATEGY_STOP_BEFORE_WALL,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR_2,
+            DRIVING_STRATEGY_TOWARDS_MARKER,
             DRIVING_STRATEGY_TRACK_ARUCOS));
 
     public class ThroughDoor {
