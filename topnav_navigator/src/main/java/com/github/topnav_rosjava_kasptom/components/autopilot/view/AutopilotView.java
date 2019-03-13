@@ -1,5 +1,6 @@
 package com.github.topnav_rosjava_kasptom.components.autopilot.view;
 
+import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 import com.github.topnav_rosjava_kasptom.components.autopilot.presenter.AutopilotPresenter;
 import com.github.topnav_rosjava_kasptom.components.autopilot.presenter.IAutopilotPresenter;
 import javafx.fxml.FXML;
@@ -59,5 +60,10 @@ public class AutopilotView implements IAutopilotView, Initializable {
     @FXML
     public void onShowGraphClicked() {
         presenter.showGraph();
+    }
+
+    @Override
+    public IBasePresenter getPresenter() {
+        return presenter;
     }
 }

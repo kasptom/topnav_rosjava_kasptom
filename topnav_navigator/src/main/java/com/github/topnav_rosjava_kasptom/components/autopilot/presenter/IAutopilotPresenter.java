@@ -1,8 +1,8 @@
 package com.github.topnav_rosjava_kasptom.components.autopilot.presenter;
 
-import java.io.FileNotFoundException;
+import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 
-public interface IAutopilotPresenter {
+public interface IAutopilotPresenter extends IBasePresenter {
     void initializePresenter();
 
     void play();

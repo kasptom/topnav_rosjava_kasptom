@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 public class NavigationApp extends Application {
     private IBasePresenter guidelinePresenter;
     private IBasePresenter feedbackPresenter;
+    private IBasePresenter autopilotPresenter;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -37,6 +38,7 @@ public class NavigationApp extends Application {
     public void stop() throws Exception {
         this.guidelinePresenter.onDestroy();
         this.feedbackPresenter.onDestroy();
+        this.autopilotPresenter.onDestroy();
         super.stop();
     }
 
@@ -47,5 +49,8 @@ public class NavigationApp extends Application {
 
         feedbackPresenter = ((IContainerView) loader.getController()).getFeedbackView().getPresenter();
         feedbackPresenter.onInit();
+
+        autopilotPresenter = ((IContainerView) loader.getController()).getAutopilotView().getPresenter();
+        autopilotPresenter.onInit();
     }
 }

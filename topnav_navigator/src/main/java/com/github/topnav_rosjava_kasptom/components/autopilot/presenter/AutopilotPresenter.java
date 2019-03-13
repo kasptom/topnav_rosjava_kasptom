@@ -73,6 +73,7 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnFeedbackChange
         loadRosonFile(fullFilePath);
     }
 
+    // FeedbackChangeListener
     @Override
     public void onFeedbackChange(Feedback feedback) {
 
@@ -105,5 +106,15 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnFeedbackChange
             autopilotView.setShowGraphButtonEnabled(false);
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onInit() {
+
+    }
+
+    @Override
+    public void onDestroy() {
+
     }
 }

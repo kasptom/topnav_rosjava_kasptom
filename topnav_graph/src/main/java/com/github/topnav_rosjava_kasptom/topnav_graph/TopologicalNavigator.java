@@ -51,7 +51,7 @@ public class TopologicalNavigator {
         graph.display().setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
     }
 
-    List<Guideline> createGuidelines(String startArUcoId, String endArUcoId) throws InvalidArUcoIdException {
+    public List<Guideline> createGuidelines(String startArUcoId, String endArUcoId) throws InvalidArUcoIdException {
         algorithm.setSource(getMarkerNodeByArUcoId(startArUcoId).getId());
         algorithm.compute();
 
