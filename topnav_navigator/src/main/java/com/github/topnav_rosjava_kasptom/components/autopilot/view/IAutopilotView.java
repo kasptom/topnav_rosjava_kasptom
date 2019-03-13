@@ -6,4 +6,10 @@ public interface IAutopilotView extends IBaseView {
     void setShowGraphButtonEnabled(boolean isEnabled);
 
     void setDisplayedRosonPath(String rosonPath);
+
+    void setDisplayedGuideline(String guideline);
+
+    String getStartMarkerId();
+
+    String getEndMarkerId();
 }

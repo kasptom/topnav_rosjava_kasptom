@@ -34,7 +34,7 @@
                     fx:id="txtFieldEndMarker"/>
         </HBox>
         <HBox spacing="10">
-            <Button>Play</Button>
+            <Button onMouseClicked="#play">Play</Button>
             <Button>Pause</Button>
             <Button>Stop</Button>
         </HBox>

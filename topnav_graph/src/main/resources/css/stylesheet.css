@@ -9,7 +9,7 @@ node.marker {
     fill-image: url('file:marker.png');
 }
 
-node.space {
+node.spaceNode {
     shape: circle;
     fill-color: green;
 }

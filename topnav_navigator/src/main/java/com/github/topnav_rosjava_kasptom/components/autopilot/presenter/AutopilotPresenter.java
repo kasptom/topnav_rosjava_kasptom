@@ -4,15 +4,18 @@ import com.github.topnav_rosjava_kasptom.components.autopilot.view.IAutopilotVie
 import com.github.topnav_rosjava_kasptom.services.*;
 import com.github.topnav_rosjava_kasptom.topnav_graph.RosonParser;
 import com.github.topnav_rosjava_kasptom.topnav_graph.TopologicalNavigator;
+import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeIdException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.PropertyKeys;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.Feedback;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
 import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class AutopilotPresenter implements IAutopilotPresenter, OnFeedbackChangeListener {
     private final IRosTopnavService rosService;
@@ -39,8 +42,15 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnFeedbackChange
     }
 
     @Override
-    public void play() {
+    public void play() throws InvalidArUcoIdException {
+        String startMarkerId = autopilotView.getStartMarkerId();
+        String endMarkerId = autopilotView.getEndMarkerId();
+        List<Guideline> guidelines = navigator.createGuidelines(startMarkerId, endMarkerId);
+        guidelines.forEach(guideline -> System.out.println(guideline.toString()));
 
+        Guideline currentGuideline = guidelines.get(0);
+        rosService.startStrategy(currentGuideline.getGuidelineType(), currentGuideline.getParameters());
+        autopilotView.setDisplayedGuideline(currentGuideline.toString());
     }
 
     @Override

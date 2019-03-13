@@ -3,6 +3,7 @@ package com.github.topnav_rosjava_kasptom.components.autopilot.view;
 import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 import com.github.topnav_rosjava_kasptom.components.autopilot.presenter.AutopilotPresenter;
 import com.github.topnav_rosjava_kasptom.components.autopilot.presenter.IAutopilotPresenter;
+import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdException;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -51,6 +52,27 @@ public class AutopilotView implements IAutopilotView, Initializable {
         txtAreaRosonFilePath.setText(rosonPath);
     }
 
+    @Override
+    public void setDisplayedGuideline(String guideline) {
+        txtAreaCurrentGuideline.setText(guideline);
+    }
+
+    @Override
+    public String getStartMarkerId() {
+        return txtFieldStartMarker.getText();
+    }
+
+    @Override
+    public String getEndMarkerId() {
+        return txtFieldEndMarker.getText();
+    }
+
+    @Override
+    public IBasePresenter getPresenter() {
+        return presenter;
+    }
+
+
     // FXML
     @FXML
     public void onLoadRosonClicked() {
@@ -62,8 +84,8 @@ public class AutopilotView implements IAutopilotView, Initializable {
         presenter.showGraph();
     }
 
-    @Override
-    public IBasePresenter getPresenter() {
-        return presenter;
+    @FXML
+    public void play() throws InvalidArUcoIdException {
+        presenter.play();
     }
 }
