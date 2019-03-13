@@ -48,4 +48,10 @@ public class GuidelineUtils {
         doorMarkersOrdered.add(guidelineParams.get(DrivingStrategy.ThroughDoor.KEY_BACK_RIGHT_MARKER_ID).getValue());
         return doorMarkersOrdered;
     }
+
+    public static LinkedHashSet<String> approachedMarkerIdAsSet(HashMap<String, GuidelineParam> guidelineParams) {
+        LinkedHashSet<String> approachedMarkerSet = new LinkedHashSet<>(1);
+        approachedMarkerSet.add(guidelineParams.get(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID).getValue());
+        return approachedMarkerSet;
+    }
 }

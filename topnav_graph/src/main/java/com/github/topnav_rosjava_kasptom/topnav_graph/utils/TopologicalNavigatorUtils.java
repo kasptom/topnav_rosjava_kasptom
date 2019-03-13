@@ -53,6 +53,6 @@ public class TopologicalNavigatorUtils {
                 .stream()
                 .map(marker -> new GuidelineParam(getParameterName(marker.getRole(), false), marker.getAruco().getId(), "String"))
                 .collect(Collectors.toList());
-        return new Guideline(DrivingStrategy.DRIVING_STRATEGY_TOWARDS_MARKER, params);
+        return new Guideline(DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER, params);
     }
 }

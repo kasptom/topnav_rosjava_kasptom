@@ -1,10 +1,12 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.approachMarker;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.PdVelocityCalculator;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.BaseSubStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.SubStrategyListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
@@ -16,31 +18,25 @@ import topnav_msgs.HoughAcc;
 
 import java.util.HashMap;
 
-import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.CompoundStrategyStage.TRACK_MARKER;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID;
+import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.CompoundStrategyStage.APPROACH_MARKER;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.NOT_DETECTED_LIMIT;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.BASE_ROBOT_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
-public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHeadTracker.TrackedMarkerListener {
+public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoHeadTracker.TrackedMarkerListener {
+
     private final Log log;
-    private PdVelocityCalculator velocityCalculator;
+    private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
     private int notDetectedCounter = 0;
 
-    public TrackMarkerSubStrategy(WheelsVelocitiesChangeListener wheelsListener,
-                           HeadRotationChangeRequestListener headListener,
-                           SubStrategyListener subStrategyListener,
-                           StrategyFinishedListener finishListener,
-                           HashMap<String, GuidelineParam> guidelineParamsMap, Log log) {
+    ApproachArUcoSubStrategy(WheelsVelocitiesChangeListener wheelsListener,
+                             HeadRotationChangeRequestListener headListener,
+                             SubStrategyListener subStrategyListener,
+                             StrategyFinishedListener finishListener,
+                             HashMap<String, GuidelineParam> guidelineParamsMap, Log log) {
         super(wheelsListener, headListener, subStrategyListener, finishListener, guidelineParamsMap);
         this.log = log;
-        velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
-    }
-
-    @Override
-    public void startStrategy() {
-        super.startStrategy();
     }
 
     @Override
@@ -62,16 +58,14 @@ public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHea
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
         double range = Math.sqrt(Math.pow(detection.getCameraPosition()[0], 2) + Math.pow(detection.getCameraPosition()[2], 2));
         WheelsVelocities velocities;
-        if (isDoorMarker(detection, KEY_FRONT_LEFT_MARKER_ID)) {
-            velocities = velocityCalculator.calculateRotationSpeed(headRotation, range, System.nanoTime(), 90, 0.3);
-        } else if (isDoorMarker(detection, KEY_FRONT_RIGHT_MARKER_ID)) {
-            velocities = velocityCalculator.calculateRotationSpeed(headRotation, range, System.nanoTime(), -90, 0.3);
+        if (isTrackedMarker(detection)) {
+            velocities = velocityCalculator.calculateRotationSpeed(headRotation, range, System.nanoTime(), 0, 0.4);
         } else {
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             notDetectedCounter++;
             if (notDetectedCounter >= NOT_DETECTED_LIMIT) {
                 log.info("not detected counter reached its limit");
-                subStrategyListener.onStageFinished(TRACK_MARKER, RelativeDirection.BEHIND);
+                subStrategyListener.onStageFinished(APPROACH_MARKER, RelativeDirection.AHEAD);
             }
             return;
         }
@@ -81,7 +75,7 @@ public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHea
         wheelsListener.onWheelsVelocitiesChanged(velocities);
     }
 
-    private boolean isDoorMarker(MarkerDetection detection, String doorMarkerParamKey) {
-        return detection.getId().equalsIgnoreCase(guidelineParamsMap.get(doorMarkerParamKey).getValue());
+    private boolean isTrackedMarker(MarkerDetection detection) {
+        return detection.getId().equalsIgnoreCase(guidelineParamsMap.get(KEY_APPROACHED_MARKER_ID).getValue());
     }
 }

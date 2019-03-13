@@ -4,9 +4,6 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.BaseSubStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.SubStrategyListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.ThroughDoorStage;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
@@ -58,7 +55,7 @@ public class DetectMarkerSubStrategy extends BaseSubStrategy implements IArUcoHe
         if (detection.getId().equals(MarkerDetection.EMPTY_DETECTION_ID)) {
             finishListener.onStrategyFinished(false);
         } else {
-            subStrategyListener.onStageFinished(ThroughDoorStage.DETECT_MARKER, RelativeDirection.UNDEFINED);
+            subStrategyListener.onStageFinished(CompoundStrategyStage.DETECT_MARKER, RelativeDirection.UNDEFINED);
         }
     }
 }

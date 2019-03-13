@@ -12,7 +12,7 @@ public class DrivingStrategy {
     public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR = "DS_PASS_THROUGH_DOOR";
     public static final String DRIVING_STRATEGY_TRACK_ARUCOS = "DS_TEST_TRACK_ARUCOS";
     public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR_2 = "DS_PASS_THROUGH_DOOR_2";
-    public static final String DRIVING_STRATEGY_TOWARDS_MARKER = "DS_TOWARDS_MARKER";
+    public static final String DRIVING_STRATEGY_APPROACH_MARKER = "DS_APPROACH_MARKER";
     public static final HashSet<String> DRIVING_STRATEGIES = new HashSet<>(Arrays.asList(
             DRIVING_STRATEGY_IDLE,
             DRIVING_STRATEGY_ALONG_WALL,
@@ -20,7 +20,7 @@ public class DrivingStrategy {
             DRIVING_STRATEGY_STOP_BEFORE_WALL,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR_2,
-            DRIVING_STRATEGY_TOWARDS_MARKER,
+            DRIVING_STRATEGY_APPROACH_MARKER,
             DRIVING_STRATEGY_TRACK_ARUCOS));
 
     public class ThroughDoor {
@@ -32,13 +32,18 @@ public class DrivingStrategy {
 
     public class FollowWall {
         public static final String KEY_TRACKED_WALL_ALIGNMENT = "DS_PARAM_TRACKED_WALL_ALIGNMENT";
-        public static final String VALUE_TRACKED_WALL_LEFT =  "LEFT";
-        public static final String VALUE_TRACKED_WALL_RIGHT =  "RIGHT";
+        public static final String VALUE_TRACKED_WALL_LEFT = "LEFT";
+        public static final String VALUE_TRACKED_WALL_RIGHT = "RIGHT";
+    }
+
+    public class ApproachMarker {
+        public static final String KEY_APPROACHED_MARKER_ID = "DS_PARAM_APPROACHED_MARKER_ID";
     }
 
     public static final List<String> PARAM_NAMES = Arrays.asList(ThroughDoor.KEY_FRONT_LEFT_MARKER_ID,
             ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID,
             ThroughDoor.KEY_BACK_LEFT_MARKER_ID,
             ThroughDoor.KEY_BACK_RIGHT_MARKER_ID,
-            FollowWall.KEY_TRACKED_WALL_ALIGNMENT);
+            FollowWall.KEY_TRACKED_WALL_ALIGNMENT,
+            ApproachMarker.KEY_APPROACHED_MARKER_ID);
 }

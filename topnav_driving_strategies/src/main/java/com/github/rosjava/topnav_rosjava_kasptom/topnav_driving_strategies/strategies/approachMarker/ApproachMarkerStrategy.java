@@ -1,8 +1,9 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.approachMarker;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.*;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.BaseCompoundStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.CompoundStrategyStage;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.DetectMarkerSubStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
@@ -13,10 +14,11 @@ import java.util.HashMap;
 import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.CompoundStrategyStage.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.UNDEFINED;
 
-public class PassThroughDoorStrategyV2 extends BaseCompoundStrategy implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener {
+public class ApproachMarkerStrategy extends BaseCompoundStrategy implements IArUcoHeadTracker.TrackedMarkerListener {
+
     private final IArUcoHeadTracker arUcoTracker;
 
-    public PassThroughDoorStrategyV2(IArUcoHeadTracker arUcoTracker, Log log) {
+    public ApproachMarkerStrategy(IArUcoHeadTracker arUcoTracker, Log log) {
         super(log);
         this.arUcoTracker = arUcoTracker;
     }
@@ -25,19 +27,18 @@ public class PassThroughDoorStrategyV2 extends BaseCompoundStrategy implements I
     public void initializeSubStrategies() {
         subStrategies = new HashMap<>();
         subStrategies.put(DETECT_MARKER, new DetectMarkerSubStrategy(arUcoTracker, wheelsListener, headListener, this, strategyFinishedListener, log, guidelineParamsMap));
-        subStrategies.put(TRACK_MARKER, new TrackMarkerSubStrategy(wheelsListener, headListener, this, strategyFinishedListener, guidelineParamsMap, log));
-        subStrategies.put(DRIVE_THROUGH_DOOR, new DriveThroughAndLookForBackMarkers(wheelsListener, headListener, this, strategyFinishedListener, guidelineParamsMap, log));
+        subStrategies.put(APPROACH_MARKER, new ApproachArUcoSubStrategy(wheelsListener, headListener, this, strategyFinishedListener, guidelineParamsMap, log));
     }
 
     @Override
     public CompoundStrategyStage[] getSubStrategiesExecutionOrder() {
-        return new CompoundStrategyStage[]{DETECT_MARKER, TRACK_MARKER, DRIVE_THROUGH_DOOR};
+        return new CompoundStrategyStage[]{DETECT_MARKER, APPROACH_MARKER};
     }
 
     @Override
     public void startStrategy() {
         initializeSubStrategies();
-        arUcoTracker.setTrackedMarkers(GuidelineUtils.asOrderedDoorMarkerIds(guidelineParamsMap));
+        arUcoTracker.setTrackedMarkers(GuidelineUtils.approachedMarkerIdAsSet(guidelineParamsMap));
         switchToInitialStage(UNDEFINED);
     }
 
@@ -50,9 +51,8 @@ public class PassThroughDoorStrategyV2 extends BaseCompoundStrategy implements I
         if (getCurrentStage().equals(DETECT_MARKER)) {
             ((DetectMarkerSubStrategy) this.subStrategies.get(getCurrentStage())).onTrackedMarkerUpdate(detection, headRotation);
         }
-
-        if (getCurrentStage().equals(TRACK_MARKER)) {
-            ((TrackMarkerSubStrategy) this.subStrategies.get(getCurrentStage())).onTrackedMarkerUpdate(detection, headRotation);
+        if (getCurrentStage().equals(APPROACH_MARKER)) {
+            ((ApproachArUcoSubStrategy) this.subStrategies.get(getCurrentStage())).onTrackedMarkerUpdate(detection, headRotation);
         }
     }
 

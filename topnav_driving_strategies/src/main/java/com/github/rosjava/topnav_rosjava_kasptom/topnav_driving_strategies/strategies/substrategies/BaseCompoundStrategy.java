@@ -4,9 +4,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.SubStrategyListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.BlockedMessageHandler;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.ThroughDoorStage;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
@@ -23,15 +21,15 @@ import java.util.List;
 public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrategyListener {
     public boolean isHeadRotationInProgress;
     public HashMap<String, GuidelineParam> guidelineParamsMap;
-    public HashMap<ThroughDoorStage, IDrivingStrategy> subStrategies;
+    public HashMap<CompoundStrategyStage, IDrivingStrategy> subStrategies;
     public WheelsVelocitiesChangeListener wheelsListener;
     public HeadRotationChangeRequestListener headListener;
     public StrategyFinishedListener strategyFinishedListener;
 
     protected final Log log;
 
-    private List<ThroughDoorStage> subStrategiesOrdered;
-    private ThroughDoorStage currentStage;
+    private List<CompoundStrategyStage> subStrategiesOrdered;
+    private CompoundStrategyStage currentStage;
 
 
     public BaseCompoundStrategy(Log log) {
@@ -105,7 +103,7 @@ public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrat
     }
 
     @Override
-    public void onStageFinished(ThroughDoorStage finishedStage, RelativeDirection direction) {
+    public void onStageFinished(CompoundStrategyStage finishedStage, RelativeDirection direction) {
         switchToNextStageFrom(finishedStage, direction);
     }
 
@@ -116,7 +114,7 @@ public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrat
 
     public abstract void initializeSubStrategies();
 
-    public abstract ThroughDoorStage[] getSubStrategiesExecutionOrder();
+    public abstract CompoundStrategyStage[] getSubStrategiesExecutionOrder();
 
     protected void switchToInitialStage(@SuppressWarnings("SameParameterValue") RelativeDirection direction) {
         currentStage = subStrategiesOrdered.get(0);
@@ -129,11 +127,11 @@ public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrat
         subStrategies.get(currentStage).startStrategy();
     }
 
-    protected ThroughDoorStage getCurrentStage() {
+    protected CompoundStrategyStage getCurrentStage() {
         return currentStage;
     }
 
-    private void switchToNextStageFrom(ThroughDoorStage finishedStage, RelativeDirection direction) {
+    private void switchToNextStageFrom(CompoundStrategyStage finishedStage, RelativeDirection direction) {
         log.info(String.format("Switching to the next stage from %s", finishedStage));
 
         int finishedIdx = subStrategiesOrdered.indexOf(finishedStage);

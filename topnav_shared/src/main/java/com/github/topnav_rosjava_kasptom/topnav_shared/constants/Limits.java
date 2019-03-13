@@ -16,4 +16,6 @@ public class Limits {
 
     public static final double CASE_WIDTH = 0.2032;
     public static final double WHEEL_WIDTH = 0.05;
+
+    public static final int NOT_DETECTED_LIMIT = 50;   // allowed number of messages with the "-1" ArUco detections in a row
 }
