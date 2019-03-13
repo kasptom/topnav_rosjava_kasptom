@@ -49,7 +49,7 @@ class GraphBuilder {
 
     private static Node addIdentifiable(String id, String type, Graph graph) {
         Node node = graph.addNode(id);
-        node.addAttribute(GS_UI_LABEL, id);
+        node.addAttribute(GS_UI_LABEL, shortLabelFromId(id));
         node.addAttribute(GS_UI_CLASS, type);
 
         node.addAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE, type);
@@ -62,7 +62,7 @@ class GraphBuilder {
         }
 
         Node node = graph.addNode(rosonNode.getId());
-        node.addAttribute(GS_UI_LABEL, rosonNode.getId());
+        node.addAttribute(GS_UI_LABEL, shortLabelFromId(rosonNode.getId()));
         node.addAttribute(GS_UI_CLASS, rosonNode.getType(), rosonNode.getKind());
 
         node.addAttribute(ROSON_NODE_KIND, rosonNode.getKind());
@@ -72,6 +72,15 @@ class GraphBuilder {
             return;
         }
         positionNodeAt(node, rosonNode.getPosition().getX(), rosonNode.getPosition().getY());
+    }
+
+    /**
+     * Leaves only the capital letters and digits from the id
+     * @param longIdName long version of the label
+     * @return the shortened id
+     */
+    private static String shortLabelFromId(String longIdName) {
+        return longIdName.replaceAll("[a-z]", "");
     }
 
     private static void addNodeNodeEdges(RosonBuildingDto buildingDto, Graph graph) {
@@ -148,7 +157,7 @@ class GraphBuilder {
             wallsFromSpace.forEach(wallFromSpace -> {
                 String wallNodeId = wallFromSpace.getWallId() + wallFromSpace.getSpaceId();
                 Node wallNode = graph.addNode(wallNodeId);
-                wallNode.addAttribute(GS_UI_LABEL, wallNodeId);
+                wallNode.addAttribute(GS_UI_LABEL, shortLabelFromId(wallNodeId));
                 graph.addEdge(directedEdgeName(wallNodeId, spaceNodeId), wallNodeId, spaceNodeId, true);
                 graph.addEdge(directedEdgeName(wallFromSpace.getWallId(), wallNodeId), wallFromSpace.getWallId(), wallNodeId, true);
             });
@@ -266,7 +275,7 @@ class GraphBuilder {
 
     private static void addMarkerToGraph(MarkerDto marker, Graph graph) {
         Node node = graph.addNode(marker.getAruco().getId());
-        node.addAttribute(GS_UI_LABEL, marker.getLabel());
+        node.addAttribute(GS_UI_LABEL, shortLabelFromId(marker.getLabel()));
         node.addAttribute(GS_UI_CLASS, marker.getType());
     }
 
