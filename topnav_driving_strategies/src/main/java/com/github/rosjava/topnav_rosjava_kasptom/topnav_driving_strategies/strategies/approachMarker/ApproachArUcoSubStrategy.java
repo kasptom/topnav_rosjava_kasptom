@@ -30,7 +30,7 @@ public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoH
     private final Log log;
     private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
     private int notDetectedCounter = 0;
-    private static final double TARGET_APPROACH_RANGE_METERS = 0.3;
+    private static final double TARGET_APPROACH_RANGE_METERS = 0.5;
 
     ApproachArUcoSubStrategy(WheelsVelocitiesChangeListener wheelsListener,
                              HeadRotationChangeRequestListener headListener,
@@ -69,6 +69,7 @@ public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoH
                 log.info(String.format("Target approach range reached: %.2f (%.2f)", range, TARGET_APPROACH_RANGE_METERS));
                 wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
                 subStrategyListener.onStageFinished(APPROACH_MARKER, RelativeDirection.AHEAD);
+                return;
             }
         } else {
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
