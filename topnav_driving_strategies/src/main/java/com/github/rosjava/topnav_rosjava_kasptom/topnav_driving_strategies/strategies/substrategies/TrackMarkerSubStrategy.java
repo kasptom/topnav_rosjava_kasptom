@@ -9,6 +9,7 @@ import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
@@ -60,7 +61,7 @@ public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHea
 
     @Override
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
-        double range = Math.sqrt(Math.pow(detection.getCameraPosition()[0], 2) + Math.pow(detection.getCameraPosition()[2], 2));
+        double range = ArucoMarkerUtils.distanceTo(detection);
         WheelsVelocities velocities;
         if (isDoorMarker(detection, KEY_FRONT_LEFT_MARKER_ID)) {
             velocities = velocityCalculator.calculateRotationSpeed(headRotation, range, System.nanoTime(), 90, 0.3);

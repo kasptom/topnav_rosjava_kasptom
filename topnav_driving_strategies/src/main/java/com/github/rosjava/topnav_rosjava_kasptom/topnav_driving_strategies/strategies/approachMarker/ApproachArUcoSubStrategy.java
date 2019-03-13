@@ -11,6 +11,7 @@ import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import org.apache.commons.logging.Log;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
@@ -29,6 +30,7 @@ public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoH
     private final Log log;
     private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
     private int notDetectedCounter = 0;
+    private static final double TARGET_APPROACH_RANGE_METERS = 0.3;
 
     ApproachArUcoSubStrategy(WheelsVelocitiesChangeListener wheelsListener,
                              HeadRotationChangeRequestListener headListener,
@@ -56,16 +58,24 @@ public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoH
 
     @Override
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
-        double range = Math.sqrt(Math.pow(detection.getCameraPosition()[0], 2) + Math.pow(detection.getCameraPosition()[2], 2));
         WheelsVelocities velocities;
         if (isTrackedMarker(detection)) {
-            velocities = velocityCalculator.calculateRotationSpeed(headRotation, range, System.nanoTime(), 0, 0.4);
+            double range = ArucoMarkerUtils.distanceTo(detection);
+            velocities = velocityCalculator.calculateRotationSpeed(headRotation, range, System.nanoTime(), 0, TARGET_APPROACH_RANGE_METERS);
+
+            log.info(String.format("Range to the target marker: %.2f", range));
+
+            if (range <= TARGET_APPROACH_RANGE_METERS) {
+                log.info(String.format("Target approach range reached: %.2f (%.2f)", range, TARGET_APPROACH_RANGE_METERS));
+                wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
+                subStrategyListener.onStageFinished(APPROACH_MARKER, RelativeDirection.AHEAD);
+            }
         } else {
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             notDetectedCounter++;
             if (notDetectedCounter >= NOT_DETECTED_LIMIT) {
                 log.info("not detected counter reached its limit");
-                subStrategyListener.onStageFinished(APPROACH_MARKER, RelativeDirection.AHEAD);
+                finishListener.onStrategyFinished(false);
             }
             return;
         }

@@ -24,6 +24,6 @@ public class ArucoMarkerUtils {
     public static double distanceTo(MarkerDetection detection) {
         return EMPTY_DETECTION_ID.equals(detection.getId())
                 ? Double.POSITIVE_INFINITY
-                : Math.sqrt(Math.pow(detection.getCameraPosition()[0], 2) + Math.pow(detection.getCameraPosition()[0], 2));
+                : Math.sqrt(Math.pow(detection.getCameraPosition()[0], 2) + Math.pow(detection.getCameraPosition()[2], 2));
     }
 }

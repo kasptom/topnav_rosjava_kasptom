@@ -122,6 +122,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
             if (foundMarkers.isEmpty()) {
                 isEnabled = false;
                 log.info("Could not find any of the listed markers in the surroundings");
+                trackedMarkerListener.onTrackedMarkerUpdate(MarkerDetection.emptyDetection(), 0.0);
             } else {
                 log.info(String.format("Found %d/%d markers", foundMarkers.size(), trackedMarkerIds.size()));
                 MarkerDetection firstDetection = detectionStrategy.execute(new ArrayList<>(foundMarkers));
