@@ -60,14 +60,15 @@ public class TopologicalNavigator {
                 .reduce((pathStr, nodeId) -> String.format("%s -> %s", pathStr, nodeId))
                 .orElse("no path available"));
 
-        for (Node node : pathNodes) {
-            if (isGateEdgeWithMarkers(node)) {
-                Iterator<Node> neighbourIterator = node.getNeighborNodeIterator();
-                Node gatePrev = neighbourIterator.next();
-                Node gateNext = neighbourIterator.next();
-                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(gatePrev, gateNext);
+        for (int i = 1; i < pathNodes.size(); i++) {
+            Node prevNode = pathNodes.get(i - 1);
+            Node node = pathNodes.get(i);
+            Node nextNode = pathNodes.size() == i + 1 ? null : pathNodes.get(i + 1);
+
+            if (isGateEdgeWithMarkers(prevNode, nextNode)) {
+                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(prevNode, nextNode);
                 guidelines.add(guideline);
-            } else if (isWallEndingEdge(node)) {
+            } else if (isWallEndingEdge(node, nextNode)) {
                 Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline();
                 guidelines.add(guideline);
             } else if (isMarkerEndingEdge(node)) {
@@ -78,13 +79,8 @@ public class TopologicalNavigator {
         return guidelines;
     }
 
-    private boolean isGateEdgeWithMarkers(Node node) {
-        Iterator<Node> neighbourIterator = node.getNeighborNodeIterator();
-        if (!neighbourIterator.hasNext()) return false;
-        Node prevNode = neighbourIterator.next();
-
-        if (!neighbourIterator.hasNext()) return false;
-        Node nextNode = neighbourIterator.next();
+    private boolean isGateEdgeWithMarkers(Node prevNode, Node nextNode) {
+        if (nextNode == null) return false;
 
         if (!prevNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE) || !nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE)) {
             return false;
@@ -96,8 +92,8 @@ public class TopologicalNavigator {
                 && nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
 
-    private boolean isWallEndingEdge(Node node) {
-        return node.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_WALL);
+    private boolean isWallEndingEdge(Node node, Node nextNode) {
+        return nextNode == null && node.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_WALL);
     }
 
     private boolean isMarkerEndingEdge(Node node) {

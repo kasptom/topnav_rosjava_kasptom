@@ -53,8 +53,9 @@
                 </Button>
             </VBox>
             <TextArea fx:id="txtAreaCurrentGuideline"
+                      style="-fx-font-size: 8"
                       prefWidth="330"
-                      prefHeight="70">
+                      prefHeight="80">
             </TextArea>
         </HBox>
         <HBox spacing="35">

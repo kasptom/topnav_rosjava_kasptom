@@ -20,18 +20,18 @@ public class TopologicalNavigatorUtils {
 
         List<GuidelineParam> params = frontMarkers
                 .stream()
-                .map(marker -> new GuidelineParam(getParameterName(marker.getRole(), true), marker.getAruco().getId(), "String"))
+                .map(marker -> new GuidelineParam(getDoorParameterName(marker.getRole(), true), marker.getAruco().getId(), "String"))
                 .collect(Collectors.toList());
 
         params.addAll(backMarkers
                 .stream()
-                .map(marker -> new GuidelineParam(getParameterName(marker.getRole(), false), marker.getAruco().getId(), "String"))
+                .map(marker -> new GuidelineParam(getDoorParameterName(marker.getRole(), false), marker.getAruco().getId(), "String"))
                 .collect(Collectors.toList()));
 
         return new Guideline(DrivingStrategy.DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, params);
     }
 
-    private static String getParameterName(String markerRole, boolean isFrontMarker) {
+    private static String getDoorParameterName(String markerRole, boolean isFrontMarker) {
         if (markerRole.equals(MARKER_ROLE_LEFT) && isFrontMarker) {
             return DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID;
         } else if (markerRole.equals(MARKER_ROLE_RIGHT) && isFrontMarker) {
@@ -51,7 +51,7 @@ public class TopologicalNavigatorUtils {
         List<MarkerDto> markers = node.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
         List<GuidelineParam> params = markers
                 .stream()
-                .map(marker -> new GuidelineParam(getParameterName(marker.getRole(), false), marker.getAruco().getId(), "String"))
+                .map(marker -> new GuidelineParam(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID, marker.getAruco().getId(), "String"))
                 .collect(Collectors.toList());
         return new Guideline(DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER, params);
     }

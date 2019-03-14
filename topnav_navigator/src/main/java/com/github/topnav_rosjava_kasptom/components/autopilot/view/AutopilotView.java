@@ -38,7 +38,6 @@ public class AutopilotView implements IAutopilotView, Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        txtAreaCurrentGuideline.setDisable(true);
         presenter.initializePresenter();
     }
 
