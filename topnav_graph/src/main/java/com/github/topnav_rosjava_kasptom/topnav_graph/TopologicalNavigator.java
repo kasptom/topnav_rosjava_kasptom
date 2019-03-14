@@ -1,12 +1,9 @@
 package com.github.topnav_rosjava_kasptom.topnav_graph;
 
-import com.github.topnav_rosjava_kasptom.topnav_graph.constants.RosonConstants;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeIdException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.NodeDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.marker.MarkerDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.ResourceUtils;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.StyleConverter;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.TopologicalNavigatorUtils;
@@ -21,6 +18,7 @@ import org.graphstream.ui.view.Viewer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,7 +28,6 @@ import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavCon
 public class TopologicalNavigator {
     private final DynamicOneToAllShortestPath algorithm;
     private Graph graph;
-    private RosonBuildingDto buildingDto;
 
     private static final String RENDERER_KEY = "org.graphstream.ui.renderer";
     private static final String RENDERER_NAME = "org.graphstream.ui.j2dviewer.J2DGraphRenderer";
@@ -41,7 +38,6 @@ public class TopologicalNavigator {
         graph = new SingleGraph("Building graph (roson)");
         graph.addAttribute(GS_UI_STYLESHEET, StyleConverter.convert(ResourceUtils.getFullPath(CUSTOM_NODE_STYLE)));
         GraphBuilder.buildGraph(buildingDto, graph);
-        this.buildingDto = buildingDto;
 
         this.algorithm = new DynamicOneToAllShortestPath(TOPNAV_ATTRIBUTE_KEY_COST);
         algorithm.init(graph);
@@ -64,12 +60,12 @@ public class TopologicalNavigator {
                 .reduce((pathStr, nodeId) -> String.format("%s -> %s", pathStr, nodeId))
                 .orElse("no path available"));
 
-        for (int i = 1; i < pathNodes.size(); i++) {
-            Node prevNode = pathNodes.get(i - 1);
-            Node node = pathNodes.get(i);
-
-            if (isGateEdgeWithMarkers(prevNode, node)) {
-                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(prevNode, node);
+        for (Node node : pathNodes) {
+            if (isGateEdgeWithMarkers(node)) {
+                Iterator<Node> neighbourIterator = node.getNeighborNodeIterator();
+                Node gatePrev = neighbourIterator.next();
+                Node gateNext = neighbourIterator.next();
+                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(gatePrev, gateNext);
                 guidelines.add(guideline);
             } else if (isWallEndingEdge(node)) {
                 Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline();
@@ -82,11 +78,22 @@ public class TopologicalNavigator {
         return guidelines;
     }
 
-    private boolean isGateEdgeWithMarkers(Node prevNode, Node node) {
-        return prevNode.getAttribute(RosonConstants.ROSON_NODE_KIND).equals(RosonConstants.NodeKind.GATE_NODE)
-                && node.getAttribute(RosonConstants.ROSON_NODE_KIND).equals(RosonConstants.NodeKind.GATE_NODE)
+    private boolean isGateEdgeWithMarkers(Node node) {
+        Iterator<Node> neighbourIterator = node.getNeighborNodeIterator();
+        if (!neighbourIterator.hasNext()) return false;
+        Node prevNode = neighbourIterator.next();
+
+        if (!neighbourIterator.hasNext()) return false;
+        Node nextNode = neighbourIterator.next();
+
+        if (!prevNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE) || !nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE)) {
+            return false;
+        }
+
+        return prevNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE)
+                && nextNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE)
                 && prevNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)
-                && node.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+                && nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
 
     private boolean isWallEndingEdge(Node node) {
@@ -97,21 +104,8 @@ public class TopologicalNavigator {
         return node.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
 
-    private Node getMarkerNodeByArUcoId(String arUcoId) throws InvalidArUcoIdException {
-        MarkerDto markerDto = buildingDto.getMarkers()
-                .stream()
-                .filter(marker -> marker.getAruco().getId().equals(arUcoId))
-                .findAny().orElse(null);
-
-        if (markerDto == null)
-            throw new InvalidArUcoIdException("ArUco with id %s does not exist in the building", arUcoId);
-
-        NodeDto markerNode = buildingDto.getNodes()
-                .stream()
-                .filter(node -> node.getId().equals(markerDto.getAttachedToNodeId()))
-                .findFirst()
-                .orElseThrow(() -> new InvalidArUcoIdException("ArUco with id %s does not exist in the building", arUcoId));
-
-        return graph.getNode(markerNode.getId());
+    private Node getMarkerNodeByArUcoId(String arUcoId) {
+        Node markerNode = graph.getNode(arUcoId);
+        return graph.getNode(markerNode.getNeighborNodeIterator().next().getId());
     }
 }
