@@ -36,7 +36,7 @@ public class TopologicalNavigator {
     private static final String RENDERER_NAME = "org.graphstream.ui.j2dviewer.J2DGraphRenderer";
     private static final String CUSTOM_NODE_STYLE = "css/stylesheet.css";
 
-    public TopologicalNavigator(RosonBuildingDto buildingDto) throws IOException, InvalidRosonNodeKindException, InvalidRosonNodeIdException {
+    public TopologicalNavigator(RosonBuildingDto buildingDto) throws IOException, InvalidRosonNodeKindException, InvalidRosonNodeIdException, InvalidArUcoIdException {
         System.setProperty(RENDERER_KEY, RENDERER_NAME);
         graph = new SingleGraph("Building graph (roson)");
         graph.addAttribute(GS_UI_STYLESHEET, StyleConverter.convert(ResourceUtils.getFullPath(CUSTOM_NODE_STYLE)));
@@ -90,7 +90,7 @@ public class TopologicalNavigator {
     }
 
     private boolean isWallEndingEdge(Node node) {
-        return node.getAttribute(TOPNAV_ATTRIBUTE_KEY_NODE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_NODE_TYPE_WALL);
+        return node.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_WALL);
     }
 
     private boolean isMarkerEndingEdge(Node node) {
