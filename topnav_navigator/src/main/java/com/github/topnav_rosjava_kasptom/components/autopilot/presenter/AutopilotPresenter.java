@@ -101,6 +101,8 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnFeedbackChange
         } catch (InvalidRosonNodeIdException | InvalidRosonNodeKindException | IOException e) {
             autopilotView.setShowGraphButtonEnabled(false);
             e.printStackTrace();
+        } catch (InvalidArUcoIdException e) {
+            e.printStackTrace();
         }
     }
 
@@ -114,6 +116,8 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnFeedbackChange
             autopilotView.setDisplayedRosonPath(rosonFileName);
         } catch (InvalidRosonNodeIdException | InvalidRosonNodeKindException | IOException e) {
             autopilotView.setShowGraphButtonEnabled(false);
+            e.printStackTrace();
+        } catch (InvalidArUcoIdException e) {
             e.printStackTrace();
         }
     }
