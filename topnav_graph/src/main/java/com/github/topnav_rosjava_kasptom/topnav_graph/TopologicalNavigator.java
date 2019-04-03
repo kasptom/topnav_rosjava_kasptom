@@ -7,6 +7,7 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.ResourceUtils;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.StyleConverter;
 import com.github.topnav_rosjava_kasptom.topnav_graph.utils.TopologicalNavigatorUtils;
+import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
 import org.graphstream.algorithm.networksimplex.DynamicOneToAllShortestPath;
 import org.graphstream.graph.Element;
@@ -18,7 +19,6 @@ import org.graphstream.ui.view.Viewer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -47,7 +47,7 @@ public class TopologicalNavigator {
         graph.display().setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
     }
 
-    public List<Guideline> createGuidelines(String startArUcoId, String endArUcoId) throws InvalidArUcoIdException {
+    public List<Guideline> createGuidelines(String startArUcoId, String endArUcoId) {
         algorithm.setSource(getMarkerNodeByArUcoId(startArUcoId).getId());
         algorithm.compute();
 
@@ -68,7 +68,7 @@ public class TopologicalNavigator {
             if (isGateEdgeWithMarkers(prevNode, nextNode)) {
                 Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(prevNode, nextNode);
                 guidelines.add(guideline);
-            } else if (isWallEndingEdge(node, nextNode)) {
+            } else if (isWallNode(node)) {
                 Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline();
                 guidelines.add(guideline);
             } else if (isMarkerEndingEdge(node)) {
@@ -76,7 +76,20 @@ public class TopologicalNavigator {
                 guidelines.add(guideline);
             }
         }
+
+        mergeSubsequentFollowWallGuidelines(guidelines);
+
         return guidelines;
+    }
+
+    private void mergeSubsequentFollowWallGuidelines(LinkedList<Guideline> guidelines) {
+        for (int i = 1; i < guidelines.size(); i++) {
+            if (guidelines.get(i - 1).getGuidelineType().equals(DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2)
+            && guidelines.get(i).getGuidelineType().equals(DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2)) {
+                //noinspection SuspiciousListRemoveInLoop
+                guidelines.remove(i);
+            }
+        }
     }
 
     private boolean isGateEdgeWithMarkers(Node prevNode, Node nextNode) {
@@ -92,8 +105,8 @@ public class TopologicalNavigator {
                 && nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
 
-    private boolean isWallEndingEdge(Node node, Node nextNode) {
-        return nextNode == null && node.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_WALL);
+    private boolean isWallNode(Node node) {
+        return node.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_WALL);
     }
 
     private boolean isMarkerEndingEdge(Node node) {

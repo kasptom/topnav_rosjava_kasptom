@@ -6,6 +6,7 @@ import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import org.graphstream.graph.Node;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,7 @@ public class TopologicalNavigatorUtils {
     }
 
     public static Guideline createFollowWallGuideline() {
-        return new Guideline(DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2, null);
+        return new Guideline(DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2, Collections.emptyList());
     }
 
     public static Guideline createLookForMarkerGuideline(Node node) {
