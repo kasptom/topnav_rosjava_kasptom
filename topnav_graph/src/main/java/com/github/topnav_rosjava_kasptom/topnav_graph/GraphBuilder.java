@@ -33,10 +33,6 @@ class GraphBuilder {
         buildingDto.getGates().forEach(gate -> addGateAndTopologyNode(gate, buildingDto, graph));
 
         addMarkers(buildingDto, graph);
-        //addNodeNodeEdges(buildingDto, graph);
-
-//        addGateNodeEdges(buildingDto, graph);
-//        addWallNodesPerSpaceAndWallNodeEdges(buildingDto, graph);
 
         for (NodeDto node : buildingDto.getNodes()) {
             if (node.getKind().equals(RosonConstants.NodeKind.SPACE_NODE)) {
@@ -64,9 +60,7 @@ class GraphBuilder {
                 .collect(Collectors.toList());
 
         HashMap<String, String> spaceIdToSpaceNodeId = new HashMap<>();
-        spaceNodes.forEach(spaceNode -> {
-            spaceIdToSpaceNodeId.put(spaceNode.getSpaceId(), spaceNode.getNodeId());
-        });
+        spaceNodes.forEach(spaceNode -> spaceIdToSpaceNodeId.put(spaceNode.getSpaceId(), spaceNode.getNodeId()));
         return spaceIdToSpaceNodeId;
     }
 
@@ -160,96 +154,6 @@ class GraphBuilder {
         return longIdName.replaceAll("[a-z]", "");
     }
 
-    private static void addNodeNodeEdges(RosonBuildingDto buildingDto, Graph graph) {
-        HashSet<String> markerNodeIds = buildingDto.getNodes()
-                .stream()
-                .filter(node -> node.getKind().equals(RosonConstants.NodeKind.MARKER_NODE))
-                .map(BaseIdentifiableDto::getId)
-                .collect(toCollection(HashSet::new));
-
-        List<NodeNodeRosonDto> nodeNodes = buildingDto.getNodeNodes()
-                .stream()
-                .filter(nodeNode -> !isEdgeWith(markerNodeIds, nodeNode))
-                .collect(Collectors.toList());
-
-        HashSet<String> spaceNodeIds = buildingDto.getNodes()
-                .stream()
-                .filter(node -> RosonConstants.NodeKind.SPACE_NODE.equals(node.getKind()))
-                .map(BaseIdentifiableDto::getId)
-                .collect(toCollection(HashSet::new));
-
-
-        nodeNodes
-                .forEach(nodeNode -> {
-                    String fromId = nodeNode.getNodeFromId();
-
-                    if (spaceNodeIds.contains(fromId)) {
-                        return;
-                    }
-
-                    String toId = nodeNode.getNodeToId();
-                    Edge edge = graph.addEdge(directedEdgeName(fromId, toId), fromId, toId, true);
-                    edge.addAttribute(TOPNAV_ATTRIBUTE_KEY_COST, 1.0);
-                });
-    }
-
-//    private static void addGateNodeEdges(RosonBuildingDto buildingDto, Graph graph) {
-//        List<GateNodeRosonDto> gateNodes = buildingDto.getGateNodes();
-//        gateNodes.forEach(gateNode -> {
-//            String gateId = gateNode.getGateId();
-//            String nodeId = gateNode.getNodeId();
-//            graph.addEdge(directedEdgeName(gateId, nodeId), gateId, nodeId, true);
-//        });
-//    }
-
-//    /**
-//     * nodeWalls does not exist in the roson format had
-//     *
-//     * @param buildingDto
-//     * @param graph
-//     */
-//    private static void addWallNodesPerSpaceAndWallNodeEdges(RosonBuildingDto buildingDto, Graph graph) {
-//
-//        HashSet<String> spaceNodeIds = buildingDto.getNodes()
-//                .stream()
-//                .filter(node -> RosonConstants.NodeKind.SPACE_NODE.equals(node.getKind()))
-//                .map(BaseIdentifiableDto::getId)
-//                .collect(toCollection(HashSet::new));
-//
-//        List<SpaceWallRosonDto> spaceWalls = buildingDto.getSpaceWalls();
-//
-//        HashMap<String, String> spaceNodeIdToSpaceId = new HashMap<>();
-//        buildingDto.getSpaceNodes()
-//                .stream()
-//                .filter(spaceNode -> spaceNodeIds.contains(spaceNode.getNodeId()))
-//                .forEach(spaceNode -> spaceNodeIdToSpaceId.put(spaceNode.getNodeId(), spaceNode.getSpaceId()));
-//
-//        spaceNodeIds.forEach(spaceNodeId -> {
-//            String spaceId = spaceNodeIdToSpaceId.get(spaceNodeId);
-//            List<SpaceWallRosonDto> wallsFromSpace = spaceWalls
-//                    .stream()
-//                    .filter(spaceWall -> spaceWall.getSpaceId().equals(spaceId))
-//                    .collect(Collectors.toList());
-//
-//            wallsFromSpace.forEach(wallFromSpace -> {
-//                String wallNodeId = getWallNodeId(wallFromSpace);
-//
-//                Node wallNode = graph.addNode(wallNodeId);
-//                wallNode.addAttribute(GS_UI_LABEL, shortLabelFromId(wallNodeId));
-//                wallNode.addAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE, TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_WALL);
-//
-//                graph.addEdge(directedEdgeName(wallNodeId, spaceNodeId), wallNodeId, spaceNodeId, true);
-//                graph.addEdge(directedEdgeName(wallFromSpace.getWallId(), wallNodeId), wallFromSpace.getWallId(), wallNodeId, true);
-//            });
-//        });
-//
-//    }
-
-    private static boolean isEdgeWith(HashSet<String> nodeIds, NodeNodeRosonDto nodeNode) {
-        return nodeIds.contains(nodeNode.getNodeFromId())
-                || nodeIds.contains(nodeNode.getNodeToId());
-    }
-
     private static String directedEdgeName(String fromNodeId, String toNodeId) {
         return String.format("%s -> %s", fromNodeId, toNodeId);
     }
@@ -294,11 +198,11 @@ class GraphBuilder {
     }
 
     /**
-     * @param buildingDto
-     * @param spaceRosonNode
-     * @param graph
-     * @return
-     * @throws InvalidRosonNodeKindException
+     * @param buildingDto roson dto
+     * @param spaceRosonNode space node
+     * @param graph graph
+     * @return ids of the nodes in the room sorted clockwise
+     * @throws InvalidRosonNodeKindException if the node is not a space node
      */
     private static List<String> getOrderedTopologyIdsForSpace(RosonBuildingDto buildingDto, NodeDto spaceRosonNode, Graph graph) throws InvalidRosonNodeKindException {
         if (!spaceRosonNode.getKind().equals(RosonConstants.NodeKind.SPACE_NODE)) {
@@ -443,7 +347,6 @@ class GraphBuilder {
                         .orElse(null);
 
                 if (spaceEdge == null) {
-//                    throw new InvalidArUcoIdException("Could not find the space edge from topology node aruco id: %s", marker.getAruco().getId());
                     System.out.printf("No edges found for ArUco %s abd neighbour %s of %s\n", marker.getAruco().getId(), neighbour.getId(), markerGateNode.getNodeId());
                     continue;
                 }
@@ -464,21 +367,7 @@ class GraphBuilder {
                 topologyMarkers.add(marker);
                 graph.addEdge(directedEdgeName(marker.getAruco().getId(), neighbour.getId()), marker.getAruco().getId(), neighbour.getId(), true);
             }
-//             TODO
-//            neighbours.stream()
-//                    .filter(neighbour -> neighbour.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE)
-//                    && neighbour.)
         }
-
-//        Node parentGraphNode = graph.getNode(parentNode.getId());
-//
-//        if (!parentGraphNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)) {
-//            parentGraphNode.addAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS, new ArrayList<MarkerDto>());
-//        }
-//
-//        List<MarkerDto> parentNodeMarkers = parentGraphNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
-//        parentNodeMarkers.add(marker);
-//
     }
 
     private static boolean isMarkerSpaceNode(Node edgeNode, String spaceId) {
