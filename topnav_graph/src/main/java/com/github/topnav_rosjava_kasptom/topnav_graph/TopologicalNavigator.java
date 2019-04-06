@@ -10,10 +10,7 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.utils.TopologicalNavigator
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
 import org.graphstream.algorithm.networksimplex.DynamicOneToAllShortestPath;
-import org.graphstream.graph.Element;
-import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
-import org.graphstream.graph.Path;
+import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.view.Viewer;
 
@@ -54,25 +51,21 @@ public class TopologicalNavigator {
         Path path = algorithm.getPath(getMarkerNodeByArUcoId(endArUcoId));
 
         LinkedList<Guideline> guidelines = new LinkedList<>();
-        List<Node> pathNodes = new ArrayList<>(path.getNodeSet());
-        System.out.println(pathNodes.stream()
+        List<Edge> pathEdges = new ArrayList<>(path.getEdgeSet());
+        System.out.println(pathEdges.stream()
                 .map(Element::getId)
-                .reduce((pathStr, nodeId) -> String.format("%s -> %s", pathStr, nodeId))
+                .reduce((pathStr, edgeId) -> String.format("%s, %s", pathStr, edgeId))
                 .orElse("no path available"));
 
-        for (int i = 1; i < pathNodes.size(); i++) {
-            Node prevNode = pathNodes.get(i - 1);
-            Node node = pathNodes.get(i);
-            Node nextNode = pathNodes.size() == i + 1 ? null : pathNodes.get(i + 1);
-
-            if (isGateEdgeWithMarkers(prevNode, nextNode)) {
-                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(prevNode, nextNode);
+        for (Edge edge : pathEdges) {
+            if (isGateEdgeWithMarkers(edge)) {
+                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(edge);
                 guidelines.add(guideline);
-            } else if (isWallNode(node)) {
-                Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline();
+            } else if (isWallEndingEdge(edge)) {
+                Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline(edge);
                 guidelines.add(guideline);
-            } else if (isMarkerEndingEdge(node)) {
-                Guideline guideline = TopologicalNavigatorUtils.createLookForMarkerGuideline(node);
+            } else if (isMarkerEndingEdge(edge)) {
+                Guideline guideline = TopologicalNavigatorUtils.createLookForMarkerGuideline(edge.getTargetNode());
                 guidelines.add(guideline);
             }
         }
@@ -92,7 +85,10 @@ public class TopologicalNavigator {
         }
     }
 
-    private boolean isGateEdgeWithMarkers(Node prevNode, Node nextNode) {
+    private boolean isGateEdgeWithMarkers(Edge edge) {
+        Node prevNode = edge.getSourceNode();
+        Node nextNode = edge.getTargetNode();
+
         if (nextNode == null) return false;
 
         if (!prevNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE) || !nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE)) {
@@ -105,11 +101,13 @@ public class TopologicalNavigator {
                 && nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
 
-    private boolean isWallNode(Node node) {
+    private boolean isWallEndingEdge(Edge edge) {
+        Node node = edge.getTargetNode();
         return node.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_WALL);
     }
 
-    private boolean isMarkerEndingEdge(Node node) {
+    private boolean isMarkerEndingEdge(Edge edge) {
+        Node node = edge.getTargetNode();
         return node.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
 

@@ -30,7 +30,7 @@ class GraphBuilder {
 
         buildingDto.getNodes().forEach(node -> addRosonNode(node, graph));
         buildingDto.getWalls().forEach(wall -> addWallAndTopologyNode(wall, buildingDto, graph));
-        buildingDto.getGates().forEach(gate -> addGateAngTopologyNode(gate, buildingDto, graph));
+        buildingDto.getGates().forEach(gate -> addGateAndTopologyNode(gate, buildingDto, graph));
 
         addMarkers(buildingDto, graph);
         //addNodeNodeEdges(buildingDto, graph);
@@ -94,7 +94,7 @@ class GraphBuilder {
         positionNodeAt(node, average.getX(), average.getY());
     }
 
-    private static void addGateAngTopologyNode(BaseIdentifiableDto gate, RosonBuildingDto buildingDto, Graph graph) {
+    private static void addGateAndTopologyNode(BaseIdentifiableDto gate, RosonBuildingDto buildingDto, Graph graph) {
         Node node = addIdentifiable(gate.getId(), gate.getType(), graph);
 
         List<SpaceGateRosonDto> spacesContainingGate = buildingDto.getSpaceGates()
@@ -265,7 +265,7 @@ class GraphBuilder {
             String prevTopologyId = sortedTopologies.get(i - 1);
             String topologyId = sortedTopologies.get(i);
             try {
-                graph.addEdge(undirectedEdgeName(prevTopologyId, topologyId), prevTopologyId, topologyId);
+                addLeftwardAndRightwardEdges(graph, prevTopologyId, topologyId);
             } catch (EdgeRejectedException | IdAlreadyInUseException exc) {
                 System.out.printf("Edge %s %s already exists\n", prevTopologyId, topologyId);
             }
@@ -274,10 +274,18 @@ class GraphBuilder {
         String prevTopologyId = sortedTopologies.get(sortedTopologies.size() - 1);
         String topologyId = sortedTopologies.get(0);
         try {
-            graph.addEdge(undirectedEdgeName(prevTopologyId, topologyId), prevTopologyId, topologyId);
+            addLeftwardAndRightwardEdges(graph, prevTopologyId, topologyId);
         } catch (EdgeRejectedException | IdAlreadyInUseException exc) {
             System.out.printf("Edge %s %s already exists\n", prevTopologyId, topologyId);
         }
+    }
+
+    private static void addLeftwardAndRightwardEdges(Graph graph, String prevTopologyId, String topologyId) {
+        Edge rightward = graph.addEdge(directedEdgeName(prevTopologyId, topologyId), prevTopologyId, topologyId, true);
+        rightward.addAttribute(TOPNAV_ATTRIBUTE_KEY_EDGE_TYPE, TOPNAV_ATTRIBUTE_VALUE_EDGE_TYPE_RIGHTWARD);
+
+        Edge leftward = graph.addEdge(directedEdgeName(topologyId, prevTopologyId), topologyId, prevTopologyId, true);
+        leftward.addAttribute(TOPNAV_ATTRIBUTE_KEY_EDGE_TYPE, TOPNAV_ATTRIBUTE_VALUE_EDGE_TYPE_LEFTWARD);
     }
 
     private static void positionNodeAt(Node node, double x, double y) {

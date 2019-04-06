@@ -4,18 +4,22 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.model.marker.MarkerDto;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.TOPNAV_ATTRIBUTE_KEY_MARKERS;
+import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRoles.MARKER_ROLE_LEFT;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRoles.MARKER_ROLE_RIGHT;
 
 public class TopologicalNavigatorUtils {
-    public static Guideline convertToPassThroughDoorGuideline(Node prevNode, Node node) {
+    public static Guideline convertToPassThroughDoorGuideline(Edge edge) {
+        Node prevNode = edge.getSourceNode();
+        Node node = edge.getTargetNode();
+
         List<MarkerDto> frontMarkers = prevNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
         List<MarkerDto> backMarkers = node.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
 
@@ -44,8 +48,17 @@ public class TopologicalNavigatorUtils {
         }
     }
 
-    public static Guideline createFollowWallGuideline() {
-        return new Guideline(DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2, Collections.emptyList());
+    public static Guideline createFollowWallGuideline(Edge edge) {
+        List<GuidelineParam> params = new ArrayList<>();
+        params.add(createWallAlignmentParameter(edge));
+        return new Guideline(DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2, params);
+    }
+
+    private static GuidelineParam createWallAlignmentParameter(Edge edge) {
+        return new GuidelineParam(DrivingStrategy.FollowWall.KEY_TRACKED_WALL_ALIGNMENT,
+                edge.getAttribute(TOPNAV_ATTRIBUTE_KEY_EDGE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_EDGE_TYPE_LEFTWARD)
+                        ? DrivingStrategy.FollowWall.VALUE_TRACKED_WALL_RIGHT
+                        : DrivingStrategy.FollowWall.VALUE_TRACKED_WALL_LEFT, "String");
     }
 
     public static Guideline createLookForMarkerGuideline(Node node) {
