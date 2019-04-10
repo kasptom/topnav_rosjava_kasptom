@@ -70,16 +70,24 @@ public class TopologicalNavigator implements ITopnavNavigator {
                 .reduce((pathStr, edgeId) -> String.format("%s, %s", pathStr, edgeId))
                 .orElse("no path available"));
 
-        for (Edge edge : pathEdges) {
-            if (isGateEdgeWithMarkers(edge)) {
-                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(edge);
+        for (int i = 0; i < pathEdges.size(); ) {
+            Edge edge = pathEdges.get(i);
+            Edge nextEdge = (i + 1 == pathEdges.size()) ? null : pathEdges.get(i + 1);
+
+            if (isGateEdgeWithMarkers(edge, nextEdge)) {
+                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(edge, nextEdge);
                 guidelines.add(guideline);
+                i += 2;
             } else if (isWallEndingEdge(edge)) {
                 Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline(edge);
                 guidelines.add(guideline);
+                i++;
             } else if (isMarkerEndingEdge(edge)) {
                 Guideline guideline = TopologicalNavigatorUtils.createLookForMarkerGuideline(edge.getTargetNode());
                 guidelines.add(guideline);
+                i++;
+            } else {
+                i++;
             }
         }
 
@@ -108,6 +116,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
     public void stop() {
         guidelines.clear();
         currentGuidelineIdx = 0;
+        guidelineChangeListener.onNoGuidelineAvailable();
     }
 
     @Override
@@ -125,20 +134,22 @@ public class TopologicalNavigator implements ITopnavNavigator {
         }
     }
 
-    private boolean isGateEdgeWithMarkers(Edge edge) {
-        Node prevNode = edge.getSourceNode();
-        Node nextNode = edge.getTargetNode();
+    private boolean isGateEdgeWithMarkers(Edge edge, Edge nextEdge) {
+        if (nextEdge == null) return false;
 
-        if (nextNode == null) return false;
+        Node frontDoorNode = edge.getSourceNode();
+        Node gateNode = edge.getTargetNode();
+        Node backDoorNode = nextEdge.getTargetNode();
 
-        if (!prevNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE) || !nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE)) {
+        if (!frontDoorNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE) || !gateNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE)) {
             return false;
         }
 
-        return prevNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE)
-                && nextNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE)
-                && prevNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)
-                && nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+        return frontDoorNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE_TOPOLOGY)
+                && gateNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE)
+                && backDoorNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE_TOPOLOGY)
+                && frontDoorNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)
+                && backDoorNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
 
     private boolean isWallEndingEdge(Edge edge) {

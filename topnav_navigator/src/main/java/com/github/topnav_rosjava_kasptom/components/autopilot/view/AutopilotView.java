@@ -9,6 +9,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -86,5 +87,15 @@ public class AutopilotView implements IAutopilotView, Initializable {
     @FXML
     public void play() throws InvalidArUcoIdException {
         presenter.play();
+    }
+
+    @FXML
+    public void pause() {
+        presenter.pause();
+    }
+
+    @FXML
+    public void stop() {
+        presenter.stop();
     }
 }

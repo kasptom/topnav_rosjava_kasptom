@@ -100,9 +100,10 @@ class GraphBuilder {
             String topologyId = spaceNode.getGateId() + spaceNode.getSpaceId();
             Node topologyNode = graph.addNode(topologyId);
             topologyNode.addAttribute(GS_UI_LABEL, shortLabelFromId(topologyId));
-            topologyNode.addAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE, TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE);
+            topologyNode.addAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE, TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE_TOPOLOGY);
 
-            graph.addEdge(undirectedEdgeName(topologyId, gate.getId()), topologyId, gate.getId());
+            graph.addEdge(directedEdgeName(topologyId, gate.getId()), topologyId, gate.getId(), true);
+            graph.addEdge(directedEdgeName(gate.getId(), topologyId), gate.getId(), topologyId, true);
 
             String spaceNodeId = spaceIdToSpaceNodeId.get(spaceNode.getSpaceId());
             graph.addEdge(directedEdgeName(topologyId, spaceNodeId), topologyId, spaceNodeId, true);

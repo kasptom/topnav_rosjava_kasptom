@@ -16,12 +16,12 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRo
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRoles.MARKER_ROLE_RIGHT;
 
 public class TopologicalNavigatorUtils {
-    public static Guideline convertToPassThroughDoorGuideline(Edge edge) {
-        Node prevNode = edge.getSourceNode();
-        Node node = edge.getTargetNode();
+    public static Guideline convertToPassThroughDoorGuideline(Edge edge, Edge nextEdge) {
+        Node frontDoorNode = edge.getSourceNode();
+        Node backDoorNode = nextEdge.getTargetNode();
 
-        List<MarkerDto> frontMarkers = prevNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
-        List<MarkerDto> backMarkers = node.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+        List<MarkerDto> frontMarkers = frontDoorNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+        List<MarkerDto> backMarkers = backDoorNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
 
         List<GuidelineParam> params = frontMarkers
                 .stream()

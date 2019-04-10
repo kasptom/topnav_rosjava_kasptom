@@ -35,8 +35,8 @@
         </HBox>
         <HBox spacing="10">
             <Button onMouseClicked="#play">Play</Button>
-            <Button>Pause</Button>
-            <Button>Stop</Button>
+            <Button onMouseClicked="#pause">Pause</Button>
+            <Button onMouseClicked="#stop">Stop</Button>
         </HBox>
     </VBox>
 
