@@ -10,6 +10,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strat
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.approachMarker.ApproachMarkerStrategy;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
+import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import std_msgs.Float64;
 import topnav_msgs.*;
@@ -26,6 +27,8 @@ public class MainController implements IMainController {
     private final IHeadController headController;
     private final IWheelsController wheelsController;
     private final IArUcoHeadTracker arUcoHeadTracker;
+
+    private final Publisher<std_msgs.String> strategyFinishedPublisher;
 
     private final Subscriber<GuidelineMsg> guidelineSubscriber;
     private final Subscriber<FeedbackMsg> markerDetectionSubscriber;
@@ -47,6 +50,8 @@ public class MainController implements IMainController {
         headController = new HeadController(connectedNode);
         wheelsController = new WheelsController(connectedNode);
         arUcoHeadTracker = new ArUcoHeadTracker(log);
+
+        strategyFinishedPublisher = connectedNode.newPublisher(TOPNAV_STRATEGY_CHANGE_TOPIC, std_msgs.String._TYPE);
 
         configMsgSubscriber = connectedNode.newSubscriber(TOPNAV_CONFIG_TOPIC, TopNavConfigMsg._TYPE);
         angleRangesMsgSubscriber = connectedNode.newSubscriber(TOPNAV_ANGLE_RANGE_TOPIC, AngleRangesMsg._TYPE);
@@ -95,6 +100,9 @@ public class MainController implements IMainController {
     private void selectStrategy(String strategyName, List<String> parameters) {
         tearDownDrivingStrategy();
         tearDownArUcoListeners();
+
+        publishStrategyChangeMessage(strategyName);
+
         headController.onStrategyStatusChange(strategyName);
 
         log.info(String.format("Selecting %s strategy", strategyName));
@@ -116,11 +124,20 @@ public class MainController implements IMainController {
         setUpDrivingStrategy(drivingStrategies.get(strategyName), parameters);
     }
 
+    private void publishStrategyChangeMessage(String strategyName) {
+        std_msgs.String message = strategyFinishedPublisher.newMessage();
+        message.setData(strategyName);
+        strategyFinishedPublisher.publish(message);
+    }
+
 
     private void setUpDrivingStrategy(IDrivingStrategy drivingStrategy, List<String> parameters) {
         drivingStrategy.setWheelsVelocitiesListener(wheelsController::setVelocities);
         drivingStrategy.setHeadRotationChangeListener(headController::handleStrategyHeadRotationChange);
-        drivingStrategy.setStrategyFinishedListener(isSuccess -> selectStrategy(DRIVING_STRATEGY_IDLE, null));
+        drivingStrategy.setStrategyFinishedListener(isSuccess -> {
+            selectStrategy(DRIVING_STRATEGY_IDLE, null);
+
+        });
         drivingStrategy.setGuidelineParameters(parameters);
 
         drivingStrategy.startStrategy();

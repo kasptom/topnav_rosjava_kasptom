@@ -23,6 +23,14 @@ public class DrivingStrategy {
             DRIVING_STRATEGY_APPROACH_MARKER,
             DRIVING_STRATEGY_TRACK_ARUCOS));
 
+    public static final HashSet<String> MARKER_PARAMS = new HashSet<>(Arrays.asList(
+            ThroughDoor.KEY_BACK_LEFT_MARKER_ID,
+            ThroughDoor.KEY_BACK_RIGHT_MARKER_ID,
+            ThroughDoor.KEY_FRONT_LEFT_MARKER_ID,
+            ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID,
+            ApproachMarker.KEY_APPROACHED_MARKER_ID
+    ));
+
     public class ThroughDoor {
         public static final String KEY_FRONT_LEFT_MARKER_ID = "DS_PARAM_FRONT_LEFT_MARKER_ID";
         public static final String KEY_FRONT_RIGHT_MARKER_ID = "DS_PARAM_FRONT_RIGHT_MARKER_ID";

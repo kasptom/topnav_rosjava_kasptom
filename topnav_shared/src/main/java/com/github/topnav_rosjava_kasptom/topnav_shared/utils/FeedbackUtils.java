@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class FeedbackUtils {
 
-    public static void fillInFeedbackMsg(FeedbackMsg feedbackMsg, MarkersMsg markersMsg, long timestamp) {
+    public static void fillInFeedbackMsg(FeedbackMsg feedbackMsg, MarkersMsg markersMsg, long timestamp, String strategyName) {
         List<MarkerDetection> detections = markersMsg.getMarkers()
                 .stream()
                 .map(markerMsg -> MarkerDetection
@@ -31,6 +31,7 @@ public class FeedbackUtils {
         List<TopologyMsg> topologyMsgs = convertToTopologyMessages(topologies);
         feedbackMsg.setTimestamp(Time.fromNano(timestamp));
         feedbackMsg.setTopologies(topologyMsgs);
+        feedbackMsg.setStrategy(strategyName);
     }
 
     private static List<TopologyMsg> convertToTopologyMessages(List<Topology> topologies) {

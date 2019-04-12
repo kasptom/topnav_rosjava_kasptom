@@ -126,7 +126,7 @@ public class RosTopNavService implements IRosTopnavService {
                             msg.getRelativeDirection(),
                             msg.getRelativeDistance()))
                     .collect(Collectors.toList());
-            Feedback feedback = new Feedback(feedbackMsg.getTimestamp().totalNsecs(), topologies);
+            Feedback feedback = new Feedback(feedbackMsg.getTimestamp().totalNsecs(), topologies, feedbackMsg.getStrategy());
             feedbackListeners.forEach(listener -> listener.onFeedbackChange(feedback));
         }
     }
