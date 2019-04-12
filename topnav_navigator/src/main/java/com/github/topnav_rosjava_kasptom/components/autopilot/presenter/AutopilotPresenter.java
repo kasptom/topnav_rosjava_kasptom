@@ -9,6 +9,7 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdE
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeIdException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
+import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.PropertyKeys;
 import com.github.topnav_rosjava_kasptom.topnav_shared.listeners.OnGuidelineChangeListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
@@ -148,11 +149,16 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
     public void onGuidelineChange(Guideline guideline) {
         currentGuideline = guideline;
         autopilotView.setDisplayedGuideline(guideline.toString());
+        rosService.stopStrategy(DrivingStrategy.DRIVING_STRATEGY_IDLE);
         rosService.startStrategy(currentGuideline.getGuidelineType(), currentGuideline.getParameters());
     }
 
     @Override
     public void onNoGuidelineAvailable() {
+        if (isStopped) {
+            return;
+        }
+
         isStopped = true;
         autopilotView.setDisplayedGuideline("N/A");
         rosService.stopStrategy("");
