@@ -1,6 +1,7 @@
 package com.github.topnav_rosjava_kasptom.services;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
+import com.github.topnav_rosjava_kasptom.topnav_shared.listeners.OnFeedbackChangeListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.Feedback;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
@@ -17,6 +18,7 @@ import org.ros.node.topic.Publisher;
 import topnav_msgs.FeedbackMsg;
 import topnav_msgs.GuidelineMsg;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +30,7 @@ public class RosTopNavService implements IRosTopnavService {
     private boolean isDestroyed;
 
     private NavigationNode navigationNode;
-    private OnFeedbackChangeListener listener;
+    private List<OnFeedbackChangeListener> feedbackListeners;
 
     public static IRosTopnavService getInstance() {
         if (instance == null) {
@@ -105,14 +107,16 @@ public class RosTopNavService implements IRosTopnavService {
     }
 
     @Override
-    public void setOnFeedbackChangeListener(OnFeedbackChangeListener listener) {
-        this.listener = listener;
+    public void addOnFeedbackChangeListener(OnFeedbackChangeListener listener) {
+        this.feedbackListeners.add(listener);
     }
 
-    private RosTopNavService() {}
+    private RosTopNavService() {
+        feedbackListeners = new ArrayList<>();
+    }
 
     private void convertAndPassToListener(FeedbackMsg feedbackMsg) {
-        if (listener != null) {
+        if (!feedbackListeners.isEmpty()) {
             List<Topology> topologies = feedbackMsg.getTopologies()
                     .stream()
                     .map(msg -> new Topology(
@@ -122,8 +126,8 @@ public class RosTopNavService implements IRosTopnavService {
                             msg.getRelativeDirection(),
                             msg.getRelativeDistance()))
                     .collect(Collectors.toList());
-            Feedback feedback = new Feedback(feedbackMsg.getTimestamp().totalNsecs(), topologies);
-            listener.onFeedbackChange(feedback);
+            Feedback feedback = new Feedback(feedbackMsg.getTimestamp().totalNsecs(), topologies, feedbackMsg.getStrategy());
+            feedbackListeners.forEach(listener -> listener.onFeedbackChange(feedback));
         }
     }
 }

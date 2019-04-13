@@ -5,6 +5,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.detectionStrategy.ChooseClosestDetectionStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.detectionStrategy.IDetectionStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import org.apache.commons.logging.Log;
 import std_msgs.Float64;
@@ -122,6 +123,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
             if (foundMarkers.isEmpty()) {
                 isEnabled = false;
                 log.info("Could not find any of the listed markers in the surroundings");
+                trackedMarkerListener.onTrackedMarkerUpdate(MarkerDetection.emptyDetection(), RelativeDirection.AHEAD.getRotationDegrees());
             } else {
                 log.info(String.format("Found %d/%d markers", foundMarkers.size(), trackedMarkerIds.size()));
                 MarkerDetection firstDetection = detectionStrategy.execute(new ArrayList<>(foundMarkers));

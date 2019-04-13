@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
 
 public class GuidelineView implements IGuidelineView, Initializable {
 
+    private static final double STRATEGY_PARAM_NAME_TEXT_BOX_WIDTH = 280;
+    private static final double STRATEGY_PARAM_VALUE_TEXT_BOX_WIDTH = 80;
+
     private final IGuidelinePresenter presenter;
 
     @FXML
@@ -111,8 +114,8 @@ public class GuidelineView implements IGuidelineView, Initializable {
         nameTextField.setText(paramName);
         nameTextField.setEditable(false);
 
-        nameTextField.setPrefWidth(250);
-        valueTextField.setPrefWidth(50);
+        nameTextField.setPrefWidth(STRATEGY_PARAM_NAME_TEXT_BOX_WIDTH);
+        valueTextField.setPrefWidth(STRATEGY_PARAM_VALUE_TEXT_BOX_WIDTH);
 
         paramEntryBox.getChildren()
                 .add(nameTextField);

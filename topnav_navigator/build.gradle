@@ -40,5 +40,6 @@ dependencies {
   /* Example of a local subproject dependency */
   /* compile project(':sibling_gradle_project') */
   compile project(':topnav_shared')
+  compile project(':topnav_graph')
 }
 

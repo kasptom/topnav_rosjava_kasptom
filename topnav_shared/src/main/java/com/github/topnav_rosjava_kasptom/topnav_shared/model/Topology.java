@@ -31,6 +31,10 @@ public class Topology {
         return relativeDirection;
     }
 
+    /**
+     * @see RelativeDistance#toString()
+     * @return the string representation of the relative distance
+     */
     public String getRelativeDistance() {
         return relativeDistance;
     }

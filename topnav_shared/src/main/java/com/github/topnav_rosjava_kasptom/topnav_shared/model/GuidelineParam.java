@@ -22,4 +22,9 @@ public class GuidelineParam {
    public String getType() {
       return type;
    }
+
+   @Override
+   public String toString() {
+      return String.format("{ name: %s, value: %s, type: %s }", name, value, type);
+   }
 }

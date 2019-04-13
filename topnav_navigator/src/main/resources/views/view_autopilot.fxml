@@ -1,0 +1,72 @@
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.VBox?>
+<GridPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.github.topnav_rosjava_kasptom.components.autopilot.view.AutopilotView"
+          prefWidth="680.0"
+          prefHeight="120.0"
+          hgap="10"
+          vgap="10">
+
+    <VBox GridPane.columnIndex="1"
+          GridPane.rowIndex="1"
+          spacing="10">
+        <HBox alignment="BASELINE_CENTER">
+            <Label textFill="white"
+                   prefWidth="110">Start marker
+            </Label>
+            <TextField alignment="BASELINE_RIGHT"
+                       prefWidth="40"
+                       fx:id="txtFieldStartMarker"/>
+        </HBox>
+        <HBox alignment="BASELINE_CENTER">
+            <Label textFill="white"
+                   prefWidth="110">End marker
+            </Label>
+            <TextField
+                    alignment="BASELINE_RIGHT"
+                    prefWidth="40"
+                    fx:id="txtFieldEndMarker"/>
+        </HBox>
+        <HBox spacing="10">
+            <Button onMouseClicked="#play">Play</Button>
+            <Button onMouseClicked="#pause">Pause</Button>
+            <Button onMouseClicked="#stop">Stop</Button>
+        </HBox>
+    </VBox>
+
+    <VBox GridPane.columnIndex="3"
+          GridPane.rowIndex="1"
+          spacing="10">
+        <HBox spacing="10">
+            <VBox spacing="5">
+                <Label textAlignment="CENTER"
+                       textFill="white">Current guideline
+                </Label>
+                <Button fx:id="btnShowGraph"
+                        onAction="#onShowGraphClicked">Show graph
+                </Button>
+                <Button fx:id="btnShowGuidelines"
+                        onAction="#onShowAllGuidelines">Show guidelines
+                </Button>
+
+            </VBox>
+            <TextArea fx:id="txtAreaCurrentGuideline"
+                      style="-fx-font-size: 8"
+                      prefWidth="330"
+                      prefHeight="80">
+            </TextArea>
+        </HBox>
+        <HBox spacing="43" prefHeight="60">
+            <Button onAction="#onLoadRosonClicked">Load roson</Button>
+            <TextField fx:id="txtAreaRosonFilePath"
+                       prefWidth="330">no *.roson file selected
+            </TextField>
+        </HBox>
+    </VBox>
+</GridPane>

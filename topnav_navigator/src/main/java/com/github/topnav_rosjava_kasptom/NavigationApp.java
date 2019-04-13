@@ -2,8 +2,7 @@ package com.github.topnav_rosjava_kasptom;
 
 import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 import com.github.topnav_rosjava_kasptom.components.container.view.IContainerView;
-import com.github.topnav_rosjava_kasptom.components.feedback.presenter.IFeedbackPresenter;
-import com.github.topnav_rosjava_kasptom.components.topnav_navigator.presenter.IGuidelinePresenter;
+import com.github.topnav_rosjava_kasptom.services.PropertiesService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,12 +12,20 @@ import javafx.stage.Stage;
 public class NavigationApp extends Application {
     private IBasePresenter guidelinePresenter;
     private IBasePresenter feedbackPresenter;
+    private IBasePresenter autopilotPresenter;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        if (!getParameters().getRaw().isEmpty()) {
+            String configFilePath = getParameters().getRaw().get(0);
+            PropertiesService.getInstance(configFilePath);
+        } else {
+            PropertiesService.getInstance(null);
+        }
+
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("views/view_container.fxml"));
         Parent root = loader.load();
-        Scene scene = new Scene(root, 640, 480);
+        Scene scene = new Scene(root, 720, 640);
 
         initPresenters(loader);
 
@@ -31,6 +38,7 @@ public class NavigationApp extends Application {
     public void stop() throws Exception {
         this.guidelinePresenter.onDestroy();
         this.feedbackPresenter.onDestroy();
+        this.autopilotPresenter.onDestroy();
         super.stop();
     }
 
@@ -41,5 +49,8 @@ public class NavigationApp extends Application {
 
         feedbackPresenter = ((IContainerView) loader.getController()).getFeedbackView().getPresenter();
         feedbackPresenter.onInit();
+
+        autopilotPresenter = ((IContainerView) loader.getController()).getAutopilotView().getPresenter();
+        autopilotPresenter.onInit();
     }
 }

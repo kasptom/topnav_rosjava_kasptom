@@ -1,10 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_graph.model;
 
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.marker.MarkerDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.MarkerNodeRosonDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.NodeNodeRosonDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceNodeRosonDto;
-import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.SpaceWallRosonDto;
+import com.github.topnav_rosjava_kasptom.topnav_graph.model.rosonRelation.*;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 
@@ -40,6 +37,14 @@ public class RosonBuildingDto {
     private List<SpaceWallRosonDto> spaceWalls;
 
     @Getter
+    @SerializedName("space-gates")
+    private List<SpaceGateRosonDto> spaceGates;
+
+    @Getter
     @SerializedName("space-nodes")
     private List<SpaceNodeRosonDto> spaceNodes;
+
+    @Getter
+    @SerializedName("gate-nodes")
+    private List<GateNodeRosonDto> gateNodes;
 }

@@ -1,5 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navigation;
 
+import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.FeedbackUtils;
 import org.ros.message.MessageListener;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 public class MarkerMessageHandler implements MessageListener<MarkersMsg> {
     private final Publisher<FeedbackMsg> feedbackPublisher;
     private HashMap<String, Long> previousTimeStamp = new HashMap<>();
+    private String strategyName = DrivingStrategy.DRIVING_STRATEGY_IDLE;
 
     public MarkerMessageHandler(Publisher<FeedbackMsg> feedbackPublisher) {
         this.feedbackPublisher = feedbackPublisher;
@@ -22,9 +24,13 @@ public class MarkerMessageHandler implements MessageListener<MarkersMsg> {
     public void onNewMessage(MarkersMsg markersMsg) {
         long currentTimeStamp = System.nanoTime();
         FeedbackMsg feedbackMsg = feedbackPublisher.newMessage();
-        FeedbackUtils.fillInFeedbackMsg(feedbackMsg, markersMsg, currentTimeStamp);
+        FeedbackUtils.fillInFeedbackMsg(feedbackMsg, markersMsg, currentTimeStamp, strategyName);
         feedbackPublisher.publish(feedbackMsg);
 //        markersMsg.getMarkers().forEach(this::printMarkerMessage);
+    }
+
+    public void setCurrentStrategyName(String strategyName) {
+        this.strategyName = strategyName;
     }
 
     private void printMarkerMessage(MarkerMsg markerMsg) {

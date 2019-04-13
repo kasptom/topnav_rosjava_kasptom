@@ -2,10 +2,7 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.BaseSubStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.DriveThroughAndLookForBackMarkers;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.RotateTheChassisSideTowardsDoorStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.*;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeAlignment;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
@@ -19,20 +16,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.substrategies.ThroughDoorStage.*;
+import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.CompoundStrategyStage.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
-public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy implements IDrivingStrategy {
+public class PassThroughDoorStrategy extends BaseCompoundStrategy implements IDrivingStrategy {
 
     public PassThroughDoorStrategy(Log log) {
         super(log);
     }
 
     @Override
-    void initializeSubStrategies() {
+    public void initializeSubStrategies() {
         this.subStrategies = new HashMap<>();
         this.subStrategies.put(DETECT_MARKER, new RotateTheChassisSideTowardsDoorStrategy(wheelsListener, headListener, this, strategyFinishedListener, log, guidelineParamsMap));
         this.subStrategies.put(ALIGN_BETWEEN_DOOR, new AlignBetweenDoorMarkersStrategy(wheelsListener, guidelineParamsMap));
@@ -41,8 +38,8 @@ public class PassThroughDoorStrategy extends BasePassThroughDoorStrategy impleme
     }
 
     @Override
-    ThroughDoorStage[] getSubStrategiesExecutionOrder() {
-        return new ThroughDoorStage[]{DETECT_MARKER, ALIGN_BETWEEN_DOOR, ROTATE_FRONT_AGAINST_DOOR, DRIVE_THROUGH_DOOR};
+    public CompoundStrategyStage[] getSubStrategiesExecutionOrder() {
+        return new CompoundStrategyStage[]{DETECT_MARKER, ALIGN_BETWEEN_DOOR, ROTATE_FRONT_AGAINST_DOOR, DRIVE_THROUGH_DOOR};
     }
 
     @Override
