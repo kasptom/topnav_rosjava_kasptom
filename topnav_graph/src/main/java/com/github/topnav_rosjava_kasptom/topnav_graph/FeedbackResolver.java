@@ -42,7 +42,6 @@ public class FeedbackResolver implements IFeedbackResolver {
         Guideline currentGuideline = guidelines.get(currentGuidelineIdx);
         Guideline nextGuideline = guidelines.get(currentGuidelineIdx + 1);
 
-//        if ()
         return false; // TODO close to the unexpected marker
     }
 }

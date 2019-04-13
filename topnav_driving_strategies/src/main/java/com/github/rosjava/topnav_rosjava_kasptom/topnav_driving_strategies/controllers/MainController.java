@@ -134,10 +134,7 @@ public class MainController implements IMainController {
     private void setUpDrivingStrategy(IDrivingStrategy drivingStrategy, List<String> parameters) {
         drivingStrategy.setWheelsVelocitiesListener(wheelsController::setVelocities);
         drivingStrategy.setHeadRotationChangeListener(headController::handleStrategyHeadRotationChange);
-        drivingStrategy.setStrategyFinishedListener(isSuccess -> {
-            selectStrategy(DRIVING_STRATEGY_IDLE, null);
-
-        });
+        drivingStrategy.setStrategyFinishedListener(isSuccess -> selectStrategy(DRIVING_STRATEGY_IDLE, null));
         drivingStrategy.setGuidelineParameters(parameters);
 
         drivingStrategy.startStrategy();

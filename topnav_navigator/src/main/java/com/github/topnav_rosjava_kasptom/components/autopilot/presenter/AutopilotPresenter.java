@@ -75,8 +75,8 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
 
     @Override
     public void stop() {
-        isStopped = true;
         navigator.stop();
+        autopilotView.setDisplayedGuideline("N/A");
     }
 
     @Override
@@ -169,7 +169,7 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
         if (isStopped) {
             return;
         }
-// tODO brak kocowego guidlinea ze znacznikiem
+
         isStopped = true;
         autopilotView.setDisplayedGuideline("N/A");
         rosService.stopStrategy(DrivingStrategy.DRIVING_STRATEGY_IDLE);
