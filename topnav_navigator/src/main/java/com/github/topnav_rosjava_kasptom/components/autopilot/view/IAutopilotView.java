@@ -12,4 +12,6 @@ public interface IAutopilotView extends IBaseView {
     String getStartMarkerId();
 
     String getEndMarkerId();
+
+    void openGuidelinesWindow(String guidelines);
 }

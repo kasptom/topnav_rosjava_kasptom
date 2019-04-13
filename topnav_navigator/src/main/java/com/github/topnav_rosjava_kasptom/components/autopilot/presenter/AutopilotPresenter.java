@@ -98,6 +98,17 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
         loadRosonFile(fullFilePath);
     }
 
+    @Override
+    public void showAllGuidelines() {
+        String guidelines = navigator.getGuidelines()
+                .stream()
+                .map(Guideline::toString)
+                .reduce((all, next) -> all + "\n" + next)
+                .orElse("N/A");
+
+        autopilotView.openGuidelinesWindow(guidelines);
+    }
+
     private void loadRosonFile(String fullFilePath) {
         try {
             RosonParser parser = new RosonParser();
@@ -158,9 +169,9 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
         if (isStopped) {
             return;
         }
-
+// tODO brak kocowego guidlinea ze znacznikiem
         isStopped = true;
         autopilotView.setDisplayedGuideline("N/A");
-        rosService.stopStrategy("");
+        rosService.stopStrategy(DrivingStrategy.DRIVING_STRATEGY_IDLE);
     }
 }

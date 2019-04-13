@@ -18,4 +18,6 @@ public interface ITopnavNavigator extends OnFeedbackChangeListener {
     void stop();
 
     void setOnGuidelineChangeListner(OnGuidelineChangeListener listener);
+
+    List<Guideline> getGuidelines();
 }

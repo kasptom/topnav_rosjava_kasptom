@@ -6,10 +6,10 @@ import com.github.topnav_rosjava_kasptom.components.autopilot.presenter.IAutopil
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdException;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -30,6 +30,9 @@ public class AutopilotView implements IAutopilotView, Initializable {
 
     @FXML
     public TextField txtAreaRosonFilePath;
+
+    @FXML
+    public Button btnShowGuidelines;
 
     private IAutopilotPresenter presenter;
 
@@ -68,6 +71,17 @@ public class AutopilotView implements IAutopilotView, Initializable {
     }
 
     @Override
+    public void openGuidelinesWindow(String guidelines) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setResizable(true);
+        alert.getDialogPane().setPrefWidth(700);
+        alert.setTitle("Guidelines");
+        alert.setHeaderText("");
+        alert.setContentText(guidelines);
+        alert.showAndWait();
+    }
+
+    @Override
     public IBasePresenter getPresenter() {
         return presenter;
     }
@@ -97,5 +111,10 @@ public class AutopilotView implements IAutopilotView, Initializable {
     @FXML
     public void stop() {
         presenter.stop();
+    }
+
+    @FXML
+    public void onShowAllGuidelines() {
+        presenter.showAllGuidelines();
     }
 }

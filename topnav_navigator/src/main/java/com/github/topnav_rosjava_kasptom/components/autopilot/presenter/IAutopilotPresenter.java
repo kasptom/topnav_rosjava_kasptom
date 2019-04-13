@@ -17,4 +17,6 @@ public interface IAutopilotPresenter extends IBasePresenter {
     void showGraph();
 
     void loadRoson();
+
+    void showAllGuidelines();
 }

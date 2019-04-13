@@ -44,13 +44,17 @@
           GridPane.rowIndex="1"
           spacing="10">
         <HBox spacing="10">
-            <VBox>
+            <VBox spacing="5">
                 <Label textAlignment="CENTER"
                        textFill="white">Current guideline
                 </Label>
                 <Button fx:id="btnShowGraph"
                         onAction="#onShowGraphClicked">Show graph
                 </Button>
+                <Button fx:id="btnShowGuidelines"
+                        onAction="#onShowAllGuidelines">Show guidelines
+                </Button>
+
             </VBox>
             <TextArea fx:id="txtAreaCurrentGuideline"
                       style="-fx-font-size: 8"
@@ -58,7 +62,7 @@
                       prefHeight="80">
             </TextArea>
         </HBox>
-        <HBox spacing="35">
+        <HBox spacing="43" prefHeight="60">
             <Button onAction="#onLoadRosonClicked">Load roson</Button>
             <TextField fx:id="txtAreaRosonFilePath"
                        prefWidth="330">no *.roson file selected

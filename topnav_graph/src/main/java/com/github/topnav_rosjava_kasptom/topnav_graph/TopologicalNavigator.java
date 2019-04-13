@@ -124,6 +124,11 @@ public class TopologicalNavigator implements ITopnavNavigator {
         guidelineChangeListener = listener;
     }
 
+    @Override
+    public List<Guideline> getGuidelines() {
+        return guidelines;
+    }
+
     private void mergeSubsequentFollowWallGuidelines(LinkedList<Guideline> guidelines) {
         for (int i = 1; i < guidelines.size(); i++) {
             if (guidelines.get(i - 1).getGuidelineType().equals(DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2)
