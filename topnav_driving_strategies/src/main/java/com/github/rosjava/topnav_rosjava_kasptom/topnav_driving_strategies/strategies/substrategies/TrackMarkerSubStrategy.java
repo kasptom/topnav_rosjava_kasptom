@@ -15,14 +15,15 @@ import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.CompoundStrategyStage.TRACK_MARKER;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.NOT_DETECTED_LIMIT;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.BASE_ROBOT_VELOCITY;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.*;
 
 public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHeadTracker.TrackedMarkerListener {
     private final Log log;
@@ -51,7 +52,7 @@ public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHea
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-
+        isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
     }
 
     @Override
@@ -61,6 +62,11 @@ public class TrackMarkerSubStrategy extends BaseSubStrategy implements IArUcoHea
 
     @Override
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
+        if (isObstacleTooClose) {
+            wheelsListener.onWheelsVelocitiesChanged(MOVE_BACK_VELOCITY);
+            return;
+        }
+
         double range = ArucoMarkerUtils.distanceTo(detection);
         WheelsVelocities velocities;
         if (isDoorMarker(detection, KEY_FRONT_LEFT_MARKER_ID)) {

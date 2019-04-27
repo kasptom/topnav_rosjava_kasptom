@@ -47,7 +47,7 @@ public class HeadController implements IHeadController {
 
         headRotationPublisher = connectedNode.newPublisher(HEAD_JOINT_TOPIC, Float64._TYPE);
         relativeDirectionChangePublisher = connectedNode.newPublisher(HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
-        linearDirectionChangePublisher = connectedNode.newPublisher(HEAD_LINЕАR_DIRECTION_CHANGE_TOPIC, Float64._TYPE);
+        linearDirectionChangePublisher = connectedNode.newPublisher(HEAD_LINEAR_DIRECTION_CHANGE_TOPIC, Float64._TYPE);
     }
 
     @Override

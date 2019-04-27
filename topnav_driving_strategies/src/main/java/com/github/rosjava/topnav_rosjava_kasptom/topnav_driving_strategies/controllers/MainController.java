@@ -64,7 +64,7 @@ public class MainController implements IMainController {
         guidelineSubscriber = connectedNode.newSubscriber(TOPNAV_GUIDELINES_TOPIC, GuidelineMsg._TYPE);
 
         headDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
-        headLinearDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_LINЕАR_DIRECTION_CHANGE_TOPIC, std_msgs.Float64._TYPE);
+        headLinearDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_LINEAR_DIRECTION_CHANGE_TOPIC, std_msgs.Float64._TYPE);
 
 
         initializeDrivingStrategies(drivingStrategies, trackedMarkerListeners);
