@@ -15,12 +15,13 @@ import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopologyMsg;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.LIDAR_MIN_RANGE;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.BASE_ROBOT_VELOCITY;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.*;
 
 public class DriveThroughAndLookForBackMarkers extends BaseSubStrategy {
 
@@ -44,16 +45,25 @@ public class DriveThroughAndLookForBackMarkers extends BaseSubStrategy {
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
+        isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
+
         if (isBackMarkVisible) {
             return;
         }
 
+        boolean isMitPointNotFound = false;
         doorFinder.dividePointsToClusters(angleRangesMsg);
         DoorFinder.Point midPoint = null;
         try {
             midPoint = doorFinder.getClustersMidPoint();
         } catch (PointNotFoundException pointNotFoundException) {
             log.info("Could not find the mid point");
+            isMitPointNotFound = true;
+        }
+
+        if (isMitPointNotFound && isObstacleTooClose) {
+            wheelsListener.onWheelsVelocitiesChanged(MOVE_BACK_VELOCITY);
+            return;
         }
 
         WheelsVelocities velocities = ZERO_VELOCITY;

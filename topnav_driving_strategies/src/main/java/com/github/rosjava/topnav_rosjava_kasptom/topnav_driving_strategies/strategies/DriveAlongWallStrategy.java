@@ -19,7 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.MOVE_BACK_VELOCITY;
 
 public class DriveAlongWallStrategy implements IDrivingStrategy {
 
@@ -61,7 +61,7 @@ public class DriveAlongWallStrategy implements IDrivingStrategy {
 
         if (isObstacleTooClose) {
             log.info("obstacle is too close");
-            return ZERO_VELOCITY;
+            return MOVE_BACK_VELOCITY;
         }
 
         if (bestLine == null) {

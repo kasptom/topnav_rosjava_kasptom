@@ -17,6 +17,7 @@ public abstract class BaseSubStrategy implements IDrivingStrategy {
     protected final WheelsVelocitiesChangeListener wheelsListener;
     protected final SubStrategyListener subStrategyListener;
     protected final HashMap<String, GuidelineParam> guidelineParamsMap;
+    boolean isObstacleTooClose;
 
 
     public BaseSubStrategy(WheelsVelocitiesChangeListener wheelsListener, HeadRotationChangeRequestListener headListener, SubStrategyListener subStrategyListener, StrategyFinishedListener finishListener, HashMap<String, GuidelineParam> guidelineParamsMap) {
