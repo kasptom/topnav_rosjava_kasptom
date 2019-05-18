@@ -45,7 +45,4 @@ public class MarkerMessageHandler implements MessageListener<MarkersMsg> {
                     detection.getId(), pos[0], pos[1], pos[2], detection.getRelativeAlignment(), detection.getRelativeDistance());
         }
     }
-
-    public void addOnSceneChangeListener(ISceneChangeListener sceneChangeListener) {
-    }
 }
