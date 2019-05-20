@@ -4,6 +4,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.BlockedMessageHandler;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
@@ -18,8 +19,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrategyListener {
+public abstract class BaseCompoundStrategy implements IDrivingStrategy, IReactionListener, SubStrategyListener {
     public boolean isHeadRotationInProgress;
+    public boolean isReactionInProgress;
     public HashMap<String, GuidelineParam> guidelineParamsMap;
     public HashMap<CompoundStrategyStage, IDrivingStrategy> subStrategies;
     public WheelsVelocitiesChangeListener wheelsListener;
@@ -45,7 +47,7 @@ public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrat
         BlockedMessageHandler.handleIfNotBlocked(
                 configMsg,
                 subStrategy::handleConfigMessage,
-                isHeadRotationInProgress);
+                isHeadRotationInProgress || isReactionInProgress);
     }
 
     @Override
@@ -54,7 +56,7 @@ public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrat
         BlockedMessageHandler.handleIfNotBlocked(
                 houghAcc,
                 subStrategy::handleHoughAccMessage,
-                isHeadRotationInProgress);
+                isHeadRotationInProgress || isReactionInProgress);
     }
 
     @Override
@@ -63,7 +65,7 @@ public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrat
         BlockedMessageHandler.handleIfNotBlocked(
                 angleRangesMsg,
                 subStrategy::handleAngleRangeMessage,
-                isHeadRotationInProgress);
+                isHeadRotationInProgress || isReactionInProgress);
     }
 
     @Override
@@ -72,7 +74,7 @@ public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrat
         BlockedMessageHandler.handleIfNotBlocked(
                 feedbackMsg,
                 subStrategy::handleDetectionMessage,
-                isHeadRotationInProgress);
+                isHeadRotationInProgress || isReactionInProgress);
     }
 
     @Override
@@ -115,6 +117,16 @@ public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrat
     public abstract void initializeSubStrategies();
 
     public abstract CompoundStrategyStage[] getSubStrategiesExecutionOrder();
+
+    @Override
+    public void onStartReaction(String reactionName) {
+        isReactionInProgress = true;
+    }
+
+    @Override
+    public void onStopReaction() {
+        isReactionInProgress = true;
+    }
 
     protected void switchToInitialStage(@SuppressWarnings("SameParameterValue") RelativeDirection direction) {
         currentStage = subStrategiesOrdered.get(0);

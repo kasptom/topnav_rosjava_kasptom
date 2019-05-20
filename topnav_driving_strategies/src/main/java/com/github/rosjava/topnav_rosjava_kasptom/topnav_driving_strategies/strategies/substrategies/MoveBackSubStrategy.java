@@ -4,6 +4,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionListener;
 import std_msgs.String;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
@@ -13,6 +14,13 @@ import topnav_msgs.TopNavConfigMsg;
 import java.util.List;
 
 public class MoveBackSubStrategy implements IDrivingStrategy {
+
+    private final IReactionListener reactionListener;
+
+    public MoveBackSubStrategy(IReactionListener reactionListener) {
+        this.reactionListener = reactionListener;
+    }
+
     @Override
     public void startStrategy() {
 
@@ -30,7 +38,6 @@ public class MoveBackSubStrategy implements IDrivingStrategy {
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-
     }
 
     @Override
