@@ -14,8 +14,11 @@ public class Limits {
     public static final double LIDAR_MIN_RANGE = 0.2;
     public static final double LIDAR_MAX_RANGE = 5.0;
 
-    public static final double CASE_WIDTH = 0.2032;
-    public static final double WHEEL_WIDTH = 0.05;
+//    public static final double CASE_WIDTH = 0.2032;   // capo (1)
+//    public static final double WHEEL_WIDTH = 0.05;    // capo (1)
+    public static final double CASE_WIDTH = 0.1;    // capo2
+    public static final double WHEEL_WIDTH = 0.02;  // capo2
+
 
     public static final int NOT_DETECTED_LIMIT = 50;   // allowed number of messages with the "-1" ArUco detections in a row
 }
