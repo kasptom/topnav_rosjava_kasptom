@@ -45,7 +45,7 @@ public class DriveThroughAndLookForBackMarkers extends BaseSubStrategy {
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-        isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
+        isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE / 2.0);
 
         if (isBackMarkVisible) {
             return;
@@ -62,7 +62,7 @@ public class DriveThroughAndLookForBackMarkers extends BaseSubStrategy {
         }
 
         if (isMitPointNotFound && isObstacleTooClose) {
-            wheelsListener.onWheelsVelocitiesChanged(MOVE_BACK_VELOCITY);
+            wheelsListener.onWheelsVelocitiesChanged(ROTATE_CLOCKWISE_VELOCITY); // TODO rotate according to the lone cluster position
             return;
         }
 

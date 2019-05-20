@@ -2,9 +2,10 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.cont
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.ArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.AruCoTrackerTestStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
+//import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.FollowWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.MoveBackSubStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategyV2;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.approachMarker.ApproachMarkerStrategy;
@@ -40,6 +41,7 @@ public class MainController implements IMainController {
     private final Subscriber<Float64> headLinearDirectionChangeSubscriber;
 
     private final HashMap<String, IDrivingStrategy> drivingStrategies = new HashMap<>();
+    private final HashMap<String, IDrivingStrategy> reactiveDrivingStrategies = new HashMap<>();
     private final HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners = new HashMap<>();
 
     private Log log;
@@ -67,14 +69,16 @@ public class MainController implements IMainController {
         headLinearDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_LINEAR_DIRECTION_CHANGE_TOPIC, std_msgs.Float64._TYPE);
 
 
-        initializeDrivingStrategies(drivingStrategies, trackedMarkerListeners);
+        initializeDrivingStrategies(drivingStrategies, reactiveDrivingStrategies, trackedMarkerListeners);
         selectStrategy(DRIVING_STRATEGY_IDLE, null);
 
         guidelineSubscriber.addMessageListener(guidelineMsg -> selectStrategy(guidelineMsg.getGuidelineType(), guidelineMsg.getParameters()));
     }
 
-    private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies, HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners) {
-        drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL, new DriveAlongWallStrategy(log));
+    private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies,
+                                             HashMap<String, IDrivingStrategy> reactiveDrivingStrategies,
+                                             HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners) {
+//        drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL, new DriveAlongWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL_2, new FollowWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_STOP_BEFORE_WALL, new StopBeforeWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR, new PassThroughDoorStrategy(log));
@@ -82,6 +86,9 @@ public class MainController implements IMainController {
         drivingStrategies.put(DRIVING_STRATEGY_APPROACH_MARKER, new ApproachMarkerStrategy(arUcoHeadTracker, log));
         drivingStrategies.put(DRIVING_STRATEGY_TRACK_ARUCOS, new AruCoTrackerTestStrategy(arUcoHeadTracker));
         drivingStrategies.values().forEach(strategy -> strategy.setWheelsVelocitiesListener(wheelsController::setVelocities));
+
+        reactiveDrivingStrategies.put(REACTIVE_DRIVING_STRATEGY_MOVE_BACK, new MoveBackSubStrategy());
+        reactiveDrivingStrategies.values().forEach(reactiveStrategy -> reactiveStrategy.setWheelsVelocitiesListener(wheelsController::setVelocities));
 
         trackedMarkerListeners.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, (PassThroughDoorStrategyV2) drivingStrategies.get(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2));
         trackedMarkerListeners.put(DRIVING_STRATEGY_APPROACH_MARKER, (ApproachMarkerStrategy) drivingStrategies.get(DRIVING_STRATEGY_APPROACH_MARKER));
