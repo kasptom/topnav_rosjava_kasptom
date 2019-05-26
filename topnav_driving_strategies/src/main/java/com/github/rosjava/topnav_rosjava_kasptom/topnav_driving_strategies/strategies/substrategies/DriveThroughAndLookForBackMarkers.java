@@ -73,7 +73,7 @@ public class DriveThroughAndLookForBackMarkers extends BaseSubStrategy {
             double angleRads = range != 0
                     ? Math.asin(midPoint.getX() / range)
                     : 0.0;
-            double angleDegrees = angleRads / 180.0 * Math.PI;
+            double angleDegrees = angleRads / Math.PI * 180.0;
             velocities = velocityCalculator.calculateRotationSpeed(angleDegrees, LIDAR_MIN_RANGE, System.nanoTime(), 0.0, LIDAR_MIN_RANGE);
         }
 
