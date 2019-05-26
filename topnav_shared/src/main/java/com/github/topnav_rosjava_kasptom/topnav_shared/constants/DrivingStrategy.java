@@ -1,7 +1,6 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.constants;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -21,9 +20,6 @@ public class DrivingStrategy {
             DRIVING_STRATEGY_TRACK_ARUCOS));
 
     public static final String REACTIVE_DRIVING_STRATEGY_MOVE_BACK = "RDS_MOVE_BACK";
-    public static final HashSet<String> REACTIVE_DRIVING_STRATEGIES = new HashSet<>(Collections.singletonList(
-            REACTIVE_DRIVING_STRATEGY_MOVE_BACK
-    ));
 
     public static final HashSet<String> MARKER_PARAMS = new HashSet<>(Arrays.asList(
             ThroughDoor.KEY_BACK_LEFT_MARKER_ID,
