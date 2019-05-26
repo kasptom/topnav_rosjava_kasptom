@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.GraphStreamConstants.GS_UI_STYLESHEET;
 import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavConstants.*;
@@ -27,6 +28,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_graph.constants.TopNavCon
 public class TopologicalNavigator implements ITopnavNavigator {
     private final DynamicOneToAllShortestPath algorithm;
     private final IFeedbackResolver feedbackResolver;
+    private final Logger logger;
     private Graph graph;
 
     private OnGuidelineChangeListener guidelineChangeListener;
@@ -39,6 +41,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
     private static final String CUSTOM_NODE_STYLE = "css/stylesheet.css";
 
     public TopologicalNavigator(RosonBuildingDto buildingDto) throws IOException, InvalidRosonNodeKindException, InvalidRosonNodeIdException, InvalidArUcoIdException {
+        logger = Logger.getGlobal();
         System.setProperty(RENDERER_KEY, RENDERER_NAME);
         graph = new SingleGraph("Building graph (roson)");
         graph.addAttribute(GS_UI_STYLESHEET, StyleConverter.convert(ResourceUtils.getFullPath(CUSTOM_NODE_STYLE)));
@@ -177,8 +180,10 @@ public class TopologicalNavigator implements ITopnavNavigator {
     public void onFeedbackChange(Feedback feedback) {
         if (feedbackResolver.shouldSwitchToNextGuideline(feedback, currentGuidelineIdx, guidelines)) {
             currentGuidelineIdx++;
+            logger.info(String.format("Feedback change, next guideline: %s",guidelines.get(currentGuidelineIdx)));
             guidelineChangeListener.onGuidelineChange(guidelines.get(currentGuidelineIdx));
         } else if (feedbackResolver.shouldStop(feedback, currentGuidelineIdx, guidelines)) {
+//            logger.info("No guideline available");
             guidelineChangeListener.onNoGuidelineAvailable();
         }
     }

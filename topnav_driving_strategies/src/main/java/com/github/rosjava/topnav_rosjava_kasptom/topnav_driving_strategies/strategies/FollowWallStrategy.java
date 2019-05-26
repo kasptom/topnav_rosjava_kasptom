@@ -4,6 +4,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionStartListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
@@ -22,33 +23,31 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.FollowWall.*;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.LIDAR_MIN_RANGE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.REACTIVE_DRIVING_STRATEGY_MOVE_BACK;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TARGET_WALL_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.*;
 
 public class FollowWallStrategy implements IDrivingStrategy {
 
+    private final IReactionStartListener reactionStartListener;
     private final Log log;
     private HashMap<String, GuidelineParam> guidelineParamsMap = new HashMap<>();
 
     private WheelsVelocitiesChangeListener wheelsListener;
+    private HeadRotationChangeRequestListener headListener;
 
     private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
     private int lineDetectionThreshold = 8;
 
     private boolean isObstacleTooClose;
-    private boolean isMovingBackInProgress;
 
-    private HeadRotationChangeRequestListener headListener;
     private static final double RIGHT_WALL_ANGLE = -90;
     private static final double LEFT_WALL_ANGLE = 90;
     private double chosenWallAngle = LEFT_WALL_ANGLE;
 
-    private static final double AHEAD_OBSTACLE_ANGLE = 0.0;
-
-    private static final double TARGET_WALL_RANGE = 0.5;
-
-    public FollowWallStrategy(Log log) {
+    public FollowWallStrategy(IReactionStartListener reactionStartListener, Log log) {
+        this.reactionStartListener = reactionStartListener;
         this.log = log;
     }
 
@@ -73,13 +72,10 @@ public class FollowWallStrategy implements IDrivingStrategy {
     public void handleHoughAccMessage(HoughAcc houghAcc) {
         List<HoughCell> filteredHoughCells = HoughUtils.toFilteredList(houghAcc, lineDetectionThreshold);
 
-        if (isObstacleTooClose || isMovingBackInProgress) {
-//            WheelsVelocities backVelocity = moveBack(filteredHoughCells);
+        if (isObstacleTooClose) {
             log.info("obstacle is too close"); // TODO move back
-
-//            wheelsListener.onWheelsVelocitiesChanged(backVelocity);
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
-
+            reactionStartListener.onReactionStart(REACTIVE_DRIVING_STRATEGY_MOVE_BACK);
             return;
         }
 
@@ -162,22 +158,6 @@ public class FollowWallStrategy implements IDrivingStrategy {
         return WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, rotationVelocityComponent);
     }
 
-//    // TODO move to reactive module
-//    private WheelsVelocities moveBack(List<HoughCell> filteredHoughCells) {
-//        HoughCell bestLine = filteredHoughCells.stream()
-//                .min(Comparator.comparingDouble(HoughCell::getRange))
-//                .orElse(null);
-//
-//        if (bestLine == null || bestLine.getRange() > 2 * TOO_CLOSE_RANGE) {
-//            isMovingBackInProgress = false;
-//            return MOVE_BACK_VELOCITY;
-//        }
-//
-//        WheelsVelocities rotationVelocityComponent = computeBackRotationComponent(bestLine);
-//
-//        return WheelsVelocities.addVelocities(MOVE_BACK_VELOCITY, rotationVelocityComponent);
-//    }
-
     private void updatePdCoefficients(double propCoeffAngle, double derivCoeffAngle, double propCoeffDist, double derivCoeffDist) {
         log.info(String.format("Changing coefficients values K_p_ang = %.2f, K_d_ang = %.2f, K_p_dst = %.2f, K_d_dst = %.2f",
                 propCoeffAngle, derivCoeffAngle, propCoeffDist, derivCoeffDist));
@@ -190,15 +170,6 @@ public class FollowWallStrategy implements IDrivingStrategy {
                 bestLine.getRange(),
                 System.nanoTime(),
                 chosenWallAngle,
-                TARGET_WALL_RANGE);
-    }
-
-    private WheelsVelocities computeBackRotationComponent(HoughCell bestLine) {
-        return velocityCalculator.calculateRotationSpeed(
-                bestLine.getAngleDegreesLidarDomain(),
-                bestLine.getRange(),
-                System.nanoTime(),
-                AHEAD_OBSTACLE_ANGLE,
                 TARGET_WALL_RANGE);
     }
 }

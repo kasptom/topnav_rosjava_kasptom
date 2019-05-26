@@ -1,13 +1,14 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.ArUcoHeadTracker;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionController;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionStartListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.ReactionController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.AruCoTrackerTestStrategy;
-//import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.FollowWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategyV2;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.approachMarker.ApproachMarkerStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategyV2;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
@@ -27,6 +28,7 @@ public class MainController implements IMainController {
     private final IHeadController headController;
     private final IWheelsController wheelsController;
     private final IArUcoHeadTracker arUcoHeadTracker;
+    private final IReactionController reactionController;
 
     private final Publisher<std_msgs.String> strategyFinishedPublisher;
 
@@ -50,6 +52,7 @@ public class MainController implements IMainController {
         headController = new HeadController(connectedNode);
         wheelsController = new WheelsController(connectedNode);
         arUcoHeadTracker = new ArUcoHeadTracker(log);
+        reactionController = new ReactionController(connectedNode);
 
         strategyFinishedPublisher = connectedNode.newPublisher(TOPNAV_STRATEGY_CHANGE_TOPIC, std_msgs.String._TYPE);
 
@@ -69,16 +72,15 @@ public class MainController implements IMainController {
 
         initializeDrivingStrategies(drivingStrategies, trackedMarkerListeners);
         selectStrategy(DRIVING_STRATEGY_IDLE, null);
+        reactionController.setWheelsVelocitiesLIstener(wheelsController::setVelocities);
 
         guidelineSubscriber.addMessageListener(guidelineMsg -> selectStrategy(guidelineMsg.getGuidelineType(), guidelineMsg.getParameters()));
     }
 
     private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies,
                                              HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners) {
-//        drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL, new DriveAlongWallStrategy(log));
-        drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL_2, new FollowWallStrategy(log));
+        drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL_2, new FollowWallStrategy((IReactionStartListener) reactionController, log));
         drivingStrategies.put(DRIVING_STRATEGY_STOP_BEFORE_WALL, new StopBeforeWallStrategy(log));
-        drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR, new PassThroughDoorStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, new PassThroughDoorStrategyV2(arUcoHeadTracker, log));
         drivingStrategies.put(DRIVING_STRATEGY_APPROACH_MARKER, new ApproachMarkerStrategy(arUcoHeadTracker, log));
         drivingStrategies.put(DRIVING_STRATEGY_TRACK_ARUCOS, new AruCoTrackerTestStrategy(arUcoHeadTracker));
@@ -141,9 +143,24 @@ public class MainController implements IMainController {
         drivingStrategy.startStrategy();
 
         configMsgSubscriber.addMessageListener(drivingStrategy::handleConfigMessage);
-        angleRangesMsgSubscriber.addMessageListener(drivingStrategy::handleAngleRangeMessage);
-        houghAccSubscriber.addMessageListener(drivingStrategy::handleHoughAccMessage);
-        markerDetectionSubscriber.addMessageListener(drivingStrategy::handleDetectionMessage);
+
+        angleRangesMsgSubscriber.addMessageListener(message -> {
+            if (reactionController.isReactionInProgress()) return;
+            drivingStrategy.handleAngleRangeMessage(message);
+        });
+
+        houghAccSubscriber.addMessageListener(message -> {
+            if (reactionController.isReactionInProgress()) {
+                reactionController.onHoughAccMessage(message);
+                return;
+            }
+            drivingStrategy.handleHoughAccMessage(message);
+        });
+
+        markerDetectionSubscriber.addMessageListener(message -> {
+            if (reactionController.isReactionInProgress()) return;
+            drivingStrategy.handleDetectionMessage(message);
+        });
         headDirectionChangeSubscriber.addMessageListener(drivingStrategy::handleHeadDirectionChange);
     }
 

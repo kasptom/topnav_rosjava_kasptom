@@ -45,9 +45,9 @@ public class MarkerDetection {
     }
 
     public RelativeDistance getRelativeDistance() {
-        if (cameraPosition[2] < 0.5) {
+        if (cameraPosition[2] < 1.0) {
             return RelativeDistance.CLOSE;
-        } else if (cameraPosition[2] > 1.5) {
+        } else if (cameraPosition[2] > 2.0) {
             return RelativeDistance.FAR;
         }
         return RelativeDistance.MIDDLE;

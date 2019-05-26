@@ -9,7 +9,6 @@ public class DrivingStrategy {
     public static final String DRIVING_STRATEGY_IDLE = "DS_IDLE";
     public static final String DRIVING_STRATEGY_ALONG_WALL_2 = "DS_ALONG_WALL_2";
     public static final String DRIVING_STRATEGY_STOP_BEFORE_WALL = "DS_STOP_WALL";
-    public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR = "DS_PASS_THROUGH_DOOR";
     public static final String DRIVING_STRATEGY_TRACK_ARUCOS = "DS_TEST_TRACK_ARUCOS";
     public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR_2 = "DS_PASS_THROUGH_DOOR_2";
     public static final String DRIVING_STRATEGY_APPROACH_MARKER = "DS_APPROACH_MARKER";
@@ -17,7 +16,6 @@ public class DrivingStrategy {
             DRIVING_STRATEGY_IDLE,
             DRIVING_STRATEGY_ALONG_WALL_2,
             DRIVING_STRATEGY_STOP_BEFORE_WALL,
-            DRIVING_STRATEGY_PASS_THROUGH_DOOR,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR_2,
             DRIVING_STRATEGY_APPROACH_MARKER,
             DRIVING_STRATEGY_TRACK_ARUCOS));
