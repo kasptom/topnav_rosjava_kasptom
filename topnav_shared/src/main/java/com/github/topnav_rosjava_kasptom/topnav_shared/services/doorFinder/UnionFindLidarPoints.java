@@ -5,6 +5,8 @@ import com.github.topnav_rosjava_kasptom.topnav_shared.utils.QuickUnionFind;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toCollection;
+
 public class UnionFindLidarPoints implements IClusteringAlgorithm {
     private static final double NEAR_POINTS_GAP_METERS = 0.3;
 
@@ -56,15 +58,23 @@ public class UnionFindLidarPoints implements IClusteringAlgorithm {
         HashSet<Integer> uniqueParents = new HashSet<>();
         int[] parentIds = unionFind.getParentIds();
         Arrays.stream(parentIds).forEach(uniqueParents::add);
-        if (uniqueParents.size() != 2) {
+        if (uniqueParents.size() < 2) {
             return Collections.emptyList();
+        } else if (uniqueParents.size() > 2) {
+            uniqueParents = keepTwoClosestParents(uniqueParents);
         }
+
         uniqueParents.forEach(parent -> {
             centroids.add(idToPoint.get(parent));
             clusters.put(idToPoint.get(parent), points.stream().filter(point -> parentIds[pointToId.get(point) - 1] == parent).collect(Collectors.toList()));
         });
 
         return DoorFinder.Point.toClustersList(clusters, centroids);
+    }
+
+    @Override
+    public DoorFinder.Point getClustersMidPoint() {
+        return DoorFinder.Point.getMidPoint(clusters, centroids);
     }
 
     private void reset(List<DoorFinder.Point> points) {
@@ -81,8 +91,17 @@ public class UnionFindLidarPoints implements IClusteringAlgorithm {
         }
     }
 
-    @Override
-    public DoorFinder.Point getClustersMidPoint() {
-        return DoorFinder.Point.getMidPoint(clusters, centroids);
+    private HashSet<Integer> keepTwoClosestParents(HashSet<Integer> uniqueParents) {
+        List<DoorFinder.Point> points = uniqueParents
+                .stream()
+                .map(parent -> idToPoint.get(parent))
+                .collect(Collectors.toList());
+        DoorFinder.Point origin = new DoorFinder.Point(0.0, 0.0);
+
+        points.sort(Comparator.comparingDouble(point -> DoorFinder.Point.distanceTo(origin, point)));
+        points = points.subList(0,2);
+        return points.stream()
+                .map(point -> pointToId.get(point))
+                .collect(toCollection(HashSet::new));
     }
 }

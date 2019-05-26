@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public abstract class BaseCompoundStrategy implements IDrivingStrategy, SubStrategyListener {
-    public boolean isHeadRotationInProgress;
+    protected boolean isHeadRotationInProgress;
     public HashMap<String, GuidelineParam> guidelineParamsMap;
-    public HashMap<CompoundStrategyStage, IDrivingStrategy> subStrategies;
+    protected HashMap<CompoundStrategyStage, IDrivingStrategy> subStrategies;
     public WheelsVelocitiesChangeListener wheelsListener;
     public HeadRotationChangeRequestListener headListener;
     public StrategyFinishedListener strategyFinishedListener;

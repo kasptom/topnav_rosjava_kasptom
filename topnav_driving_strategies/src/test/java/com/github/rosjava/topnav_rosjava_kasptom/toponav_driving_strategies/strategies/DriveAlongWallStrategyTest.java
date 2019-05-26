@@ -8,7 +8,7 @@ import org.mockito.Mock;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
+@Deprecated
 class DriveAlongWallStrategyTest {
     @Mock
     Log logMock;

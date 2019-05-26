@@ -28,7 +28,8 @@ public class FeedbackResolver implements IFeedbackResolver {
 
         List<String> visibleNextGuidelineTopologies = feedback.getTopologies()
                 .stream()
-                .filter(topology -> nextGuidelineTopologies.contains(topology.getIdentity()))
+                .filter(topology -> nextGuidelineTopologies.contains(topology.getIdentity())
+                        && RelativeDistance.CLOSE.name().equals(topology.getRelativeDistance()))
                 .map(Topology::getIdentity)
                 .collect(Collectors.toList());
 

@@ -22,6 +22,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingS
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection.*;
 
+@Deprecated
 public class PassThroughDoorStrategy extends BaseCompoundStrategy implements IDrivingStrategy {
 
     public PassThroughDoorStrategy(Log log) {

@@ -21,6 +21,7 @@ import java.util.List;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.MOVE_BACK_VELOCITY;
 
+@Deprecated
 public class DriveAlongWallStrategy implements IDrivingStrategy {
 
     private final Log log;

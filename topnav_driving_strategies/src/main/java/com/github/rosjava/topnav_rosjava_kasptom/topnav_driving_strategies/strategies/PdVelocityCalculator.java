@@ -33,7 +33,7 @@ public class PdVelocityCalculator {
         return new PdVelocityCalculator(0.5, 1.0, 1.0, 1.0, axisLength / 2.0);
     }
 
-    public WheelsVelocities calculateRotationSpeed(double angle, double range, long timestamp, double targetAngle, @SuppressWarnings("SameParameterValue") double targetRange) {
+    public WheelsVelocities calculateRotationSpeed(double angle, double range, long timestamp, double targetAngle, double targetRange) {
         double angularVelocityAngle = calculateRotationSpeedForAngle(angle, timestamp, targetAngle);
         double angularVelocityRange = calculateRotationSpeedForRange(range, timestamp, targetRange, angle, targetAngle);
 

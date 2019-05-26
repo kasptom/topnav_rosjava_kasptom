@@ -6,22 +6,20 @@ import java.util.List;
 
 public class DrivingStrategy {
     public static final String DRIVING_STRATEGY_IDLE = "DS_IDLE";
-    public static final String DRIVING_STRATEGY_ALONG_WALL = "DS_ALONG_WALL";
     public static final String DRIVING_STRATEGY_ALONG_WALL_2 = "DS_ALONG_WALL_2";
     public static final String DRIVING_STRATEGY_STOP_BEFORE_WALL = "DS_STOP_WALL";
-    public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR = "DS_PASS_THROUGH_DOOR";
     public static final String DRIVING_STRATEGY_TRACK_ARUCOS = "DS_TEST_TRACK_ARUCOS";
     public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR_2 = "DS_PASS_THROUGH_DOOR_2";
     public static final String DRIVING_STRATEGY_APPROACH_MARKER = "DS_APPROACH_MARKER";
     public static final HashSet<String> DRIVING_STRATEGIES = new HashSet<>(Arrays.asList(
             DRIVING_STRATEGY_IDLE,
-            DRIVING_STRATEGY_ALONG_WALL,
             DRIVING_STRATEGY_ALONG_WALL_2,
             DRIVING_STRATEGY_STOP_BEFORE_WALL,
-            DRIVING_STRATEGY_PASS_THROUGH_DOOR,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR_2,
             DRIVING_STRATEGY_APPROACH_MARKER,
             DRIVING_STRATEGY_TRACK_ARUCOS));
+
+    public static final String REACTIVE_DRIVING_STRATEGY_MOVE_BACK = "RDS_MOVE_BACK";
 
     public static final HashSet<String> MARKER_PARAMS = new HashSet<>(Arrays.asList(
             ThroughDoor.KEY_BACK_LEFT_MARKER_ID,
