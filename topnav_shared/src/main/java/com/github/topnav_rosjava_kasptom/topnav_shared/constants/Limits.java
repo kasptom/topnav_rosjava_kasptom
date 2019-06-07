@@ -2,7 +2,7 @@ package com.github.topnav_rosjava_kasptom.topnav_shared.constants;
 
 public class Limits {
     public static final int LIDAR_SAMPLES_COUNT = 61;
-    public static double TOO_CLOSE_RANGE = 0.3;
+    public static double TOO_CLOSE_RANGE = 0.25;
     public static double DOOR_DETECTION_RANGE = 1.0; // meters
 
     public static final double BASE_VELOCITY = 2.0;
@@ -16,8 +16,8 @@ public class Limits {
 
 //    public static final double CASE_WIDTH = 0.2032;   // capo (1)
 //    public static final double WHEEL_WIDTH = 0.05;    // capo (1)
-    public static final double CASE_WIDTH = 0.1;    // capo2
-    public static final double WHEEL_WIDTH = 0.02;  // capo2
+    public static final double CASE_WIDTH = 0.135;    // capo2
+    public static final double WHEEL_WIDTH = 0.01;  // capo2
 
     public static final int NOT_DETECTED_LIMIT = 50;   // allowed number of messages with the "-1" ArUco detections in a row
 
