@@ -33,6 +33,13 @@ public class PdVelocityCalculator {
         return new PdVelocityCalculator(0.5, 1.0, 1.0, 1.0, axisLength / 2.0);
     }
 
+    @SuppressWarnings("SameParameterValue")
+    static PdVelocityCalculator createPdVelocityCalculator(double propCoefAngle, double propCoefDist, double derivCoefAngle, double derivCoefDist) {
+        double axisLength = CASE_WIDTH + WHEEL_WIDTH;
+        return new PdVelocityCalculator(propCoefAngle, propCoefDist, derivCoefAngle, derivCoefDist, axisLength / 2.0);
+    }
+
+
     public WheelsVelocities calculateRotationSpeed(double angle, double range, long timestamp, double targetAngle, double targetRange) {
         double angularVelocityAngle = calculateRotationSpeedForAngle(angle, timestamp, targetAngle);
         double angularVelocityRange = calculateRotationSpeedForRange(range, timestamp, targetRange, angle, targetAngle);
