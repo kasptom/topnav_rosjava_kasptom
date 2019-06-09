@@ -27,10 +27,16 @@ public class MarkerDetection {
         return id;
     }
 
+    /**
+     * @return x coordinates of the detected marker (in pixels, clockwise order from the top left corner)
+     */
     public double[] getXCorners() {
         return xCorners;
     }
 
+    /**
+     * @return y coordinates of the detected marker (in pixels, clockwise order from the top left corner)
+     */
     public double[] getYCorners() {
         return yCorners;
     }
@@ -45,9 +51,9 @@ public class MarkerDetection {
     }
 
     public RelativeDistance getRelativeDistance() {
-        if (cameraPosition[2] < 1.0) {
+        if (cameraPosition[2] < 1.5) {
             return RelativeDistance.CLOSE;
-        } else if (cameraPosition[2] > 2.0) {
+        } else if (cameraPosition[2] > 2.5) {
             return RelativeDistance.FAR;
         }
         return RelativeDistance.MIDDLE;

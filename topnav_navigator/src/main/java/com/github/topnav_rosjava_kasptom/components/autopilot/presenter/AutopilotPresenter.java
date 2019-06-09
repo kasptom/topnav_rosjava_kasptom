@@ -64,7 +64,8 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
             isPaused = false;
         }
 
-        autopilotView.setDisplayedGuideline(currentGuideline.toString());
+        autopilotView.setDisplayedGuideline(currentGuideline.toString()
+                + String.format("\ncurrent guideline idx: %d", navigator.getCurrentGuidelineIndex()));
     }
 
     @Override
@@ -106,7 +107,8 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
                 .reduce((all, next) -> all + "\n" + next)
                 .orElse("N/A");
 
-        autopilotView.openGuidelinesWindow(guidelines);
+        autopilotView.openGuidelinesWindow(guidelines
+                + String.format("\ncurrent guideline idx: %d", navigator.getCurrentGuidelineIndex()));
     }
 
     private void loadRosonFile(String fullFilePath) {
@@ -159,7 +161,8 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
     @Override
     public void onGuidelineChange(Guideline guideline) {
         currentGuideline = guideline;
-        autopilotView.setDisplayedGuideline(guideline.toString());
+        autopilotView.setDisplayedGuideline(guideline.toString()
+                + String.format("\ncurrent guideline idx: %d", navigator.getCurrentGuidelineIndex()));
         rosService.stopStrategy(DrivingStrategy.DRIVING_STRATEGY_IDLE);
         rosService.startStrategy(currentGuideline.getGuidelineType(), currentGuideline.getParameters());
     }
