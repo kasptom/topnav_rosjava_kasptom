@@ -28,7 +28,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVe
 public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoHeadTracker.TrackedMarkerListener {
 
     private final Log log;
-    private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createDefaultPdVelocityCalculator();
+    private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createPdVelocityCalculator(1.75, 1.7, 1.0, 1.2);
     private int notDetectedCounter = 0;
     private static final double TARGET_APPROACH_RANGE_METERS = 0.5;
 
@@ -83,6 +83,12 @@ public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoH
 
         notDetectedCounter = 0;
         velocities = WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, velocities);
+
+        double scale = WheelsVelocities.getSpeedScaleFromMarkerPicturePosition(detection);
+        System.out.println("------------------------------> scale: " + scale);
+        velocities = WheelsVelocities.scaleVelocity(velocities, scale);
+        velocities = WheelsVelocities.scaleVelocity(velocities, 0.25);
+
         wheelsListener.onWheelsVelocitiesChanged(velocities);
     }
 

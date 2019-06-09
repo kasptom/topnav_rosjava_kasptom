@@ -34,7 +34,7 @@ public class PdVelocityCalculator {
     }
 
     @SuppressWarnings("SameParameterValue")
-    static PdVelocityCalculator createPdVelocityCalculator(double propCoefAngle, double propCoefDist, double derivCoefAngle, double derivCoefDist) {
+    public static PdVelocityCalculator createPdVelocityCalculator(double propCoefAngle, double propCoefDist, double derivCoefAngle, double derivCoefDist) {
         double axisLength = CASE_WIDTH + WHEEL_WIDTH;
         return new PdVelocityCalculator(propCoefAngle, propCoefDist, derivCoefAngle, derivCoefDist, axisLength / 2.0);
     }
