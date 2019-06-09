@@ -84,9 +84,7 @@ public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoH
         notDetectedCounter = 0;
         velocities = WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, velocities);
 
-        double scale = WheelsVelocities.getSpeedScaleFromMarkerPicturePosition(detection);
-        System.out.println("------------------------------> scale: " + scale);
-        velocities = WheelsVelocities.scaleVelocity(velocities, scale);
+        WheelsVelocities.scaleVelocityAccordingToMarkersPicturePosition(detection, velocities);
         velocities = WheelsVelocities.scaleVelocity(velocities, 0.25);
 
         wheelsListener.onWheelsVelocitiesChanged(velocities);
