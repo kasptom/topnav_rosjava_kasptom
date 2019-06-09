@@ -56,7 +56,11 @@ public class WheelsVelocities {
     private static double getSpeedScaleFromMarkerPicturePosition(MarkerDetection detection) {
         double[] xCorners = detection.getXCorners();
         double averagePicturePosition = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0 - CAM_PREVIEW_WIDTH / 2.0;    // 0 is the middle of the picture
+
         double scale = 1.0 - Math.abs(averagePicturePosition) / (CAM_PREVIEW_WIDTH / 2.0);
+
+        if (Math.abs(averagePicturePosition) > 20) scale = 0.0;
+
         assert scale >= 0.0 && scale <= 1.0;
         return scale;
     }
