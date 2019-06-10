@@ -46,7 +46,7 @@ public class WheelsVelocities {
         return velocities;
     }
 
-    public static WheelsVelocities scaleVelocity(WheelsVelocities velocities, double scale) {
+    private static WheelsVelocities scaleVelocity(WheelsVelocities velocities, double scale) {
         return new WheelsVelocities(velocities.getFrontLeft() * scale,
                 velocities.getFrontRight() * scale,
                 velocities.getRearLeft() * scale,
@@ -59,9 +59,15 @@ public class WheelsVelocities {
 
         double scale = 1.0 - Math.abs(averagePicturePosition) / (CAM_PREVIEW_WIDTH / 2.0);
 
+//        System.out.printf("avg picture position: %.2f\n", averagePicturePosition);
         if (Math.abs(averagePicturePosition) > 20) scale = 0.0;
 
         assert scale >= 0.0 && scale <= 1.0;
         return scale;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("v = (%.2f, %.2f,%.2f, %.2f)", frontLeft, frontRight, rearLeft, rearRight);
     }
 }
