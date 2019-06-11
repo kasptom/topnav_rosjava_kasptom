@@ -61,6 +61,8 @@ public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoH
         WheelsVelocities velocities;
         if (isTrackedMarker(detection)) {
             double range = ArucoMarkerUtils.distanceTo(detection);
+
+            System.out.printf("head rotation %.2f\n", headRotation);
             velocities = velocityCalculator.calculateRotationSpeed(headRotation, range, System.nanoTime(), 0, TARGET_APPROACH_RANGE_METERS);
 
             log.info(String.format("Range to the target marker: %.2f", range));
@@ -84,10 +86,8 @@ public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoH
         notDetectedCounter = 0;
         velocities = WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, velocities);
 
-        double scale = WheelsVelocities.getSpeedScaleFromMarkerPicturePosition(detection);
-        System.out.println("------------------------------> scale: " + scale);
-        velocities = WheelsVelocities.scaleVelocity(velocities, scale);
-        velocities = WheelsVelocities.scaleVelocity(velocities, 0.25);
+        WheelsVelocities.scaleVelocityAccordingToMarkersPicturePosition(detection, velocities);
+//        System.out.println(velocities);
 
         wheelsListener.onWheelsVelocitiesChanged(velocities);
     }

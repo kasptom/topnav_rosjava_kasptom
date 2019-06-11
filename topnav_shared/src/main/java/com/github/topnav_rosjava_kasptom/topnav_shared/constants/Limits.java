@@ -23,4 +23,7 @@ public class Limits {
 
     public static final double AHEAD_OBSTACLE_ANGLE = 0.0;
     public static final double TARGET_WALL_RANGE = 0.5;
+
+    public static final double MIN_SEARCH_ANGLE = -180.0;
+    public static final double MAX_SEARCH_ANGLE = 180.0;
 }
