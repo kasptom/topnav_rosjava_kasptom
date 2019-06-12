@@ -111,6 +111,15 @@ public class RosTopNavService implements IRosTopnavService {
         this.feedbackListeners.add(listener);
     }
 
+    @Override
+    public void sendManualVelocityChange(short keyPressSum) {
+        Publisher<std_msgs.Int16> publisher = navigationNode.getSteeringCommandPublisher();
+
+        std_msgs.Int16 message = publisher.newMessage();
+        message.setData(keyPressSum);
+        publisher.publish(message);
+    }
+
     private RosTopNavService() {
         feedbackListeners = new ArrayList<>();
     }

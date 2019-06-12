@@ -19,4 +19,6 @@ public class TopicNames {
     public static final String TOPNAV_CONFIG_TOPIC = "/topnav/config";
 
     public static final String GAZEBO_LASER_SCAN_TOPIC = "/capo/laser/scan";
+
+    public static final String TOPNAV_NAVIGATION_MANUAL_STEERING_TOPIC = "topnav/manual_steering";
 }
