@@ -3,7 +3,7 @@ package com.github.topnav_rosjava_kasptom.components.remote_controller;
 import com.github.topnav_rosjava_kasptom.components.remote_controller.presenter.IRemoteControlPresenter;
 import com.github.topnav_rosjava_kasptom.services.IRosTopnavService;
 import com.github.topnav_rosjava_kasptom.services.RosTopNavService;
-import com.github.topnav_rosjava_kasptom.topnav_graph.constants.SteeringKeyDecoder;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.SteeringKeyDecoder;
 
 public class RemoteControlCommandSender implements IRemoteControlCommandSender, IRemoteControlPresenter.OnControlCheckboxChangedListener {
     private final IRosTopnavService topnavService;
@@ -75,6 +75,7 @@ public class RemoteControlCommandSender implements IRemoteControlCommandSender, 
     }
 
     private void sendCommand() {
+//        System.out.printf("mocked command send: %d\n",SteeringKeyDecoder.encode(isForwardPressed, isBackPressed, isLeftPressed, isRightPressed));
         this.topnavService.sendManualVelocityChange(SteeringKeyDecoder.encode(isForwardPressed, isBackPressed, isLeftPressed, isRightPressed));
     }
 

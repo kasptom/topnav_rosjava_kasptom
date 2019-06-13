@@ -1,4 +1,4 @@
-package com.github.topnav_rosjava_kasptom.topnav_graph.constants;
+package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
 public class SteeringKeyDecoder {
     private static final short KEY_UP = 1;

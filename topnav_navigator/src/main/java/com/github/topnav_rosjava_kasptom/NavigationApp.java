@@ -4,11 +4,11 @@ import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 import com.github.topnav_rosjava_kasptom.components.container.view.IContainerView;
 import com.github.topnav_rosjava_kasptom.components.remote_controller.IRemoteControlCommandSender;
 import com.github.topnav_rosjava_kasptom.components.remote_controller.KeyPressHandler;
-import com.github.topnav_rosjava_kasptom.components.remote_controller.KeyReleaseHandler;
 import com.github.topnav_rosjava_kasptom.components.remote_controller.RemoteControlCommandSender;
 import com.github.topnav_rosjava_kasptom.components.remote_controller.presenter.IRemoteControlPresenter;
 import com.github.topnav_rosjava_kasptom.services.PropertiesService;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -70,7 +70,8 @@ public class NavigationApp extends Application {
 
     private void initCommandSender(Scene scene) {
         commandSender = new RemoteControlCommandSender();
-        scene.addEventHandler(KeyEvent.KEY_PRESSED, new KeyPressHandler(commandSender));
-        scene.addEventHandler(KeyEvent.KEY_RELEASED, new KeyReleaseHandler(commandSender));
+        EventHandler<KeyEvent> keyEventHandler = new KeyPressHandler(commandSender);
+        scene.addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandler);
+        scene.addEventHandler(KeyEvent.KEY_RELEASED, keyEventHandler);
     }
 }
