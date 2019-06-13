@@ -2,17 +2,25 @@ package com.github.topnav_rosjava_kasptom;
 
 import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 import com.github.topnav_rosjava_kasptom.components.container.view.IContainerView;
+import com.github.topnav_rosjava_kasptom.components.remote_controller.IRemoteControlCommandSender;
+import com.github.topnav_rosjava_kasptom.components.remote_controller.KeyPressHandler;
+import com.github.topnav_rosjava_kasptom.components.remote_controller.RemoteControlCommandSender;
+import com.github.topnav_rosjava_kasptom.components.remote_controller.presenter.IRemoteControlPresenter;
 import com.github.topnav_rosjava_kasptom.services.PropertiesService;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 public class NavigationApp extends Application {
     private IBasePresenter guidelinePresenter;
     private IBasePresenter feedbackPresenter;
     private IBasePresenter autopilotPresenter;
+    private IBasePresenter controllerPresenter;
+    private IRemoteControlCommandSender commandSender;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -27,6 +35,7 @@ public class NavigationApp extends Application {
         Parent root = loader.load();
         Scene scene = new Scene(root, 720, 640);
 
+        initCommandSender(scene);
         initPresenters(loader);
 
         primaryStage.setTitle("Navigation app");
@@ -39,6 +48,7 @@ public class NavigationApp extends Application {
         this.guidelinePresenter.onDestroy();
         this.feedbackPresenter.onDestroy();
         this.autopilotPresenter.onDestroy();
+        this.controllerPresenter.onDestroy();
         super.stop();
     }
 
@@ -52,5 +62,16 @@ public class NavigationApp extends Application {
 
         autopilotPresenter = ((IContainerView) loader.getController()).getAutopilotView().getPresenter();
         autopilotPresenter.onInit();
+
+        controllerPresenter = ((IContainerView) loader.getController()).getRemoteControlView().getPresenter();
+        controllerPresenter.onInit();
+        ((IRemoteControlPresenter)controllerPresenter).setOnControlCheckboxChangedListener((IRemoteControlPresenter.OnControlCheckboxChangedListener) commandSender);
+    }
+
+    private void initCommandSender(Scene scene) {
+        commandSender = new RemoteControlCommandSender();
+        EventHandler<KeyEvent> keyEventHandler = new KeyPressHandler(commandSender);
+        scene.addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandler);
+        scene.addEventHandler(KeyEvent.KEY_RELEASED, keyEventHandler);
     }
 }

@@ -1,6 +1,7 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.ArUcoHeadTracker;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.ManualSteeringController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionStartListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.ReactionController;
@@ -9,11 +10,13 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strat
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.approachMarker.ApproachMarkerStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategyV2;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import std_msgs.Float64;
+import std_msgs.Int16;
 import topnav_msgs.*;
 
 import java.util.HashMap;
@@ -40,6 +43,8 @@ public class MainController implements IMainController {
     private final TopnavSubscriber<MarkersMsg> arUcoSubscriber;
     private final Subscriber<std_msgs.String> headDirectionChangeSubscriber;
     private final Subscriber<Float64> headLinearDirectionChangeSubscriber;
+    private final Subscriber<std_msgs.Int16> manualSteeringSubscriber;
+    private final ManualSteeringController manualSteeringController;
 
     private final HashMap<String, IDrivingStrategy> drivingStrategies = new HashMap<>();
     private final HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners = new HashMap<>();
@@ -53,6 +58,7 @@ public class MainController implements IMainController {
         wheelsController = new WheelsController(connectedNode);
         arUcoHeadTracker = new ArUcoHeadTracker(log);
         reactionController = new ReactionController(connectedNode);
+        manualSteeringController = new ManualSteeringController();
 
         strategyFinishedPublisher = connectedNode.newPublisher(TOPNAV_STRATEGY_CHANGE_TOPIC, std_msgs.String._TYPE);
 
@@ -69,12 +75,21 @@ public class MainController implements IMainController {
         headDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
         headLinearDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_LINEAR_DIRECTION_CHANGE_TOPIC, std_msgs.Float64._TYPE);
 
+        manualSteeringSubscriber = connectedNode.newSubscriber(TOPNAV_NAVIGATION_MANUAL_STEERING_TOPIC, std_msgs.Int16._TYPE);
+        initializeManualSteering(manualSteeringSubscriber);
 
         initializeDrivingStrategies(drivingStrategies, trackedMarkerListeners);
         selectStrategy(DRIVING_STRATEGY_IDLE, null);
         reactionController.setWheelsVelocitiesLIstener(wheelsController::setVelocities);
 
         guidelineSubscriber.addMessageListener(guidelineMsg -> selectStrategy(guidelineMsg.getGuidelineType(), guidelineMsg.getParameters()));
+    }
+
+    private void initializeManualSteering(Subscriber<Int16> manualSteeringSubscriber) {
+        manualSteeringSubscriber.addMessageListener(message -> {
+            WheelsVelocities velocities = manualSteeringController.handleSteeringMessage(message.getData());
+            wheelsController.setVelocities(velocities);
+        });
     }
 
     private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies,

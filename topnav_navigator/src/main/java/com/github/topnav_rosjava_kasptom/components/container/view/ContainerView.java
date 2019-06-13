@@ -2,6 +2,7 @@ package com.github.topnav_rosjava_kasptom.components.container.view;
 
 import com.github.topnav_rosjava_kasptom.components.autopilot.view.IAutopilotView;
 import com.github.topnav_rosjava_kasptom.components.feedback.view.IFeedbackView;
+import com.github.topnav_rosjava_kasptom.components.remote_controller.view.IRemoteControlView;
 import com.github.topnav_rosjava_kasptom.components.topnav_navigator.view.IGuidelineView;
 import javafx.fxml.FXML;
 
@@ -20,6 +21,10 @@ public class ContainerView implements IContainerView {
     @SuppressWarnings("unused")
     private IAutopilotView autopilotController;
 
+    @FXML
+    @SuppressWarnings("unused")
+    private IRemoteControlView remoteControlController;
+
     @Override
     public IGuidelineView getGuideLineView() {
         return guidelineController;
@@ -33,5 +38,10 @@ public class ContainerView implements IContainerView {
     @Override
     public IAutopilotView getAutopilotView() {
         return autopilotController;
+    }
+
+    @Override
+    public IRemoteControlView getRemoteControlView() {
+        return remoteControlController;
     }
 }

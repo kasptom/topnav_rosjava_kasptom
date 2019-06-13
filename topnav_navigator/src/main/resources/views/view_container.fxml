@@ -13,6 +13,12 @@
         <Insets top="25" right="25" bottom="25" left="25"/>
     </padding>
     <HBox AnchorPane.topAnchor="0.0"
+          AnchorPane.leftAnchor="0.0">
+        <!--suppress JavaFxUnresolvedFxIdReference -->
+        <!-- remoteControl ==> @FXML remoteControlView -->
+        <fx:include fx:id="remoteControl" source="view_remotecontrol.fxml"/>
+    </HBox>
+    <HBox AnchorPane.topAnchor="20.0"
           AnchorPane.leftAnchor="0.0"
           AnchorPane.rightAnchor="0.0">
         <!--suppress JavaFxUnresolvedFxIdReference -->
