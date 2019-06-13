@@ -39,11 +39,6 @@ public class WheelsController implements IWheelsController {
                 wheelsVelocities.getRearRight()
         };
 
-//        if (!WheelsVelocityValidator.areInLimits(wheelsVelocities)) {
-//            wheelsVelocities = ZERO_VELOCITY;
-//            System.err.println("Velocity limit exceeded");
-//        }
-
         if (isVelocityChanged(wheelsVelocities, currentVelocity)) {
             log.debug(String.format("Setting velocities (%.2f, %.2f,%.2f, %.2f)",
                     velocities[0], velocities[1], velocities[2], velocities[3]));

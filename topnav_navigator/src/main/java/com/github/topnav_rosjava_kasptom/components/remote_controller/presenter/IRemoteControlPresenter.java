@@ -11,5 +11,3 @@ public interface IRemoteControlPresenter extends IBasePresenter {
         void onCheckboxChanged(boolean isChecked);
     }
 }
-
-
