@@ -1,7 +1,8 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.ArUcoHeadTracker;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker.ArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.ManualSteeringController;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker.IArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionStartListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.ReactionController;
@@ -17,6 +18,7 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import std_msgs.Float64;
 import std_msgs.Int16;
+import std_msgs.UInt64;
 import topnav_msgs.*;
 
 import java.util.HashMap;
@@ -43,6 +45,7 @@ public class MainController implements IMainController {
     private final TopnavSubscriber<MarkersMsg> arUcoSubscriber;
     private final Subscriber<std_msgs.String> headDirectionChangeSubscriber;
     private final Subscriber<Float64> headLinearDirectionChangeSubscriber;
+    private final Subscriber<std_msgs.UInt64> headTimeSinceLastRotationSubscriber;
     private final Subscriber<std_msgs.Int16> manualSteeringSubscriber;
     private final ManualSteeringController manualSteeringController;
 
@@ -74,6 +77,7 @@ public class MainController implements IMainController {
 
         headDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
         headLinearDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_LINEAR_DIRECTION_CHANGE_TOPIC, std_msgs.Float64._TYPE);
+        headTimeSinceLastRotationSubscriber = connectedNode.newSubscriber(HEAD_TIME_MS_SINCE_LAST_ROTATION_TOPIC, UInt64._TYPE);
 
         manualSteeringSubscriber = connectedNode.newSubscriber(TOPNAV_NAVIGATION_MANUAL_STEERING_TOPIC, std_msgs.Int16._TYPE);
         initializeManualSteering(manualSteeringSubscriber);
@@ -194,6 +198,7 @@ public class MainController implements IMainController {
     private void tearDownArUcoListeners() {
         arUcoSubscriber.removeAllLocalMessageListeners();
         headLinearDirectionChangeSubscriber.removeAllMessageListeners();
+        headTimeSinceLastRotationSubscriber.removeAllMessageListeners();
         arUcoHeadTracker.setTrackedMarkerListener(null);
     }
 
@@ -203,5 +208,6 @@ public class MainController implements IMainController {
 
         arUcoSubscriber.addMessageListener(arUcoHeadTracker::handleArUcoMessage);
         headLinearDirectionChangeSubscriber.addMessageListener(arUcoHeadTracker::handleHeadRotationChange);
+        headTimeSinceLastRotationSubscriber.addMessageListener(arUcoHeadTracker::handleTimeSinceLastRotationMessage);
     }
 }

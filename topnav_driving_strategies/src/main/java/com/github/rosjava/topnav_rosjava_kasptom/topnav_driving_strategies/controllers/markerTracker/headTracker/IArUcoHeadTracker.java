@@ -1,7 +1,9 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker;
 
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadLinearRotationChangeRequestListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
 import std_msgs.Float64;
+import std_msgs.UInt64;
 import topnav_msgs.MarkersMsg;
 
 import java.util.LinkedHashSet;
@@ -10,6 +12,11 @@ public interface IArUcoHeadTracker {
     void handleArUcoMessage(MarkersMsg markersMsg);
 
     void handleHeadRotationChange(Float64 headRotationMessage);
+
+    /**
+     * @param timeSinceLastRotationMessage time since last head rotation in ms
+     */
+    void handleTimeSinceLastRotationMessage(UInt64 timeSinceLastRotationMessage);
 
     void start();
 
