@@ -23,7 +23,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.
 public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private static final double UNDEFINED_ANGLE = -1000.0;
     private static final double SEARCH_ANGLE_STEP_DEGREES = 30.0;
-    private static final long CAMERA_LATENCY_MS = 500;
+    private static final long CAMERA_LATENCY_MS = 1000;
 
     private final LinkedHashSet<String> trackedMarkerIds;
     private final LinkedHashSet<MarkerDetection> foundMarkers;
@@ -58,7 +58,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
             return;
         }
 
-        trackDoorMarker(markersMsg);
+        trackMarker(markersMsg);
     }
 
     @Override
@@ -154,15 +154,15 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         isHeadRotationInProgress = true;
     }
 
-    private void trackDoorMarker(MarkersMsg markersMsg) {
-        if (isHeadRotationInProgress) {
+    private void trackMarker(MarkersMsg markersMsg) {
+        if (isHeadRotationInProgress || !minTimeSinceLastRotationElapsed) {
             return;
         }
 
         List<MarkerDetection> detections = ArucoMarkerUtils.createMarkerDetections(markersMsg);
         MarkerDetection trackedDetection = detectionStrategy.execute(detections);
 
-        if (trackedDetection == null) {
+        if (!isValidMarker(trackedDetection)) {
             trackedMarkerListener.onTrackedMarkerUpdate(MarkerDetection.emptyDetection(), 0.0);
             return; // TODO warn / error / handling
         }
@@ -170,13 +170,19 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         centerHeadOn(trackedDetection);
     }
 
+    private boolean isValidMarker(MarkerDetection trackedDetection) {
+        return trackedDetection != null && !trackedDetection.isEmptyDetection();
+    }
+
     private void centerHeadOn(MarkerDetection marker) {
         double[] xCorners = marker.getXCorners();
         double averagePicturePosition = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0 - CAM_PREVIEW_WIDTH / 2.0;    // 0 is the middle of the picture
         double headRotationCorrection = -averagePicturePosition * CAM_FOV_DEGREES / CAM_PREVIEW_WIDTH;
 
-        System.out.printf("setting angle to %.2f\n", angleDegrees);
         angleDegrees += headRotationCorrection;
+        System.out.printf("setting angle to %.2f\n", angleDegrees);
+
+        isHeadRotationInProgress = true;
         headRotationChangeListener.onLinearRotationRequestChange(angleDegrees);
         trackedMarkerListener.onTrackedMarkerUpdate(marker, angleDegrees);
     }
