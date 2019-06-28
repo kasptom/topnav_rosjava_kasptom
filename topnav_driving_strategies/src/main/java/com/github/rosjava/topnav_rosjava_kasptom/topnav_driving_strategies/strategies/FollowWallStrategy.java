@@ -5,10 +5,12 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionStartListener;
+import com.github.topnav_rosjava_kasptom.topnav_shared.exceptions.PointNotFoundException;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.DoorFinder;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.HoughUtils;
 import org.apache.commons.logging.Log;
@@ -24,8 +26,7 @@ import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.FollowWall.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.REACTIVE_DRIVING_STRATEGY_MOVE_BACK;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TARGET_WALL_RANGE;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.*;
 
 public class FollowWallStrategy implements IDrivingStrategy {
@@ -45,10 +46,12 @@ public class FollowWallStrategy implements IDrivingStrategy {
     private static final double RIGHT_WALL_ANGLE = -90;
     private static final double LEFT_WALL_ANGLE = 90;
     private double chosenWallAngle = LEFT_WALL_ANGLE;
+    private DoorFinder doorFinder;
 
     public FollowWallStrategy(IReactionStartListener reactionStartListener, Log log) {
         this.reactionStartListener = reactionStartListener;
         this.log = log;
+        this.doorFinder = new DoorFinder();
     }
 
     @Override
@@ -73,9 +76,6 @@ public class FollowWallStrategy implements IDrivingStrategy {
         List<HoughCell> filteredHoughCells = HoughUtils.toFilteredList(houghAcc, lineDetectionThreshold);
 
         if (isObstacleTooClose) {
-            log.info("obstacle is too close"); // TODO move back
-            wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
-            reactionStartListener.onReactionStart(REACTIVE_DRIVING_STRATEGY_MOVE_BACK);
             return;
         }
 
@@ -83,9 +83,38 @@ public class FollowWallStrategy implements IDrivingStrategy {
         wheelsListener.onWheelsVelocitiesChanged(wheelsVelocities);
     }
 
+    private void switchToMoveBackReaction() {
+        log.info("obstacle is too close"); // TODO move back
+        wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
+        reactionStartListener.onReactionStart(REACTIVE_DRIVING_STRATEGY_MOVE_BACK);
+    }
+
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
         isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
+
+        if (isObstacleTooClose) {
+            switchToMoveBackReaction();
+            return;
+        }
+
+        doorFinder.dividePointsToClusters(angleRangesMsg);
+
+        try {
+            List<DoorFinder.Point> points = doorFinder.getMidPointWithClosestClustersPoints();
+            HoughCell cell = HoughUtils.toHoughCell(points.get(1), points.get(2));
+            if (cell.getRange() <= TOO_CLOSE_RANGE) {
+                log.info("Avoiding unwanted door passage");
+                isObstacleTooClose = true;
+            }
+
+        } catch (PointNotFoundException pointNotFoundException) {
+            isObstacleTooClose = false;
+        }
+
+        if (isObstacleTooClose) {
+            switchToMoveBackReaction();
+        }
     }
 
     @Override
@@ -157,6 +186,13 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
         return WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, rotationVelocityComponent);
     }
+
+//    private WheelsVelocities computeVelocities(DoorFinder.Point firstClusterPoint, DoorFinder.Point secondClusterPoint) {
+//        HoughCell asHoughLine = HoughUtils.toHoughCell(firstClusterPoint, secondClusterPoint);
+//        WheelsVelocities rotationVelocityComponent = computeRotationComponent(asHoughLine);
+//
+//        return WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, rotationVelocityComponent);
+//    }
 
     private void updatePdCoefficients(double propCoeffAngle, double derivCoeffAngle, double propCoeffDist, double derivCoeffDist) {
         log.info(String.format("Changing coefficients values K_p_ang = %.2f, K_d_ang = %.2f, K_p_dst = %.2f, K_d_dst = %.2f",

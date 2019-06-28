@@ -84,7 +84,7 @@ public class MainController implements IMainController {
 
         initializeDrivingStrategies(drivingStrategies, trackedMarkerListeners);
         selectStrategy(DRIVING_STRATEGY_IDLE, null);
-        reactionController.setWheelsVelocitiesLIstener(wheelsController::setVelocities);
+        reactionController.setWheelsVelocitiesListener(wheelsController::setVelocities);
 
         guidelineSubscriber.addMessageListener(guidelineMsg -> selectStrategy(guidelineMsg.getGuidelineType(), guidelineMsg.getParameters()));
     }
@@ -167,7 +167,10 @@ public class MainController implements IMainController {
         configMsgSubscriber.addMessageListener(drivingStrategy::handleConfigMessage);
 
         angleRangesMsgSubscriber.addMessageListener(message -> {
-            if (reactionController.isReactionInProgress()) return;
+            if (reactionController.isReactionInProgress()) {
+                reactionController.onAngleRangeMessage(message);
+                return;
+            }
             drivingStrategy.handleAngleRangeMessage(message);
         });
 

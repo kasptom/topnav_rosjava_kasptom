@@ -51,17 +51,17 @@ public class DriveThroughAndLookForBackMarkers extends BaseSubStrategy {
             return;
         }
 
-        boolean isMitPointNotFound = false;
+        boolean isMidPointNotFound = false;
         doorFinder.dividePointsToClusters(angleRangesMsg);
         DoorFinder.Point midPoint = null;
         try {
             midPoint = doorFinder.getClustersMidPoint();
         } catch (PointNotFoundException pointNotFoundException) {
             log.info("Could not find the mid point");
-            isMitPointNotFound = true;
+            isMidPointNotFound = true;
         }
 
-        if (isMitPointNotFound && isObstacleTooClose) {
+        if (isMidPointNotFound && isObstacleTooClose) {
             wheelsListener.onWheelsVelocitiesChanged(ROTATE_CLOCKWISE_VELOCITY); // TODO rotate according to the lone cluster position
             return;
         }

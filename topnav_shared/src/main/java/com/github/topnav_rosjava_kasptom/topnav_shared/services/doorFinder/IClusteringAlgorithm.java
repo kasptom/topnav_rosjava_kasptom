@@ -12,4 +12,6 @@ public interface IClusteringAlgorithm {
     List<List<DoorFinder.Point>> computeClusters(List<DoorFinder.Point> data);
 
     DoorFinder.Point getClustersMidPoint();
+
+    List<DoorFinder.Point> getMidPointWithClosest();
 }
