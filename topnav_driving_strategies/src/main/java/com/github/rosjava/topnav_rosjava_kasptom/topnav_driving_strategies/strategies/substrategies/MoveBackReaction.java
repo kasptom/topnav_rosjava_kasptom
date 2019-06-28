@@ -2,13 +2,16 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.stra
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReaction;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.PdVelocityCalculator;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.HoughUtils;
+import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.HoughAcc;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.MOVE_BACK_VELOCITY;
@@ -22,6 +25,26 @@ public class MoveBackReaction implements IReaction {
         int lineDetectionThreshold = 8;
         List<HoughCell> filteredHoughCells = HoughUtils.toFilteredList(houghAcc, lineDetectionThreshold);
         return moveBack(filteredHoughCells);
+    }
+
+    @Override
+    public WheelsVelocities onAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
+        List<AngleRange> angleRanges = AngleRange.messageToAngleRange(angleRangesMsg);
+        angleRanges = angleRanges.stream()
+                .filter(angleRange -> angleRange.getRange() <= 2 * TOO_CLOSE_RANGE)
+                .collect(Collectors.toList());
+        AngleRange minAngleRange = angleRanges
+                .stream()
+                .min(Comparator.comparingDouble(AngleRange::getRange))
+                .orElse(null);
+
+        if (minAngleRange == null) {
+            return ZERO_VELOCITY;
+        }
+
+        WheelsVelocities rotationVelocityComponent = computeBackRotationComponent(minAngleRange);
+
+        return WheelsVelocities.addVelocities(MOVE_BACK_VELOCITY, rotationVelocityComponent);
     }
 
     private WheelsVelocities moveBack(List<HoughCell> filteredHoughCells) {
@@ -45,5 +68,15 @@ public class MoveBackReaction implements IReaction {
                 System.nanoTime(),
                 AHEAD_OBSTACLE_ANGLE,
                 TARGET_WALL_RANGE);
+    }
+
+    private WheelsVelocities computeBackRotationComponent(AngleRange angleRange) {
+        return velocityCalculator.calculateRotationSpeed(
+                angleRange.getAngleRad(),
+                angleRange.getRange(),
+                System.nanoTime(),
+                AHEAD_OBSTACLE_ANGLE,
+                TARGET_WALL_RANGE
+        );
     }
 }

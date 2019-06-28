@@ -1,6 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
+import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.DoorFinder;
 import topnav_msgs.HoughAcc;
 
 import java.util.ArrayList;
@@ -44,5 +45,25 @@ public class HoughUtils {
         return houghCells.stream()
                 .filter(cell -> cell.getVotes() >= lineDetectionThreshold)
                 .collect(Collectors.toList());
+    }
+
+    public static HoughCell toHoughCell(DoorFinder.Point firstPoint, DoorFinder.Point secondPoint) {
+        double x1 = firstPoint.getX();
+        double y1 = firstPoint.getY();
+        double x2 = secondPoint.getX();
+        double y2 = secondPoint.getY();
+
+
+        double const_cross = (x1 * y2 - x2 * y1) / ((y2 - y1) * (y2 - y1) + (x1 - x2) * (x1 - x2));
+        double x_cross =  (x1 - x2) * const_cross;
+        double y_cross = -(y2 - y1) * const_cross;
+
+        double angle = Math.atan2(y_cross, x_cross);
+        angle = angle > 3/2.0 * Math.PI
+                ? angle - 3 /2.0 * Math.PI
+                : angle + Math.PI / 2.0;
+
+
+        return new HoughCell(angle, Math.sqrt(x_cross * x_cross + y_cross * y_cross), 2);
     }
 }

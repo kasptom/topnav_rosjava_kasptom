@@ -1,7 +1,7 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.approachMarker;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker.IArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.PdVelocityCalculator;
@@ -28,7 +28,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVe
 public class ApproachArUcoSubStrategy extends BaseSubStrategy implements IArUcoHeadTracker.TrackedMarkerListener {
 
     private final Log log;
-    private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createPdVelocityCalculator(1.75, 1.7, 1.0, 1.2);
+    private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createPdVelocityCalculator(0.5, 1.0, 1.0, 1.0);
     private int notDetectedCounter = 0;
     private static final double TARGET_APPROACH_RANGE_METERS = 0.5;
 

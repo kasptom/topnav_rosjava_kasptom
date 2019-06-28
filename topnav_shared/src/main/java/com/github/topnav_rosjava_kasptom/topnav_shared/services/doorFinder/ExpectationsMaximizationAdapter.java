@@ -51,4 +51,9 @@ public class ExpectationsMaximizationAdapter implements IClusteringAlgorithm {
         if (firstMean == null) new DoorFinder.Point(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         return new DoorFinder.Point((firstMean[0] + secondMean[0]) / 2, (firstMean[1] + secondMean[1]) / 2);
     }
+
+    @Override
+    public List<DoorFinder.Point> getMidPointWithClosest() {
+        throw new RuntimeException("Not implemented");
+    }
 }

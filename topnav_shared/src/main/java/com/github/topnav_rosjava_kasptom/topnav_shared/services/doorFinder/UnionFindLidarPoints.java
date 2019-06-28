@@ -77,6 +77,11 @@ public class UnionFindLidarPoints implements IClusteringAlgorithm {
         return DoorFinder.Point.getMidPoint(clusters, centroids);
     }
 
+    @Override
+    public List<DoorFinder.Point> getMidPointWithClosest() {
+        return DoorFinder.Point.getMidPointWithClosest(clusters, centroids);
+    }
+
     private void reset(List<DoorFinder.Point> points) {
         idToPoint.clear();
         pointToId.clear();

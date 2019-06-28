@@ -50,6 +50,17 @@ public class DoorFinder {
         return point;
     }
 
+    /**
+     * @return mid point and the closest point from each of the found clusters
+     */
+    public List<Point> getMidPointWithClosestClustersPoints() {
+        List<Point> midPointWithClosest = algorithm.getMidPointWithClosest();
+        if (midPointWithClosest.isEmpty()) {
+            throw new PointNotFoundException("could not find the mid point");
+        }
+        return midPointWithClosest;
+    }
+
     public static class Point {
         double x, y;
 
@@ -58,7 +69,7 @@ public class DoorFinder {
             y = angleRange.getRange() * Math.cos(angleRange.getAngleRad());
         }
 
-        Point(double x, double y) {
+        public Point(double x, double y) {
             this.x = x;
             this.y = y;
         }
@@ -73,23 +84,31 @@ public class DoorFinder {
                 return new DoorFinder.Point(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
             }
 
-            List<DoorFinder.Point> firstCluster = clusters.get(centroids.get(0));
-            List<DoorFinder.Point> secondCluster = clusters.get(centroids.get(1));
+            final DoorFinder.Point[] firstClosest = {null};
+            final DoorFinder.Point[] secondClosest = {null};
+            findClosestPointsFromDifferentClusters(clusters, centroids, firstClosest, secondClosest);
+
+            return new DoorFinder.Point((firstClosest[0].x + secondClosest[0].x) / 2, (firstClosest[0].y + secondClosest[0].y) / 2);
+        }
+
+        static List<Point> getMidPointWithClosest(HashMap<Point, List<Point>> clusters, List<Point> centroids) {
+
+            List<Point> midWithClosest = new ArrayList<>();
+
+            if (clusters.size() != 2 || centroids.size() != 2) {
+                return midWithClosest;
+            }
 
             final DoorFinder.Point[] firstClosest = {null};
             final DoorFinder.Point[] secondClosest = {null};
-            final double[] minDistance = {Double.POSITIVE_INFINITY};
-            final double[] distance = {0};
-            firstCluster.forEach(point -> secondCluster.forEach(otherPoint -> {
-                distance[0] = DoorFinder.Point.distanceTo(point, otherPoint);
-                if (distance[0] < minDistance[0]) {
-                    minDistance[0] = distance[0];
-                    firstClosest[0] = point;
-                    secondClosest[0] = otherPoint;
-                }
-            }));
+            findClosestPointsFromDifferentClusters(clusters, centroids, firstClosest, secondClosest);
 
-            return new DoorFinder.Point((firstClosest[0].x + secondClosest[0].x) / 2, (firstClosest[0].y + secondClosest[0].y) / 2);
+            Point midPoint = new DoorFinder.Point((firstClosest[0].x + secondClosest[0].x) / 2, (firstClosest[0].y + secondClosest[0].y) / 2);
+
+            midWithClosest.add(midPoint);
+            midWithClosest.add(firstClosest[0]);
+            midWithClosest.add(secondClosest[0]);
+            return midWithClosest;
         }
 
         static ArrayList<List<Point>> toClustersList(HashMap<Point, List<Point>> clusters, List<Point> centroids) {
@@ -100,6 +119,22 @@ public class DoorFinder {
             pointClusters.add(clusters.get(centroids.get(0)));
             pointClusters.add(clusters.get(centroids.get(1)));
             return pointClusters;
+        }
+
+        private static void findClosestPointsFromDifferentClusters(HashMap<Point, List<Point>> clusters, List<Point> centroids, Point[] firstClosest, Point[] secondClosest) {
+            List<DoorFinder.Point> firstCluster = clusters.get(centroids.get(0));
+            List<DoorFinder.Point> secondCluster = clusters.get(centroids.get(1));
+
+            final double[] minDistance = {Double.POSITIVE_INFINITY};
+            final double[] distance = {0};
+            firstCluster.forEach(point -> secondCluster.forEach(otherPoint -> {
+                distance[0] = Point.distanceTo(point, otherPoint);
+                if (distance[0] < minDistance[0]) {
+                    minDistance[0] = distance[0];
+                    firstClosest[0] = point;
+                    secondClosest[0] = otherPoint;
+                }
+            }));
         }
 
         public double getX() {

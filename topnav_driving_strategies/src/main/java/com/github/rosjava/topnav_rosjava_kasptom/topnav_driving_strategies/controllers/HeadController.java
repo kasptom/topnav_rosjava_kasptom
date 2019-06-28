@@ -28,13 +28,20 @@ public class HeadController implements IHeadController {
 
     private RelativeDirection currentDirection = RelativeDirection.AHEAD;
     private double currentRequestedRotationDegrees = 0.0;
+    private long lastHeadRotationFinishTimestamp = System.nanoTime();
 
     private final Publisher<Float64> headRotationPublisher;
     private final Publisher<std_msgs.String> relativeDirectionChangePublisher;
     private final Publisher<std_msgs.Float64> linearDirectionChangePublisher;
+    private final Publisher<std_msgs.UInt64> msElapsedSinceLastHeadRotationPublisher;
 
     HeadController(ConnectedNode connectedNode) {
         log = connectedNode.getLog();
+
+        headRotationPublisher = connectedNode.newPublisher(HEAD_JOINT_TOPIC, Float64._TYPE);
+        relativeDirectionChangePublisher = connectedNode.newPublisher(HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
+        linearDirectionChangePublisher = connectedNode.newPublisher(HEAD_LINEAR_DIRECTION_CHANGE_TOPIC, Float64._TYPE);
+        msElapsedSinceLastHeadRotationPublisher = connectedNode.newPublisher(HEAD_TIME_MS_SINCE_LAST_ROTATION_TOPIC, std_msgs.UInt64._TYPE);
 
         drivingHeadRotationSubscriber = connectedNode.newSubscriber(TOPNAV_STRATEGY_HEAD_DIRECTION_TOPIC, std_msgs.String._TYPE);
         navigationHeadRotationSubscriber = connectedNode.newSubscriber(TOPNAV_NAVIGATION_HEAD_DIRECTION_TOPIC, std_msgs.String._TYPE);
@@ -43,11 +50,6 @@ public class HeadController implements IHeadController {
         drivingHeadRotationSubscriber.addMessageListener(message -> handleStrategyHeadRotationChange(RelativeDirectionUtils.convertMessageToRelativeDirection(message)));
         navigationHeadRotationSubscriber.addMessageListener(message -> handleNavigationHeadRotationChange(RelativeDirectionUtils.convertMessageToRelativeDirection(message)));
         jointStatesSubscriber.addMessageListener(this::handleJointStateMessage);
-
-
-        headRotationPublisher = connectedNode.newPublisher(HEAD_JOINT_TOPIC, Float64._TYPE);
-        relativeDirectionChangePublisher = connectedNode.newPublisher(HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
-        linearDirectionChangePublisher = connectedNode.newPublisher(HEAD_LINEAR_DIRECTION_CHANGE_TOPIC, Float64._TYPE);
     }
 
     @Override
@@ -114,16 +116,26 @@ public class HeadController implements IHeadController {
         if (!LinearDirectionUtils.isInPosition(headRotationRads, currentRequestedRotationDegrees)) {
             isLinearDirectionChangeNotificationRequired = true;
         } else if (isLinearDirectionChangeNotificationRequired) {
+            lastHeadRotationFinishTimestamp = System.nanoTime();
             isLinearDirectionChangeNotificationRequired = false;
             Float64 linearDirectionMessage = linearDirectionChangePublisher.newMessage();
             linearDirectionMessage.setData(currentRequestedRotationDegrees);
             linearDirectionChangePublisher.publish(linearDirectionMessage);
         }
+
+        publishMsElapsedSinceLastHeadRotationStop();
     }
 
     @Override
     public void onStrategyStatusChange(String strategyName) {
         isIdle = DrivingStrategy.DRIVING_STRATEGY_IDLE.equals(strategyName);
         publishHeadRotationChange(RelativeDirection.AHEAD);
+    }
+
+    private void publishMsElapsedSinceLastHeadRotationStop() {
+        long msElapsed = (System.nanoTime() - lastHeadRotationFinishTimestamp) / 1000000;
+        std_msgs.UInt64 timeMsMsg = msElapsedSinceLastHeadRotationPublisher.newMessage();
+        timeMsMsg.setData(msElapsed);
+        msElapsedSinceLastHeadRotationPublisher.publish(timeMsMsg);
     }
 }

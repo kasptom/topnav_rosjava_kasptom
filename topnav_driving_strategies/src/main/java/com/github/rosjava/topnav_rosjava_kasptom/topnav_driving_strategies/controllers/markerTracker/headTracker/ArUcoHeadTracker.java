@@ -1,7 +1,6 @@
-package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadLinearRotationChangeRequestListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.detectionStrategy.ChooseClosestDetectionStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.detectionStrategy.IDetectionStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
@@ -9,20 +8,19 @@ import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import org.apache.commons.logging.Log;
 import std_msgs.Float64;
+import std_msgs.UInt64;
 import topnav_msgs.MarkersMsg;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MAX_SEARCH_ANGLE;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MIN_SEARCH_ANGLE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_FOV_DEGREES;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_PREVIEW_WIDTH;
 
 public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private static final double UNDEFINED_ANGLE = -1000.0;
-    private static final double SEARCH_ANGLE_STEP_DEGREES = 5.0;
 
     private final LinkedHashSet<String> trackedMarkerIds;
     private final LinkedHashSet<MarkerDetection> foundMarkers;
@@ -33,6 +31,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private boolean isEnabled;
     private boolean isLookingForMarkers;
     private boolean isHeadRotationInProgress;
+    private boolean minTimeSinceLastRotationElapsed;
 
     private HeadLinearRotationChangeRequestListener headRotationChangeListener;
     private TrackedMarkerListener trackedMarkerListener;
@@ -56,13 +55,18 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
             return;
         }
 
-        trackDoorMarker(markersMsg);
+        trackMarker(markersMsg);
     }
 
     @Override
     public void handleHeadRotationChange(Float64 headRotationMessage) {
         currentSearchAngle = headRotationMessage.getData();
         isHeadRotationInProgress = false;
+    }
+
+    @Override
+    public void handleTimeSinceLastRotationMessage(UInt64 timeSinceLastRotationMessage) {
+        minTimeSinceLastRotationElapsed = timeSinceLastRotationMessage.getData() > CAMERA_LATENCY_MS;
     }
 
     @Override
@@ -73,6 +77,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
 
         detectionStrategy = new ChooseClosestDetectionStrategy(trackedMarkerIds);
         isHeadRotationInProgress = true;
+        minTimeSinceLastRotationElapsed = false;
         headRotationChangeListener.onLinearRotationRequestChange(currentSearchAngle);
 
         isLookingForMarkers = true;
@@ -105,7 +110,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
     }
 
     private void lookAroundForMarkers(MarkersMsg markersMsg) {
-        if (isHeadRotationInProgress) {
+        if (isHeadRotationInProgress || !minTimeSinceLastRotationElapsed) {
             return;
         }
 
@@ -146,7 +151,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         isHeadRotationInProgress = true;
     }
 
-    private void trackDoorMarker(MarkersMsg markersMsg) {
+    private void trackMarker(MarkersMsg markersMsg) {
         if (isHeadRotationInProgress) {
             return;
         }
@@ -154,7 +159,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         List<MarkerDetection> detections = ArucoMarkerUtils.createMarkerDetections(markersMsg);
         MarkerDetection trackedDetection = detectionStrategy.execute(detections);
 
-        if (trackedDetection == null) {
+        if (!isValidMarker(trackedDetection)) {
             trackedMarkerListener.onTrackedMarkerUpdate(MarkerDetection.emptyDetection(), 0.0);
             return; // TODO warn / error / handling
         }
@@ -162,13 +167,18 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         centerHeadOn(trackedDetection);
     }
 
+    private boolean isValidMarker(MarkerDetection trackedDetection) {
+        return trackedDetection != null && !trackedDetection.isEmptyDetection();
+    }
+
     private void centerHeadOn(MarkerDetection marker) {
         double[] xCorners = marker.getXCorners();
         double averagePicturePosition = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0 - CAM_PREVIEW_WIDTH / 2.0;    // 0 is the middle of the picture
         double headRotationCorrection = -averagePicturePosition * CAM_FOV_DEGREES / CAM_PREVIEW_WIDTH;
 
-        System.out.printf("setting angle to %.2f\n", angleDegrees);
         angleDegrees += headRotationCorrection;
+        System.out.printf("setting angle to %.2f\n", angleDegrees);
+
         headRotationChangeListener.onLinearRotationRequestChange(angleDegrees);
         trackedMarkerListener.onTrackedMarkerUpdate(marker, angleDegrees);
     }

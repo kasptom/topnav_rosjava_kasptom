@@ -74,4 +74,9 @@ public class MyKMeansClustering implements IClusteringAlgorithm {
     public DoorFinder.Point getClustersMidPoint() {
         return DoorFinder.Point.getMidPoint(clusters, centroids);
     }
+
+    @Override
+    public List<DoorFinder.Point> getMidPointWithClosest() {
+        return DoorFinder.Point.getMidPointWithClosest(clusters, centroids);
+    }
 }

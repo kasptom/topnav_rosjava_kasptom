@@ -28,4 +28,7 @@ public class Limits {
 
     public static final double MIN_SEARCH_ANGLE = -180.0;
     public static final double MAX_SEARCH_ANGLE = 180.0;
+
+    public static final double SEARCH_ANGLE_STEP_DEGREES = 30.0;
+    public static final long CAMERA_LATENCY_MS = 1000;
 }

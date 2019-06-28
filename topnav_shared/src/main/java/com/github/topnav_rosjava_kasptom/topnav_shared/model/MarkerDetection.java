@@ -67,6 +67,10 @@ public class MarkerDetection {
         return detectedAtAngle;
     }
 
+    public boolean isEmptyDetection() {
+        return EMPTY_DETECTION_ID.equals(id);
+    }
+
     private MarkerDetection(String id, double[] cameraPosition, double[] xCorners, double[] yCorners) {
         this.id = id;
         System.arraycopy(cameraPosition, 0, this.cameraPosition, 0, this.cameraPosition.length);
