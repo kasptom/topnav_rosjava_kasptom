@@ -38,7 +38,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     private WheelsVelocitiesChangeListener wheelsListener;
     private HeadRotationChangeRequestListener headListener;
 
-    private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createPdVelocityCalculator(1.75, 1.7, 1.0, 1.2);
+    private PdVelocityCalculator velocityCalculator = PdVelocityCalculator.createPdVelocityCalculator(0.5, 1.0, 1.0, 1.0);
     private int lineDetectionThreshold = 8;
 
     private boolean isObstacleTooClose;
