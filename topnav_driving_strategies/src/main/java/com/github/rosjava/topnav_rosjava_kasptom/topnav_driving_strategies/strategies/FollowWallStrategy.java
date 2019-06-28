@@ -83,12 +83,6 @@ public class FollowWallStrategy implements IDrivingStrategy {
         wheelsListener.onWheelsVelocitiesChanged(wheelsVelocities);
     }
 
-    private void switchToMoveBackReaction() {
-        log.info("obstacle is too close"); // TODO move back
-        wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
-        reactionStartListener.onReactionStart(REACTIVE_DRIVING_STRATEGY_MOVE_BACK);
-    }
-
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
         isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
@@ -163,6 +157,12 @@ public class FollowWallStrategy implements IDrivingStrategy {
                 : RelativeDirection.AT_RIGHT);
     }
 
+    private void switchToMoveBackReaction() {
+        log.info("switching to move back reaction");
+        wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
+        reactionStartListener.onReactionStart(REACTIVE_DRIVING_STRATEGY_MOVE_BACK);
+    }
+
     private RelativeDirection getInitialRelativeDirection(HashMap<String, GuidelineParam> guidelineParamsMap) {
         String alignment = null;
         if (guidelineParamsMap.containsKey(KEY_TRACKED_WALL_ALIGNMENT)) {
@@ -186,13 +186,6 @@ public class FollowWallStrategy implements IDrivingStrategy {
 
         return WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, rotationVelocityComponent);
     }
-
-//    private WheelsVelocities computeVelocities(DoorFinder.Point firstClusterPoint, DoorFinder.Point secondClusterPoint) {
-//        HoughCell asHoughLine = HoughUtils.toHoughCell(firstClusterPoint, secondClusterPoint);
-//        WheelsVelocities rotationVelocityComponent = computeRotationComponent(asHoughLine);
-//
-//        return WheelsVelocities.addVelocities(BASE_ROBOT_VELOCITY, rotationVelocityComponent);
-//    }
 
     private void updatePdCoefficients(double propCoeffAngle, double derivCoeffAngle, double propCoeffDist, double derivCoeffDist) {
         log.info(String.format("Changing coefficients values K_p_ang = %.2f, K_d_ang = %.2f, K_p_dst = %.2f, K_d_dst = %.2f",

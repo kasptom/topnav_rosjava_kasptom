@@ -3,7 +3,6 @@ package com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits;
 import com.github.topnav_rosjava_kasptom.topnav_shared.exceptions.PointNotFoundException;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.AngleRange;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import topnav_msgs.AngleRangesMsg;
 
 import java.util.ArrayList;

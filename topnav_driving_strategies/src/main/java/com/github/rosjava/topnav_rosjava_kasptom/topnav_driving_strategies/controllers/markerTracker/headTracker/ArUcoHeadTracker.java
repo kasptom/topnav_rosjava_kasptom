@@ -15,15 +15,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MAX_SEARCH_ANGLE;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MIN_SEARCH_ANGLE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_FOV_DEGREES;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_PREVIEW_WIDTH;
 
 public class ArUcoHeadTracker implements IArUcoHeadTracker {
     private static final double UNDEFINED_ANGLE = -1000.0;
-    private static final double SEARCH_ANGLE_STEP_DEGREES = 30.0;
-    private static final long CAMERA_LATENCY_MS = 1000;
 
     private final LinkedHashSet<String> trackedMarkerIds;
     private final LinkedHashSet<MarkerDetection> foundMarkers;
