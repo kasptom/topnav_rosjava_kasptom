@@ -10,7 +10,7 @@ import topnav_msgs.AngleRangesMsg;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckining.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckoning.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MAX_VELOCITY_DELTA;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
@@ -54,6 +54,7 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
     @Override
     public void startManeuver(String maneuverName, double angleDegrees, double distanceMeters) {
         currentManeuver = maneuvers.get(maneuverName);
+        currentManeuver.start(angleDegrees, distanceMeters);
         maneuverStartTimestamp = System.nanoTime();
         isRunning = true;
     }

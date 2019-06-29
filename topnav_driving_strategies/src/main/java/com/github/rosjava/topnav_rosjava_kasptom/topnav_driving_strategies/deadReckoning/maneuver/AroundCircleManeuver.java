@@ -18,7 +18,7 @@ public class AroundCircleManeuver implements IManeuver {
     }
 
     @Override
-    public boolean isFinished(double timeMs) {
+    public boolean isFinished(long timeMs) {
         return false;
     }
 }

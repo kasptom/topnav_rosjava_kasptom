@@ -42,7 +42,8 @@ public class RotateManeuver implements IManeuver {
     }
 
     @Override
-    public boolean isFinished(double timeMs) {
+    public boolean isFinished(long timeMs) {
+//        System.out.printf("maneuver duration %d, time ms %s\n", maneuverDurationMs, timeMs);
         return maneuverDurationMs < timeMs;
     }
 

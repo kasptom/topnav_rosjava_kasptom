@@ -7,5 +7,5 @@ public interface IManeuver {
 
     WheelsVelocities getNextVelocity(long timeMs);
 
-    boolean isFinished(double timeMs);
+    boolean isFinished(long timeMs);
 }

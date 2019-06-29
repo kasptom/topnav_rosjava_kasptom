@@ -35,7 +35,7 @@ public class StraightLineManeuver implements IManeuver {
     }
 
     @Override
-    public boolean isFinished(double timeMs) {
+    public boolean isFinished(long timeMs) {
         return maneuverDurationMs < timeMs;
     }
 

@@ -19,7 +19,8 @@ public class DrivingStrategy {
             DRIVING_STRATEGY_STOP_BEFORE_WALL,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR_2,
             DRIVING_STRATEGY_APPROACH_MARKER,
-            DRIVING_STRATEGY_TRACK_ARUCOS));
+            DRIVING_STRATEGY_TRACK_ARUCOS,
+            DRIVING_STRATEGY_DEAD_RECKONING_TEST));
 
     public static final String REACTIVE_DRIVING_STRATEGY_MOVE_BACK = "RDS_MOVE_BACK";
 
@@ -44,12 +45,15 @@ public class DrivingStrategy {
         public static final String VALUE_TRACKED_WALL_RIGHT = "RIGHT";
     }
 
-    public class DeadReckining {
+    public class DeadReckoning {
         public static final String KEY_MANEUVER_NAME = "DS_PARAM_MANEUVER_NAME";
-        public static final String VALUE_MANEUVER_NAME_FORWARD = "maneuver_forward";
-        public static final String VALUE_MANEUVER_NAME_BACKWARD = "maneuver_backward";
-        public static final String VALUE_MANEUVER_NAME_ROTATE = "maneuver_rotate";
-        public static final String VALUE_MANEUVER_NAME_AROUND_CIRCLE = "maneuver_around";
+        public static final String VALUE_MANEUVER_NAME_FORWARD = "forward";
+        public static final String VALUE_MANEUVER_NAME_BACKWARD = "backward";
+        public static final String VALUE_MANEUVER_NAME_ROTATE = "rotate";
+        public static final String VALUE_MANEUVER_NAME_AROUND_CIRCLE = "around";
+
+        public static final String KEY_MANEUVER_ANGLE_DEGREES = "DS_PARAM_MANEUVER_AMGLE_DEGREES";
+        public static final String KEY_MANEUVER_DISTANCE_METERS = "DS_PARAM_MANEUVER_DIST_METERS";
     }
 
     public class ApproachMarker {
@@ -61,5 +65,8 @@ public class DrivingStrategy {
             ThroughDoor.KEY_BACK_LEFT_MARKER_ID,
             ThroughDoor.KEY_BACK_RIGHT_MARKER_ID,
             FollowWall.KEY_TRACKED_WALL_ALIGNMENT,
-            ApproachMarker.KEY_APPROACHED_MARKER_ID);
+            ApproachMarker.KEY_APPROACHED_MARKER_ID,
+            DeadReckoning.KEY_MANEUVER_NAME,
+            DeadReckoning.KEY_MANEUVER_ANGLE_DEGREES,
+            DeadReckoning.KEY_MANEUVER_DISTANCE_METERS);
 }
