@@ -11,6 +11,8 @@ public class DrivingStrategy {
     public static final String DRIVING_STRATEGY_TRACK_ARUCOS = "DS_TEST_TRACK_ARUCOS";
     public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR_2 = "DS_PASS_THROUGH_DOOR_2";
     public static final String DRIVING_STRATEGY_APPROACH_MARKER = "DS_APPROACH_MARKER";
+    public static final String DRIVING_STRATEGY_DEAD_RECKONING_TEST = "DS_DEAD_RECKONING_TEST";
+
     public static final HashSet<String> DRIVING_STRATEGIES = new HashSet<>(Arrays.asList(
             DRIVING_STRATEGY_IDLE,
             DRIVING_STRATEGY_ALONG_WALL_2,
@@ -40,6 +42,14 @@ public class DrivingStrategy {
         public static final String KEY_TRACKED_WALL_ALIGNMENT = "DS_PARAM_TRACKED_WALL_ALIGNMENT";
         public static final String VALUE_TRACKED_WALL_LEFT = "LEFT";
         public static final String VALUE_TRACKED_WALL_RIGHT = "RIGHT";
+    }
+
+    public class DeadReckining {
+        public static final String KEY_MANEUVER_NAME = "DS_PARAM_MANEUVER_NAME";
+        public static final String VALUE_MANEUVER_NAME_FORWARD = "maneuver_forward";
+        public static final String VALUE_MANEUVER_NAME_BACKWARD = "maneuver_backward";
+        public static final String VALUE_MANEUVER_NAME_ROTATE = "maneuver_rotate";
+        public static final String VALUE_MANEUVER_NAME_AROUND_CIRCLE = "maneuver_around";
     }
 
     public class ApproachMarker {
