@@ -70,6 +70,7 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
         if (isObstacleTooClose) {
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             finnishManeuver(false);
+            return;
         }
 
         long millisecondsSinceStart = getMillisecondSinceStart();
