@@ -21,7 +21,6 @@ public class Limits {
     public static final double CASE_WIDTH = 0.135;    // capo2
     public static final double WHEEL_WIDTH = 0.01;  // capo2
     public static final double WHEEL_DIAMETER = 0.09; // [m] capo2
-    public static final long FULL_ROTATION_TIME_MILLISECONDS = 7000;
 
     public static final int NOT_DETECTED_LIMIT = 50;   // allowed number of messages with the "-1" ArUco detections in a row
 

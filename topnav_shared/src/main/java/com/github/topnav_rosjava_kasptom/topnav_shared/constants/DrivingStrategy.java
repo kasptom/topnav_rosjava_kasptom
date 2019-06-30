@@ -54,6 +54,7 @@ public class DrivingStrategy {
 
         public static final String KEY_MANEUVER_ANGLE_DEGREES = "DS_PARAM_MANEUVER_AMGLE_DEGREES";
         public static final String KEY_MANEUVER_DISTANCE_METERS = "DS_PARAM_MANEUVER_DIST_METERS";
+        public static final String KEY_MANEUVER_WHEEL_FULL_ROTATION_MS = "DS_PARAM_MANEUVER_WHEEL_FULL_ROTATION_MS";
     }
 
     public class ApproachMarker {
@@ -68,5 +69,6 @@ public class DrivingStrategy {
             ApproachMarker.KEY_APPROACHED_MARKER_ID,
             DeadReckoning.KEY_MANEUVER_NAME,
             DeadReckoning.KEY_MANEUVER_ANGLE_DEGREES,
-            DeadReckoning.KEY_MANEUVER_DISTANCE_METERS);
+            DeadReckoning.KEY_MANEUVER_DISTANCE_METERS,
+            DeadReckoning.KEY_MANEUVER_WHEEL_FULL_ROTATION_MS);
 }
