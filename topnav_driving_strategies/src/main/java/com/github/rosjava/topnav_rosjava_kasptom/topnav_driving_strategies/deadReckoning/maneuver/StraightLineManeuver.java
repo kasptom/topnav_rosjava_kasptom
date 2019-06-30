@@ -7,15 +7,15 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVe
 
 public class StraightLineManeuver implements IManeuver {
 
-    private final double wheelDiamMeters;
+    private final double wheelDiameter;
     private final long fullRotationTimeMs;
     private final double leftWheelSpeed;
     private final double rightWheelsSpeed;
 
     private long maneuverDurationMs;
 
-    public StraightLineManeuver(double wheelDiamMeters, long fullRotationTimeMs, double leftWheelSpeed, double rightWheelSpeed) {
-        this.wheelDiamMeters = wheelDiamMeters;
+    public StraightLineManeuver(double wheelDiamMeter, long fullRotationTimeMs, double leftWheelSpeed, double rightWheelSpeed) {
+        this.wheelDiameter = wheelDiamMeter;
         this.fullRotationTimeMs = fullRotationTimeMs;
         this.leftWheelSpeed = leftWheelSpeed;
         this.rightWheelsSpeed = rightWheelSpeed;
@@ -40,6 +40,6 @@ public class StraightLineManeuver implements IManeuver {
     }
 
     private long calculateManeuverTime(double targetDistanceMeters) {
-        return (long) (fullRotationTimeMs * (targetDistanceMeters / (Math.PI * wheelDiamMeters)));
+        return (long) (fullRotationTimeMs * (targetDistanceMeters / (Math.PI * wheelDiameter)));
     }
 }
