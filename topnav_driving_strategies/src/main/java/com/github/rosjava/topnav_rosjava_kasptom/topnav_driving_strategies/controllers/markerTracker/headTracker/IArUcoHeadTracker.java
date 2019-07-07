@@ -18,7 +18,17 @@ public interface IArUcoHeadTracker {
      */
     void handleTimeSinceLastRotationMessage(UInt64 timeSinceLastRotationMessage);
 
+    /**
+     * Starts the searching phase of the markers. To skip the searching phase use {@link #start(double, boolean)}
+     */
     void start();
+
+    /**
+     * Starts the head tracker, optionally skipping the searching phase
+     * @param initialAngleDegrees initial head position
+     * @param isLookingForMarkers set to false to skip the searching phase
+     */
+    void start(double initialAngleDegrees, boolean isLookingForMarkers);
 
     void stop();
 
