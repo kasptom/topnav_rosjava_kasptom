@@ -5,12 +5,13 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker.IArUcoHeadTracker;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.DeadReckoningDrive;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.IDeadReckoningDrive;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.IDeadReckoningManeuverListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.*;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.IManeuverDescriptionGenerator;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.ManeuverDescriptionGenerator;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.ManeuverUtils;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.CompoundStrategyStage;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.*;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import org.apache.commons.logging.Log;
@@ -19,20 +20,19 @@ import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckoning.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_PREVIEW_WIDTH;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener, IDeadReckoningManeuverListener {
 
     private final IArUcoHeadTracker arUcoTracker;
+    private final IManeuverDescriptionGenerator maneuverGenerator;
     private StrategyFinishedListener finishedListener;
-    private final WheelsVelocitiesChangeListener wheelsVelocitiesChangeListener;
+    private WheelsVelocitiesChangeListener wheelsVelocitiesChangeListener;
 
     double fullRotationTimeMilliseconds;
 
@@ -44,22 +44,29 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
     private boolean isObstacleTooClose;
 
-    public PositionAccordingToMarkerStrategy(IArUcoHeadTracker arUcoTracker, WheelsVelocitiesChangeListener wheelsVelocitiesChangeListener, Log log) {
+    private String markerId;
+    private RelativeDirection requestedRelativeDirection;
+    private RelativeAlignment requestedRelativeAlignment;
+    private Queue<ManeuverDescription> maneuverDescriptions;
+
+    public PositionAccordingToMarkerStrategy(IArUcoHeadTracker arUcoTracker, Log log) {
         guidelineParamsMap = new HashMap<>();
         this.arUcoTracker = arUcoTracker;
-        this.wheelsVelocitiesChangeListener = wheelsVelocitiesChangeListener;
         this.log = log;
         currentStage = CompoundStrategyStage.INITIAL;
+        maneuverGenerator = new ManeuverDescriptionGenerator();
     }
 
     @Override
     public void startStrategy() {
         LinkedHashSet<String> markerIds = GuidelineUtils.asOrderedDoorMarkerIds(guidelineParamsMap);
         markerIds.addAll(GuidelineUtils.approachedMarkerIdAsSet(guidelineParamsMap));
+        markerIds.addAll(GuidelineUtils.accordingToMarkerIdAsSet(guidelineParamsMap));
         markerIds.remove(GuidelineParam.getEmptyParam().getValue());
         arUcoTracker.setTrackedMarkers(markerIds);
         deadReckoningDrive = initializeDeadReckoningDrive();
 
+        currentStage = CompoundStrategyStage.LOOK_AROUND_FOR_MARKER;
         arUcoTracker.start();
     }
 
@@ -95,7 +102,7 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
     @Override
     public void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener listener) {
-
+        wheelsVelocitiesChangeListener = listener;
     }
 
     @Override
@@ -111,22 +118,115 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     public void setGuidelineParameters(List<String> parameters) {
         GuidelineUtils.reloadParameters(parameters, guidelineParamsMap);
         fullRotationTimeMilliseconds = Long.parseLong(guidelineParamsMap.get(KEY_MANEUVER_WHEEL_FULL_ROTATION_MS).getValue());
+        requestedRelativeDirection = RelativeDirection.valueOf(
+                guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION)
+                        .getValue()
+                        .toUpperCase());
+
+        requestedRelativeAlignment = RelativeAlignment.valueOf(
+                guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT)
+                        .getValue()
+                        .toUpperCase());
+
+        markerId = guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID).getValue();
     }
 
     @Override
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
         System.out.printf("tracked marker update: %s, at: %.2f[deg], distance: %.2f",
                 detection.getId(),
-                detection.getDetectedAtAngle(),
+                headRotation,
                 ArucoMarkerUtils.distanceTo(detection));
+
+        if (currentStage == CompoundStrategyStage.LOOKING_AT_MARKER) {
+            if (detection.getId().equals(MarkerDetection.EMPTY_DETECTION_ID)) {
+                arUcoTracker.stop();
+                currentStage = CompoundStrategyStage.LOOK_AROUND_FOR_MARKER;
+                arUcoTracker.start();
+            } else if (isCenteredOn(detection) && !isInRequestedPosition(detection, headRotation)) {
+                maneuverDescriptions = createManeuverDescriptions(detection, headRotation);
+                currentStage = CompoundStrategyStage.MANEUVER;
+                startManeuvers();
+                return;
+            }
+        }
+
+        if (currentStage == CompoundStrategyStage.LOOK_AROUND_FOR_MARKER) {
+            if (detection.getId().equals(MarkerDetection.EMPTY_DETECTION_ID)) {
+                finishedListener.onStrategyFinished(false);
+                return;
+            }
+
+            if (detection.getId().equals(markerId) && isCenteredOn(detection) && isInRequestedPosition(detection, headRotation)) {
+                // TODO - if in correct position - finish with success
+                // else - retry the maneuver
+                // if not found - failure
+            }
+        }
+
+
+//
+//        if () {
+//            arUcoTracker.stop();
+//            log.info("Successfully reached the requested position");
+//            finishedListener.onStrategyFinished(true);
+//        } else if (isCenteredOn(detection)){
+//            arUcoTracker.start(headRotation, false);
+//
+//        }
+
         // TODO handle detection / switch stages or finish
+    }
+
+    private Queue<ManeuverDescription> createManeuverDescriptions(MarkerDetection detection, double headRotation) {
+
+        maneuverDescriptions.clear();
+
+        double srcX = detection.getCameraPosition()[0];
+        double srcY = detection.getCameraPosition()[2];
+
+        RelativeAlignment targetAlignment = RelativeAlignment
+                .valueOf(guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT)
+                        .getValue()
+                        .toUpperCase());
+        RelativeDirection targetDirection = RelativeDirection
+                .valueOf(guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION)
+                        .getValue()
+                        .toUpperCase());
+
+        double dstX = ManeuverUtils.relativeAlignmentToMeters(targetAlignment);
+        double dstY = MIN_MID_RANGE / 2.0;      // TODO check
+        double dstRotation = ManeuverUtils.relativeDirectionToDegrees(targetDirection);
+
+        Queue<ManeuverDescription> newManeuvers = maneuverGenerator.generateManeuverDescriptions(srcX, srcY, headRotation, dstX, dstY, dstRotation);
+        this.maneuverDescriptions.addAll(newManeuvers);
+
+        return maneuverDescriptions;
+    }
+
+    private void startManeuvers() {
+        ManeuverDescription description = maneuverDescriptions.poll();
+        deadReckoningDrive.startManeuver(description.getName(), description.getRotationDegrees(), description.getDistanceMeters());
+    }
+
+    private boolean isCenteredOn(MarkerDetection detection) {
+        double[] xCorners = detection.getXCorners();
+        double averagePicturePositionPixels = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0 - CAM_PREVIEW_WIDTH / 2.0;    // 0 is the middle of the picture
+        return Math.abs(averagePicturePositionPixels - 5) <= 5;
     }
 
     @Override
     public void onManeuverFinished(boolean isWithoutObstacles) {
         if (!isWithoutObstacles) {
             finishedListener.onStrategyFinished(false);
+            return;
+        } else if (maneuverDescriptions.isEmpty()){
+            finishedListener.onStrategyFinished(true); // TODO check the position and retry the maneuvers
+            return;
         }
+
+        ManeuverDescription description = maneuverDescriptions.poll();
+        deadReckoningDrive.startManeuver(description.getName(), description.getRotationDegrees(), description.getDistanceMeters());
     }
 
     private IDeadReckoningDrive initializeDeadReckoningDrive() {
@@ -139,10 +239,15 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
         return deadReckoningDrive;
     }
 
-    private void startManeuver() {
-        String maneuverName = guidelineParamsMap.get(KEY_MANEUVER_NAME).getValue();
-        double angleDegrees = Double.parseDouble(guidelineParamsMap.get(KEY_MANEUVER_ANGLE_DEGREES).getValue());
-        double distanceMeters = Double.parseDouble(guidelineParamsMap.get(KEY_MANEUVER_DISTANCE_METERS).getValue());
-        deadReckoningDrive.startManeuver(maneuverName, angleDegrees, distanceMeters);
+    private boolean isInRequestedPosition(MarkerDetection detection, double angle) {
+        return detection.getId().equals(markerId)
+                && detection.getRelativeDistance().equals(RelativeDistance.CLOSE)
+                && detection.getRelativeAlignment().equals(requestedRelativeAlignment)
+                && isChassisCorrectlyRotated(angle);
+
+    }
+
+    private boolean isChassisCorrectlyRotated(double angleDegrees) {
+        return Math.abs(requestedRelativeDirection.getRotationDegrees() - angleDegrees) <= 5.0;
     }
 }

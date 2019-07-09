@@ -11,6 +11,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strat
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.FollowWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.approachMarker.ApproachMarkerStrategy;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.markerRelativePositioning.PositionAccordingToMarkerStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.throughDoor.PassThroughDoorStrategyV2;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
@@ -107,11 +108,13 @@ public class MainController implements IMainController {
         drivingStrategies.put(DRIVING_STRATEGY_APPROACH_MARKER, new ApproachMarkerStrategy(arUcoHeadTracker, log));
         drivingStrategies.put(DRIVING_STRATEGY_TRACK_ARUCOS, new AruCoTrackerTestStrategy(arUcoHeadTracker));
         drivingStrategies.put(DRIVING_STRATEGY_DEAD_RECKONING_TEST, new DeadReckoningTestStrategy());
+        drivingStrategies.put(DRIVING_STRATEGY_ACCORDING_TO_MARKER, new PositionAccordingToMarkerStrategy(arUcoHeadTracker, log));
         drivingStrategies.values().forEach(strategy -> strategy.setWheelsVelocitiesListener(wheelsController::setVelocities));
 
         trackedMarkerListeners.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, (PassThroughDoorStrategyV2) drivingStrategies.get(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2));
         trackedMarkerListeners.put(DRIVING_STRATEGY_APPROACH_MARKER, (ApproachMarkerStrategy) drivingStrategies.get(DRIVING_STRATEGY_APPROACH_MARKER));
         trackedMarkerListeners.put(DRIVING_STRATEGY_TRACK_ARUCOS, (AruCoTrackerTestStrategy) drivingStrategies.get(DRIVING_STRATEGY_TRACK_ARUCOS));
+        trackedMarkerListeners.put(DRIVING_STRATEGY_ACCORDING_TO_MARKER, (PositionAccordingToMarkerStrategy) drivingStrategies.get(DRIVING_STRATEGY_ACCORDING_TO_MARKER));
     }
 
     public void emergencyStop() {

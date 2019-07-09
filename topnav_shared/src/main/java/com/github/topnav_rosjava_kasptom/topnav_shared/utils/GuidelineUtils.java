@@ -54,4 +54,10 @@ public class GuidelineUtils {
         approachedMarkerSet.add(guidelineParams.getOrDefault(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID, GuidelineParam.getEmptyParam()).getValue());
         return approachedMarkerSet;
     }
+
+    public static LinkedHashSet<String> accordingToMarkerIdAsSet(HashMap<String, GuidelineParam> guidelineParams) {
+        LinkedHashSet<String> approachedMarkerSet = new LinkedHashSet<>(1);
+        approachedMarkerSet.add(guidelineParams.getOrDefault(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID, GuidelineParam.getEmptyParam()).getValue());
+        return approachedMarkerSet;
+    }
 }

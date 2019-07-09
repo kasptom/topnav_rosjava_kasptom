@@ -1,6 +1,10 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.constants;
 
 public class Limits {
+    public static final double MIN_MID_RANGE = 1.5;
+    public static final double MAX_MID_RANGE = 2.5;
+    public static final double OFFSET_MARKER_CENTER_METERS = 0.1; // TODO topnav_config
+
     public static final int LIDAR_SAMPLES_COUNT = 61;
     public static double TOO_CLOSE_RANGE = 0.25;
     public static double DOOR_DETECTION_RANGE = 1.0; // meters

@@ -11,6 +11,7 @@ public enum CompoundStrategyStage {
     APPROACH_MARKER,
 
     LOOK_AROUND_FOR_MARKER,
+    LOOKING_AT_MARKER,
     MANEUVER,
 
     FINISH_OK,

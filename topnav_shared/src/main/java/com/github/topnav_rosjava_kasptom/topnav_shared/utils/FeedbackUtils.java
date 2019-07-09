@@ -47,7 +47,7 @@ public class FeedbackUtils {
                 }).collect(Collectors.toList());
     }
 
-    private static Topology convertToTopology(MarkerDetection detection, long timestamp) {
+    public static Topology convertToTopology(MarkerDetection detection, long timestamp) {
         return new Topology(timestamp,
                 detection.getId(),
                 detection.getRelativeAlignment().name(),
