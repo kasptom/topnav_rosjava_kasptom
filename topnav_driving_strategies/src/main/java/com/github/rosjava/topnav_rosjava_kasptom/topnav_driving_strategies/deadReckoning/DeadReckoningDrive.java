@@ -5,6 +5,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadR
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.RotateManeuver;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.StraightLineManeuver;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
+import std_msgs.UInt64;
 import topnav_msgs.AngleRangesMsg;
 
 import java.util.Arrays;
@@ -70,8 +71,12 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
         if (isObstacleTooClose) {
             wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             finnishManeuver(false);
-            return;
         }
+    }
+
+    @Override
+    public void onClockMessage(UInt64 clockMessage) {
+        if (!isRunning) return;
 
         long millisecondsSinceStart = getMillisecondSinceStart();
         if (currentManeuver.isFinished(millisecondsSinceStart)) {

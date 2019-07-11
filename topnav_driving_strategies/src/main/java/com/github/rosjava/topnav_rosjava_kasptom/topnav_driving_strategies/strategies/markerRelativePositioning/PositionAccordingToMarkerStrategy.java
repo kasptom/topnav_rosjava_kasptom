@@ -1,11 +1,11 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.markerRelativePositioning;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.*;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker.IArUcoHeadTracker;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.*;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.DeadReckoningDrive;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.IDeadReckoningDrive;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.IDeadReckoningManeuverListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.ManeuverDescription;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.IManeuverDescriptionGenerator;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.ManeuverDescriptionGenerator;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.ManeuverUtils;
@@ -15,6 +15,7 @@ import com.github.topnav_rosjava_kasptom.topnav_shared.model.*;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import org.apache.commons.logging.Log;
+import std_msgs.UInt64;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
@@ -22,12 +23,12 @@ import topnav_msgs.TopNavConfigMsg;
 
 import java.util.*;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckoning.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckoning.KEY_MANEUVER_WHEEL_FULL_ROTATION_MS;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_PREVIEW_WIDTH;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
-public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener, IDeadReckoningManeuverListener {
+public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener, IDeadReckoningManeuverListener, IClockMessageHandler {
 
     private final IArUcoHeadTracker arUcoTracker;
     private final IManeuverDescriptionGenerator maneuverGenerator;
@@ -55,6 +56,7 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
         this.log = log;
         currentStage = CompoundStrategyStage.INITIAL;
         maneuverGenerator = new ManeuverDescriptionGenerator();
+        maneuverDescriptions = new ArrayDeque<>();
     }
 
     @Override
@@ -88,6 +90,13 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
             wheelsVelocitiesChangeListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             finishedListener.onStrategyFinished(false);
         }
+    }
+
+    @Override
+    public void handleClockMessage(UInt64 clockMsg) {
+        if (isObstacleTooClose) return;
+
+        deadReckoningDrive.onClockMessage(clockMsg);
     }
 
     @Override
@@ -133,7 +142,7 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
     @Override
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
-        System.out.printf("tracked marker update: %s, at: %.2f[deg], distance: %.2f",
+        System.out.printf("tracked marker update: %s, at: %.2f[deg], distance: %.2f\n",
                 detection.getId(),
                 headRotation,
                 ArucoMarkerUtils.distanceTo(detection));
@@ -161,6 +170,12 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                 // TODO - if in correct position - finish with success
                 // else - retry the maneuver
                 // if not found - failure
+                finishedListener.onStrategyFinished(true);
+            } else if (detection.getId().equals(markerId) && isCenteredOn(detection)) {
+                maneuverDescriptions = createManeuverDescriptions(detection, headRotation);
+                currentStage = CompoundStrategyStage.MANEUVER;
+                arUcoTracker.stop();
+                startManeuvers();
             }
         }
 
@@ -211,8 +226,11 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
     private boolean isCenteredOn(MarkerDetection detection) {
         double[] xCorners = detection.getXCorners();
+
+        // TODO
         double averagePicturePositionPixels = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0 - CAM_PREVIEW_WIDTH / 2.0;    // 0 is the middle of the picture
-        return Math.abs(averagePicturePositionPixels - 5) <= 5;
+        System.out.printf("average picture position [px]: %.2f\n", averagePicturePositionPixels);
+        return Math.abs(averagePicturePositionPixels) <= 5;
     }
 
     @Override

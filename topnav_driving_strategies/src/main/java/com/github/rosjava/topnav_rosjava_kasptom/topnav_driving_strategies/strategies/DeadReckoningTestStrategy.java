@@ -1,14 +1,12 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies;
 
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.HeadRotationChangeRequestListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
+import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.*;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.DeadReckoningDrive;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.IDeadReckoningManeuverListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
+import std_msgs.UInt64;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
 import topnav_msgs.HoughAcc;
@@ -20,7 +18,7 @@ import java.util.List;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckoning.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 
-public class DeadReckoningTestStrategy implements IDrivingStrategy, IDeadReckoningManeuverListener, WheelsVelocitiesChangeListener {
+public class DeadReckoningTestStrategy implements IDrivingStrategy, IDeadReckoningManeuverListener, WheelsVelocitiesChangeListener, IClockMessageHandler {
 
     private DeadReckoningDrive deadReckoningDrive;
     private StrategyFinishedListener strategyFinishedListener;
@@ -99,5 +97,10 @@ public class DeadReckoningTestStrategy implements IDrivingStrategy, IDeadReckoni
     @Override
     public void onWheelsVelocitiesChanged(WheelsVelocities velocities) {
         wheelsListener.onWheelsVelocitiesChanged(velocities);
+    }
+
+    @Override
+    public void handleClockMessage(UInt64 clockMsg) {
+        deadReckoningDrive.onClockMessage(clockMsg);
     }
 }

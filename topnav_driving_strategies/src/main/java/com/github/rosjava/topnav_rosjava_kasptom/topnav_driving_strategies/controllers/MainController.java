@@ -45,6 +45,7 @@ public class MainController implements IMainController {
     private final Subscriber<AngleRangesMsg> angleRangesMsgSubscriber;
     private final Subscriber<HoughAcc> houghAccSubscriber;
     private final TopnavSubscriber<MarkersMsg> arUcoSubscriber;
+    private final TopnavSubscriber<std_msgs.UInt64> clockSubscriber;
     private final Subscriber<std_msgs.String> headDirectionChangeSubscriber;
     private final Subscriber<Float64> headLinearDirectionChangeSubscriber;
     private final Subscriber<std_msgs.UInt64> headTimeSinceLastRotationSubscriber;
@@ -53,6 +54,7 @@ public class MainController implements IMainController {
 
     private final HashMap<String, IDrivingStrategy> drivingStrategies = new HashMap<>();
     private final HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners = new HashMap<>();
+    private final HashMap<String, IClockMessageHandler> clockListeners = new HashMap<>();
 
     private TopNavConfigMsg latestConfigMessage = null;
 
@@ -77,6 +79,8 @@ public class MainController implements IMainController {
         arUcoSubscriber = new TopnavSubscriber<>(connectedNode, TOPNAV_ARUCO_TOPIC, MarkersMsg._TYPE);
         arUcoHeadTracker.setAngleChangeListener(headController::handleStrategyHeadLinearRotationChange);
 
+        clockSubscriber = new TopnavSubscriber<>(connectedNode, TOPNAV_CAPO_CLOCK_TOPIC, UInt64._TYPE);
+
         guidelineSubscriber = connectedNode.newSubscriber(TOPNAV_GUIDELINES_TOPIC, GuidelineMsg._TYPE);
 
         headDirectionChangeSubscriber = connectedNode.newSubscriber(HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC, std_msgs.String._TYPE);
@@ -86,7 +90,7 @@ public class MainController implements IMainController {
         manualSteeringSubscriber = connectedNode.newSubscriber(TOPNAV_NAVIGATION_MANUAL_STEERING_TOPIC, std_msgs.Int16._TYPE);
         initializeManualSteering(manualSteeringSubscriber);
 
-        initializeDrivingStrategies(drivingStrategies, trackedMarkerListeners);
+        initializeDrivingStrategies(drivingStrategies, trackedMarkerListeners, clockListeners);
         selectStrategy(DRIVING_STRATEGY_IDLE, null);
         reactionController.setWheelsVelocitiesListener(wheelsController::setVelocities);
 
@@ -101,7 +105,8 @@ public class MainController implements IMainController {
     }
 
     private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies,
-                                             HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners) {
+                                             HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners,
+                                             HashMap<String, IClockMessageHandler> clockListeners) {
         drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL_2, new FollowWallStrategy((IReactionStartListener) reactionController, log));
         drivingStrategies.put(DRIVING_STRATEGY_STOP_BEFORE_WALL, new StopBeforeWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, new PassThroughDoorStrategyV2(arUcoHeadTracker, log));
@@ -115,12 +120,16 @@ public class MainController implements IMainController {
         trackedMarkerListeners.put(DRIVING_STRATEGY_APPROACH_MARKER, (ApproachMarkerStrategy) drivingStrategies.get(DRIVING_STRATEGY_APPROACH_MARKER));
         trackedMarkerListeners.put(DRIVING_STRATEGY_TRACK_ARUCOS, (AruCoTrackerTestStrategy) drivingStrategies.get(DRIVING_STRATEGY_TRACK_ARUCOS));
         trackedMarkerListeners.put(DRIVING_STRATEGY_ACCORDING_TO_MARKER, (PositionAccordingToMarkerStrategy) drivingStrategies.get(DRIVING_STRATEGY_ACCORDING_TO_MARKER));
+
+        clockListeners.put(DRIVING_STRATEGY_ACCORDING_TO_MARKER, (PositionAccordingToMarkerStrategy) drivingStrategies.get(DRIVING_STRATEGY_ACCORDING_TO_MARKER));
+        clockListeners.put(DRIVING_STRATEGY_DEAD_RECKONING_TEST, (DeadReckoningTestStrategy) drivingStrategies.get(DRIVING_STRATEGY_DEAD_RECKONING_TEST));
     }
 
     public void emergencyStop() {
         log.info("removing message handlers");
         tearDownDrivingStrategy();
         tearDownArUcoListeners();
+        tearDownClockListeners();
 
         log.info("stopping the robot");
         wheelsController.setVelocities(ZERO_VELOCITY);
@@ -129,6 +138,7 @@ public class MainController implements IMainController {
     private void selectStrategy(String strategyName, List<String> parameters) {
         tearDownDrivingStrategy();
         tearDownArUcoListeners();
+        tearDownClockListeners();
 
         publishStrategyChangeMessage(strategyName);
 
@@ -148,6 +158,10 @@ public class MainController implements IMainController {
 
         if (trackedMarkerListeners.containsKey(strategyName)) {
             setUpArUcoListeners(trackedMarkerListeners.get(strategyName));
+        }
+
+        if (clockListeners.containsKey(strategyName)) {
+            setUpClockListeners(clockListeners.get(strategyName));
         }
 
         setUpDrivingStrategy(drivingStrategies.get(strategyName), parameters);
@@ -219,5 +233,13 @@ public class MainController implements IMainController {
         arUcoSubscriber.addMessageListener(arUcoHeadTracker::handleArUcoMessage);
         headLinearDirectionChangeSubscriber.addMessageListener(arUcoHeadTracker::handleHeadRotationChange);
         headTimeSinceLastRotationSubscriber.addMessageListener(arUcoHeadTracker::handleTimeSinceLastRotationMessage);
+    }
+
+    private void setUpClockListeners(IClockMessageHandler clockMessageHandler) {
+        clockSubscriber.addMessageListener(clockMessageHandler::handleClockMessage);
+    }
+
+    private void tearDownClockListeners() {
+        clockSubscriber.removeAllLocalMessageListeners();
     }
 }
