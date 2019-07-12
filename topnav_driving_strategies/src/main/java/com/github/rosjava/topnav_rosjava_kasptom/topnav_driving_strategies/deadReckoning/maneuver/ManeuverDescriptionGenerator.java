@@ -30,7 +30,7 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
         double markerSourceDistance = Math.sqrt(Math.pow(srcX, 2) + Math.pow(srcY, 2));
         double markerTargetDistance = Math.sqrt(Math.pow(dstX, 2) + Math.pow(dstY, 2));
         double markerDestinationAngleDiff = getMarkerDestinationAngleDiff(markerTargetDistance, distance, markerSourceDistance);
-        return markerDestinationAngleDiff - srcRotation;
+        return srcRotation - markerDestinationAngleDiff;
     }
 
     private double getDriveForwardDistance(double srcX, double srcY, double dstX, double dstY) {

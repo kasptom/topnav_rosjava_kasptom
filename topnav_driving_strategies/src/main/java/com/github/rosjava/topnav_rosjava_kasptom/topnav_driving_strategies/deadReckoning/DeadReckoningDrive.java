@@ -54,6 +54,7 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
 
     @Override
     public void startManeuver(String maneuverName, double angleDegrees, double distanceMeters) {
+        System.out.printf("starting maneuver %s, %.2f°, %.2f m\n", maneuverName, angleDegrees, distanceMeters);
         currentManeuver = maneuvers.get(maneuverName);
         currentManeuver.start(angleDegrees, distanceMeters);
         maneuverStartTimestamp = System.nanoTime();

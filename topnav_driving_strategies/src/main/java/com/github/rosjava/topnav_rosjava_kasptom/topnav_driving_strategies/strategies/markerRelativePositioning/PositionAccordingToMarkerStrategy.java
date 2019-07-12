@@ -94,7 +94,7 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
     @Override
     public void handleClockMessage(UInt64 clockMsg) {
-        if (isObstacleTooClose) return;
+        if (isObstacleTooClose || currentStage != CompoundStrategyStage.MANEUVER) return;
 
         deadReckoningDrive.onClockMessage(clockMsg);
     }
