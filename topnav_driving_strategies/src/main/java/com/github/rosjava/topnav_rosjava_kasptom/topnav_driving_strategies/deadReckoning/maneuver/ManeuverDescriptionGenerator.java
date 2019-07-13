@@ -12,6 +12,7 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
 
     @Override
     public Queue<ManeuverDescription> generateManeuverDescriptions(double srcX, double srcY, double srcRotation, double dstX, double dstY, double dstRotation) {
+//        System.out.printf("generating maneuvers for passage: (%.2fm, %.2fm, %.2f°) --> (%.2fm, %.2fm, %.2f°)\n", srcX, srcY, srcRotation, dstX, dstY, dstRotation);
         Queue<ManeuverDescription> descriptions = new ArrayDeque<>(3);
 
         double firstRotationAngle = getFirstRotationAngle(srcX, srcY, dstX, dstY, srcRotation);
@@ -39,7 +40,7 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
 
     private double getSecondRotationAngle(double srcX, double srcY, double firstRotationAngle, double dstRotation) {
         double theta = Math.atan(srcX / srcY);
-        return firstRotationAngle + theta + dstRotation;
+        return -(firstRotationAngle + theta + dstRotation);
     }
 
     private double getMarkerDestinationAngleDiff(double markerTargetDistance, double distance, double markerSourceDistance) {

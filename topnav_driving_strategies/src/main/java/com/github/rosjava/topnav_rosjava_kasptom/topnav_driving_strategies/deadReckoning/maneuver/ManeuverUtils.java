@@ -11,8 +11,8 @@ public class ManeuverUtils {
     private static final HashMap<String, Double> relativeAlignmentToMeters = new HashMap<>();
     static {
         relativeAlignmentToMeters.put(RelativeAlignment.CENTER.name(), 0.0);
-        relativeAlignmentToMeters.put(RelativeAlignment.LEFT.name(), -1.5 * Limits.OFFSET_MARKER_CENTER_METERS);
-        relativeAlignmentToMeters.put(RelativeAlignment.RIGHT.name(), 1.5 * Limits.OFFSET_MARKER_CENTER_METERS);
+        relativeAlignmentToMeters.put(RelativeAlignment.LEFT.name(), Limits.ACCORDING_TO_MARKER_CENTER_OFFSET);
+        relativeAlignmentToMeters.put(RelativeAlignment.RIGHT.name(), -Limits.ACCORDING_TO_MARKER_CENTER_OFFSET);
     }
 
     public static double relativeAlignmentToMeters(RelativeAlignment alignment) {

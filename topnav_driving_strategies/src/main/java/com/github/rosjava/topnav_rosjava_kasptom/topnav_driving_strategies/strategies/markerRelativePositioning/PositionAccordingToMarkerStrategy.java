@@ -150,6 +150,8 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                 currentStage = CompoundStrategyStage.LOOK_AROUND_FOR_MARKER;
                 arUcoTracker.start();
             } else if (isCenteredOn(detection) && !isInRequestedPosition(detection, headRotation)) {
+                System.out.printf("distance: %.2fm, angle %.2f°",
+                        ArucoMarkerUtils.distanceTo(detection), headRotation);
                 maneuverDescriptions = createManeuverDescriptions(detection, headRotation);
                 currentStage = CompoundStrategyStage.MANEUVER;
                 startManeuvers();
@@ -169,6 +171,8 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                 // if not found - failure
                 finishedListener.onStrategyFinished(true);
             } else if (detection.getId().equals(markerId) && isCenteredOn(detection)) {
+                System.out.printf("distance: %.2fm, angle %.2f°\n",
+                        ArucoMarkerUtils.distanceTo(detection), headRotation);
                 maneuverDescriptions = createManeuverDescriptions(detection, headRotation);
                 currentStage = CompoundStrategyStage.MANEUVER;
                 arUcoTracker.stop();
@@ -207,10 +211,11 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                         .toUpperCase());
 
         double dstX = ManeuverUtils.relativeAlignmentToMeters(targetAlignment);
-        double dstY = MIN_MID_RANGE / 2.0;      // TODO check
         double dstRotation = ManeuverUtils.relativeDirectionToDegrees(targetDirection);
 
-        Queue<ManeuverDescription> newManeuvers = maneuverGenerator.generateManeuverDescriptions(srcX, srcY, headRotation, dstX, dstY, dstRotation);
+        Queue<ManeuverDescription> newManeuvers = maneuverGenerator
+                .generateManeuverDescriptions(srcX, srcY, headRotation,
+                        dstX, ACCORDING_TO_MARKER_DISTANCE, dstRotation);
         this.maneuverDescriptions.addAll(newManeuvers);
 
         return maneuverDescriptions;
