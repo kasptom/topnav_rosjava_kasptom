@@ -39,7 +39,7 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
     }
 
     private double getSecondRotationAngle(double srcX, double srcY, double firstRotationAngle, double dstRotation) {
-        double theta = Math.atan(srcX / srcY);
+        double theta = Math.atan(srcX / srcY) * 180.0 / Math.PI;
         return -(firstRotationAngle + theta + dstRotation);
     }
 
