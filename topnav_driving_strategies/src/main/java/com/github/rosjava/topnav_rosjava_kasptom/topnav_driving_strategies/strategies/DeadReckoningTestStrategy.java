@@ -34,7 +34,7 @@ public class DeadReckoningTestStrategy implements IDrivingStrategy, IDeadReckoni
         String maneuverName = guidelineParamsMap.get(KEY_MANEUVER_NAME).getValue();
         double angleDegrees = Double.parseDouble(guidelineParamsMap.get(KEY_MANEUVER_ANGLE_DEGREES).getValue());
         double distanceMeters = Double.parseDouble(guidelineParamsMap.get(KEY_MANEUVER_DISTANCE_METERS).getValue());
-        long fullRotationTimeMilliseconds = Long.parseLong(guidelineParamsMap.get(KEY_MANEUVER_WHEEL_FULL_ROTATION_MS).getValue());
+        long fullRotationTimeMilliseconds = Long.parseLong(guidelineParamsMap.get(KEY_MANEUVER_ROBOT_FULL_ROTATION_MS).getValue());
 
         deadReckoningDrive = new DeadReckoningDrive(CASE_WIDTH + WHEEL_WIDTH, WHEEL_DIAMETER, fullRotationTimeMilliseconds);
         deadReckoningDrive.setManeuverFinishListener(this);

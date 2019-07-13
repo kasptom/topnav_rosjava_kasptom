@@ -23,7 +23,7 @@ import topnav_msgs.TopNavConfigMsg;
 
 import java.util.*;
 
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckoning.KEY_MANEUVER_WHEEL_FULL_ROTATION_MS;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_PREVIEW_WIDTH;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
@@ -34,8 +34,6 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     private final IManeuverDescriptionGenerator maneuverGenerator;
     private StrategyFinishedListener finishedListener;
     private WheelsVelocitiesChangeListener wheelsVelocitiesChangeListener;
-
-    double fullRotationTimeMilliseconds;
 
     private CompoundStrategyStage currentStage;
 
@@ -126,7 +124,6 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     @Override
     public void setGuidelineParameters(List<String> parameters) {
         GuidelineUtils.reloadParameters(parameters, guidelineParamsMap);
-        fullRotationTimeMilliseconds = Long.parseLong(guidelineParamsMap.get(KEY_MANEUVER_WHEEL_FULL_ROTATION_MS).getValue());
         requestedRelativeDirection = RelativeDirection.valueOf(
                 guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION)
                         .getValue()
@@ -142,10 +139,10 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
     @Override
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
-        System.out.printf("tracked marker update: %s, at: %.2f[deg], distance: %.2f\n",
+        log.debug(String.format("tracked marker update: %s, at: %.2f[deg], distance: %.2f",
                 detection.getId(),
                 headRotation,
-                ArucoMarkerUtils.distanceTo(detection));
+                ArucoMarkerUtils.distanceTo(detection)));
 
         if (currentStage == CompoundStrategyStage.LOOKING_AT_MARKER) {
             if (detection.getId().equals(MarkerDetection.EMPTY_DETECTION_ID)) {
@@ -220,6 +217,11 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     }
 
     private void startManeuvers() {
+        if (maneuverDescriptions.isEmpty()) {
+            log.error("Maneuver descriptions is empty");
+            return;
+        }
+
         ManeuverDescription description = maneuverDescriptions.poll();
         deadReckoningDrive.startManeuver(description.getName(), description.getRotationDegrees(), description.getDistanceMeters());
     }
@@ -227,7 +229,6 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     private boolean isCenteredOn(MarkerDetection detection) {
         double[] xCorners = detection.getXCorners();
 
-        // TODO
         double averagePicturePositionPixels = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0 - CAM_PREVIEW_WIDTH / 2.0;    // 0 is the middle of the picture
         System.out.printf("average picture position [px]: %.2f\n", averagePicturePositionPixels);
         return Math.abs(averagePicturePositionPixels) <= 5;
@@ -248,7 +249,7 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     }
 
     private IDeadReckoningDrive initializeDeadReckoningDrive() {
-        long fullRotationTimeMilliseconds = Long.parseLong(guidelineParamsMap.get(KEY_MANEUVER_WHEEL_FULL_ROTATION_MS).getValue());
+        long fullRotationTimeMilliseconds = Long.parseLong(guidelineParamsMap.get(KEY_MANEUVER_ROBOT_FULL_ROTATION_MS).getValue());
 
         IDeadReckoningDrive deadReckoningDrive = new DeadReckoningDrive(CASE_WIDTH + WHEEL_WIDTH, WHEEL_DIAMETER, fullRotationTimeMilliseconds);
         deadReckoningDrive.setWheelsVelocitiesListener(wheelsVelocitiesChangeListener);

@@ -7,6 +7,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVe
 
 public class StraightLineManeuver implements IManeuver {
 
+    private final double axisLength;
     private final double wheelDiameter;
     private final long fullRotationTimeMs;
     private final double leftWheelSpeed;
@@ -14,8 +15,9 @@ public class StraightLineManeuver implements IManeuver {
 
     private long maneuverDurationMs;
 
-    public StraightLineManeuver(double wheelDiamMeter, long fullRotationTimeMs, double leftWheelSpeed, double rightWheelSpeed) {
-        this.wheelDiameter = wheelDiamMeter;
+    public StraightLineManeuver(double axisLength, double wheelDiameter, long fullRotationTimeMs, double leftWheelSpeed, double rightWheelSpeed) {
+        this.axisLength = axisLength;
+        this.wheelDiameter = wheelDiameter;
         this.fullRotationTimeMs = fullRotationTimeMs;
         this.leftWheelSpeed = leftWheelSpeed;
         this.rightWheelsSpeed = rightWheelSpeed;
@@ -24,6 +26,7 @@ public class StraightLineManeuver implements IManeuver {
     @Override
     public void start(double targetAngleDegrees, double targetDistanceMeters) {
         this.maneuverDurationMs = calculateManeuverTime(targetDistanceMeters);
+        System.out.printf("Estimated maneuver time: %.2f[s]\n", maneuverDurationMs / 1000.0);
     }
 
     @Override
@@ -40,6 +43,10 @@ public class StraightLineManeuver implements IManeuver {
     }
 
     private long calculateManeuverTime(double targetDistanceMeters) {
-        return (long) (fullRotationTimeMs * (targetDistanceMeters / (Math.PI * wheelDiameter)));
+        double fullWheelRotationDistance =  Math.PI * wheelDiameter;
+        double fullRobotRotationDistance = Math.PI * axisLength;
+        double fullWheelRotationTimeMs = fullRotationTimeMs * fullWheelRotationDistance / fullRobotRotationDistance;
+
+        return (long) (fullWheelRotationTimeMs * targetDistanceMeters / fullWheelRotationDistance);
     }
 }

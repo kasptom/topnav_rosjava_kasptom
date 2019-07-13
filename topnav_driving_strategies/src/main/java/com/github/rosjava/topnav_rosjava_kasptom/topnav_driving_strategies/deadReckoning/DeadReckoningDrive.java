@@ -20,7 +20,7 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
 
     private double axisLength;
     private double wheelDiameter;
-    private long fullWheelRotationTimeMs;
+    private long fullRobotRotationTimeMs;
     private boolean isRunning;
     private long maneuverStartTimestamp;
 
@@ -30,16 +30,16 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
 
     private final HashMap<String, IManeuver> maneuvers;
 
-    public DeadReckoningDrive(double axisLength, double wheelDiameter, long fullWheelRotationTimeMs) {
-        this.setWheelsParameters(axisLength, wheelDiameter, fullWheelRotationTimeMs);
+    public DeadReckoningDrive(double axisLength, double wheelDiameter, long fullRobotRotationTimeMs) {
+        this.setWheelsParameters(axisLength, wheelDiameter, fullRobotRotationTimeMs);
         this.maneuvers = initializeManeuvers();
     }
 
     @Override
-    public void setWheelsParameters(double axisLength, double wheelDiameter, long fullWheelRotationTimeMs) {
+    public void setWheelsParameters(double axisLength, double wheelDiameter, long fullRobotRotationMilliseconds) {
         this.axisLength = axisLength;
         this.wheelDiameter = wheelDiameter;
-        this.fullWheelRotationTimeMs = fullWheelRotationTimeMs;
+        this.fullRobotRotationTimeMs = fullRobotRotationMilliseconds;
     }
 
     @Override
@@ -91,10 +91,10 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
 
     private HashMap<String, IManeuver> initializeManeuvers() {
         HashMap<String, IManeuver> maneuvers = new HashMap<>();
-        maneuvers.put(VALUE_MANEUVER_NAME_FORWARD, new StraightLineManeuver(wheelDiameter, fullWheelRotationTimeMs, MAX_VELOCITY_DELTA, MAX_VELOCITY_DELTA));
-        maneuvers.put(VALUE_MANEUVER_NAME_BACKWARD, new StraightLineManeuver(wheelDiameter, fullWheelRotationTimeMs, -MAX_VELOCITY_DELTA, -MAX_VELOCITY_DELTA));
-        maneuvers.put(VALUE_MANEUVER_NAME_ROTATE, new RotateManeuver(axisLength, wheelDiameter, fullWheelRotationTimeMs, MAX_VELOCITY_DELTA));
-        maneuvers.put(VALUE_MANEUVER_NAME_AROUND_CIRCLE, new AroundCircleManeuver(wheelDiameter, fullWheelRotationTimeMs));
+        maneuvers.put(VALUE_MANEUVER_NAME_FORWARD, new StraightLineManeuver(axisLength, wheelDiameter, fullRobotRotationTimeMs, MAX_VELOCITY_DELTA, MAX_VELOCITY_DELTA));
+        maneuvers.put(VALUE_MANEUVER_NAME_BACKWARD, new StraightLineManeuver(axisLength, wheelDiameter, fullRobotRotationTimeMs, -MAX_VELOCITY_DELTA, -MAX_VELOCITY_DELTA));
+        maneuvers.put(VALUE_MANEUVER_NAME_ROTATE, new RotateManeuver(fullRobotRotationTimeMs, MAX_VELOCITY_DELTA));
+        maneuvers.put(VALUE_MANEUVER_NAME_AROUND_CIRCLE, new AroundCircleManeuver(wheelDiameter, fullRobotRotationTimeMs));
         return maneuvers;
     }
 

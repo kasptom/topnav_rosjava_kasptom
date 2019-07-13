@@ -6,23 +6,20 @@ import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class RotateManeuver implements IManeuver {
-    private final double axisLength;
-    private final long fullWheelRotationTimeMs;
-    private final double wheelDiameter;
+    private final long fullRobotRotationMilliseconds;
     private final double wheelSpeed;
     private long maneuverDurationMs;
     private WheelsVelocities rotationVelocity;
 
-    public RotateManeuver(double axisLength, double wheelDiameter, long fullWheelRotationTimeMs, double wheelSpeed) {
-        this.axisLength = axisLength;
-        this.wheelDiameter = wheelDiameter;
-        this.fullWheelRotationTimeMs = fullWheelRotationTimeMs;
+    public RotateManeuver(long fullRobotRotationMilliseconds, double wheelSpeed) {
+        this.fullRobotRotationMilliseconds = fullRobotRotationMilliseconds;
         this.wheelSpeed = wheelSpeed;
     }
 
     @Override
     public void start(double targetAngleDegrees, double targetDistanceMeters) {
         this.maneuverDurationMs = calculateManeuverTime(targetAngleDegrees);
+        System.out.printf("Estimated maneuver time: %.2f[s]\n", maneuverDurationMs / 1000.0);
         this.rotationVelocity = getRotationVelocity(targetAngleDegrees);
     }
 
@@ -48,10 +45,6 @@ public class RotateManeuver implements IManeuver {
     }
 
     private long calculateManeuverTime(double targetAngleDegrees) {
-        double fullRotationDistance = axisLength * Math.PI;
-        double rotationDistance = Math.abs(targetAngleDegrees) / 360.0 * fullRotationDistance;
-        double wheelDistance = rotationDistance / 2.0;
-
-        return (long) (fullWheelRotationTimeMs * (wheelDistance / (Math.PI * wheelDiameter)));
+        return (long) (fullRobotRotationMilliseconds * Math.abs(targetAngleDegrees) / 360.0);
     }
 }

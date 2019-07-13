@@ -6,7 +6,7 @@ import topnav_msgs.AngleRangesMsg;
 
 public interface IDeadReckoningDrive {
 
-    void setWheelsParameters(double axisLength, double wheelDiameter, long fullWheelRotationTimeMs);
+    void setWheelsParameters(double axisLength, double wheelDiameter, long fullRobotRotationMilliseconds);
 
     void setManeuverFinishListener(IDeadReckoningManeuverListener listener);
 
