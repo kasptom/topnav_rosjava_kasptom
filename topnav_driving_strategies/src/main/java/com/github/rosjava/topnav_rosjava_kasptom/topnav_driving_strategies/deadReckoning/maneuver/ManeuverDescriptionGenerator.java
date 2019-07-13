@@ -47,6 +47,6 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
         return Math.acos(
                 (Math.pow(distance, 2) + Math.pow(markerSourceDistance, 2) - Math.pow(markerTargetDistance, 2)) /
                         (2 * distance * markerSourceDistance)
-        );
+        ) * 180.0 / Math.PI;
     }
 }
