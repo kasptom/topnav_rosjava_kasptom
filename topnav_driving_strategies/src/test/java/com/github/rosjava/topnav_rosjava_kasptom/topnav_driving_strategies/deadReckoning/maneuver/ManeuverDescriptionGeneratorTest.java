@@ -29,6 +29,18 @@ class ManeuverDescriptionGeneratorTest {
         assertEquals(0.0, first.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
         assertEquals(VALUE_MANEUVER_NAME_ROTATE, first.getName());
         assertEquals(0.0, first.getRotationDegrees(), MAX_ALLOWED_ANGLE_DELTA_DEGREES);
+
+        ManeuverDescription second = descriptions.poll();
+        assertNotNull(second);
+        assertEquals(2.0, second.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
+        assertEquals(VALUE_MANEUVER_NAME_FORWARD, second.getName());
+        assertEquals(0.0, second.getRotationDegrees());
+
+        ManeuverDescription third = descriptions.poll();
+        assertNotNull(third);
+        assertEquals(0.0, third.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
+        assertEquals(VALUE_MANEUVER_NAME_ROTATE, third.getName());
+        assertEquals(0.0, third.getRotationDegrees());
     }
 
     @Test
@@ -47,6 +59,18 @@ class ManeuverDescriptionGeneratorTest {
         assertEquals(0.0, first.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
         assertEquals(VALUE_MANEUVER_NAME_ROTATE, first.getName());
         assertEquals(180.0, first.getRotationDegrees(), MAX_ALLOWED_ANGLE_DELTA_DEGREES);
+
+        ManeuverDescription second = descriptions.poll();
+        assertNotNull(second);
+        assertEquals(2.0, second.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
+        assertEquals(VALUE_MANEUVER_NAME_FORWARD, second.getName());
+        assertEquals(0.0, second.getRotationDegrees());
+
+        ManeuverDescription third = descriptions.poll();
+        assertNotNull(third);
+        assertEquals(0.0, third.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
+        assertEquals(VALUE_MANEUVER_NAME_ROTATE, third.getName());
+        assertEquals(180.0, third.getRotationDegrees());
     }
 
     @Test
@@ -65,5 +89,17 @@ class ManeuverDescriptionGeneratorTest {
         assertEquals(0.0, first.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
         assertEquals(VALUE_MANEUVER_NAME_ROTATE, first.getName());
         assertEquals(45.0, first.getRotationDegrees(), MAX_ALLOWED_ANGLE_DELTA_DEGREES);
+
+        ManeuverDescription second = descriptions.poll();
+        assertNotNull(second);
+        assertEquals(2.0, second.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
+        assertEquals(VALUE_MANEUVER_NAME_FORWARD, second.getName());
+        assertEquals(0.0, second.getRotationDegrees());
+
+        ManeuverDescription third = descriptions.poll();
+        assertNotNull(third);
+        assertEquals(0.0, third.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
+        assertEquals(VALUE_MANEUVER_NAME_ROTATE, third.getName());
+        assertEquals(0.0, third.getRotationDegrees());
     }
 }

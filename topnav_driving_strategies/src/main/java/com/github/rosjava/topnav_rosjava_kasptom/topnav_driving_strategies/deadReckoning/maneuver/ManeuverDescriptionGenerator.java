@@ -17,7 +17,7 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
 
         double firstRotationAngle = getFirstRotationAngle(srcX, srcY, dstX, dstY, srcRotation);
         double driveForwardDistance = getDriveForwardDistance(srcX, srcY, dstX, dstY);
-        double secondRotationAngle = getSecondRotationAngle(srcX, srcY, firstRotationAngle, dstRotation);
+        double secondRotationAngle = getSecondRotationAngle(srcX, srcY, dstX, dstY, dstRotation);
 
         descriptions.add(new ManeuverDescription(VALUE_MANEUVER_NAME_ROTATE, firstRotationAngle, 0.0));
         descriptions.add(new ManeuverDescription(VALUE_MANEUVER_NAME_FORWARD, 0.0, driveForwardDistance));
@@ -36,6 +36,12 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
                 : srcRotation - markerDestinationAngleDiff;
     }
 
+    private double getSecondRotationAngle(double srcX, double srcY, double dstX, double dstY, double dstRotation) {
+        double betaCorrection = Math.atan2(dstY - srcY, dstX - srcX) * 180.0 / Math.PI;
+        double angleMarkerTarget = 180.0 - Math.atan2(dstY, dstX) * 180.0 / Math.PI;
+        return betaCorrection + (angleMarkerTarget - dstRotation);
+    }
+
     private boolean isSourceBeforeDestinationClockwise(double srcX, double srcY, double dstX, double dstY) {
         double angleToSource = computeAngleRelativeToMarker(srcX, srcY);
         double angleToDestination = computeAngleRelativeToMarker(dstX, dstY);
@@ -50,11 +56,6 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
 
     private double getDriveForwardDistance(double srcX, double srcY, double dstX, double dstY) {
         return Math.sqrt(Math.pow(dstX - srcX, 2) + Math.pow(dstY - srcY, 2));
-    }
-
-    private double getSecondRotationAngle(double srcX, double srcY, double firstRotationAngle, double dstRotation) {
-        double theta = Math.atan(srcX / srcY) * 180.0 / Math.PI;
-        return firstRotationAngle + theta + dstRotation;
     }
 
     private double getMarkerDestinationAngleDiff(double markerTargetDistance, double distance, double markerSourceDistance) {
