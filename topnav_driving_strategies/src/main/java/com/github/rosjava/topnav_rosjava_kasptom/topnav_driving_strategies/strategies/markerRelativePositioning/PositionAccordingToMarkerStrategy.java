@@ -41,6 +41,8 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     private final Log log;
     private IDeadReckoningDrive deadReckoningDrive = null;
 
+    private long earliestCenteredOnTimeStamp = Long.MAX_VALUE;
+
     private boolean isObstacleTooClose;
 
     private String markerId;
@@ -144,12 +146,14 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                 headRotation,
                 ArucoMarkerUtils.distanceTo(detection)));
 
+        boolean isCenteredOn = isCenteredOn(detection);
+
         if (currentStage == CompoundStrategyStage.LOOKING_AT_MARKER) {
             if (detection.getId().equals(MarkerDetection.EMPTY_DETECTION_ID)) {
                 arUcoTracker.stop();
                 currentStage = CompoundStrategyStage.LOOK_AROUND_FOR_MARKER;
                 arUcoTracker.start();
-            } else if (isCenteredOn(detection) && !isInRequestedPosition(detection, headRotation)) {
+            } else if (isCenteredOn && !isInRequestedPosition(detection, headRotation)) {
                 System.out.printf("distance: %.2fm, angle %.2f°",
                         ArucoMarkerUtils.distanceTo(detection), headRotation);
                 maneuverDescriptions = createManeuverDescriptions(detection, headRotation);
@@ -165,12 +169,12 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                 return;
             }
 
-            if (detection.getId().equals(markerId) && isCenteredOn(detection) && isInRequestedPosition(detection, headRotation)) {
+            if (detection.getId().equals(markerId) && isCenteredOn && isInRequestedPosition(detection, headRotation)) {
                 // TODO - if in correct position - finish with success
                 // else - retry the maneuver
                 // if not found - failure
                 finishedListener.onStrategyFinished(true);
-            } else if (detection.getId().equals(markerId) && isCenteredOn(detection)) {
+            } else if (detection.getId().equals(markerId) && isCenteredOn) {
                 System.out.printf("distance: %.2fm, angle %.2f°\n",
                         ArucoMarkerUtils.distanceTo(detection), headRotation);
                 maneuverDescriptions = createManeuverDescriptions(detection, headRotation);
@@ -211,11 +215,13 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                         .toUpperCase());
 
         double dstX = ManeuverUtils.relativeAlignmentToMeters(targetAlignment);
-        double dstRotation = ManeuverUtils.relativeDirectionToDegrees(targetDirection);
+        double dstY = ACCORDING_TO_MARKER_DISTANCE;
+        double dstRotation = ManeuverUtils.relativeDirectionToDegrees(targetDirection)
+                + Math.atan2(dstY, dstX) * 180.0 / Math.PI;
 
         Queue<ManeuverDescription> newManeuvers = maneuverGenerator
                 .generateManeuverDescriptions(srcX, srcY, headRotation,
-                        dstX, ACCORDING_TO_MARKER_DISTANCE, dstRotation);
+                        dstX, dstY, dstRotation);
         this.maneuverDescriptions.addAll(newManeuvers);
 
         return maneuverDescriptions;
@@ -236,7 +242,22 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
         double averagePicturePositionPixels = (xCorners[0] + xCorners[1] + xCorners[2] + xCorners[3]) / 4.0 - CAM_PREVIEW_WIDTH / 2.0;    // 0 is the middle of the picture
         System.out.printf("average picture position [px]: %.2f\n", averagePicturePositionPixels);
-        return Math.abs(averagePicturePositionPixels) <= 5;
+        boolean isInPixelMargin = Math.abs(averagePicturePositionPixels) <= 5;
+
+        if (isInPixelMargin && earliestCenteredOnTimeStamp == Long.MAX_VALUE) {
+            earliestCenteredOnTimeStamp = System.currentTimeMillis();
+            return false;
+        }
+
+        if (isInPixelMargin && isCenteringTimeElapsed(System.currentTimeMillis())) {
+            earliestCenteredOnTimeStamp = Long.MAX_VALUE;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isCenteringTimeElapsed(long currentTimeMillis) {
+        return currentTimeMillis - earliestCenteredOnTimeStamp> MARKER_CENTERING_TIME_MS;
     }
 
     @Override

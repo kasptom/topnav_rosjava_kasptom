@@ -7,6 +7,7 @@ public class Limits {
 
     public static final double ACCORDING_TO_MARKER_DISTANCE = 1.0; // meters
     public static final double ACCORDING_TO_MARKER_CENTER_OFFSET = 0.5; // meters
+    public static final long MARKER_CENTERING_TIME_MS = 3000;
 
     public static final int LIDAR_SAMPLES_COUNT = 61;
     public static double TOO_CLOSE_RANGE = 0.25;
