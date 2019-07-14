@@ -1,7 +1,6 @@
 package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.AroundCircleManeuver;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.RotateManeuver;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.StraightLineManeuver;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
@@ -57,7 +56,7 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
         System.out.printf("starting maneuver %s, %.2f°, %.2f m\n", maneuverName, angleDegrees, distanceMeters);
         currentManeuver = maneuvers.get(maneuverName);
         currentManeuver.start(angleDegrees, distanceMeters);
-        maneuverStartTimestamp = System.nanoTime();
+        maneuverStartTimestamp = System.currentTimeMillis();
         isRunning = true;
     }
 
@@ -94,7 +93,6 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
         maneuvers.put(VALUE_MANEUVER_NAME_FORWARD, new StraightLineManeuver(axisLength, wheelDiameter, fullRobotRotationTimeMs, MAX_VELOCITY_DELTA, MAX_VELOCITY_DELTA));
         maneuvers.put(VALUE_MANEUVER_NAME_BACKWARD, new StraightLineManeuver(axisLength, wheelDiameter, fullRobotRotationTimeMs, -MAX_VELOCITY_DELTA, -MAX_VELOCITY_DELTA));
         maneuvers.put(VALUE_MANEUVER_NAME_ROTATE, new RotateManeuver(fullRobotRotationTimeMs, MAX_VELOCITY_DELTA));
-        maneuvers.put(VALUE_MANEUVER_NAME_AROUND_CIRCLE, new AroundCircleManeuver(wheelDiameter, fullRobotRotationTimeMs));
         return maneuvers;
     }
 
@@ -104,6 +102,6 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
     }
 
     private long getMillisecondSinceStart() {
-        return (System.nanoTime() - maneuverStartTimestamp) / 1000000;
+        return System.currentTimeMillis() - maneuverStartTimestamp;
     }
 }

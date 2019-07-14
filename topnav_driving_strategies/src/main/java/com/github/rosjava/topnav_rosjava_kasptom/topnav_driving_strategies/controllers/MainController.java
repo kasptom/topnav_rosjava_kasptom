@@ -56,8 +56,6 @@ public class MainController implements IMainController {
     private final HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners = new HashMap<>();
     private final HashMap<String, IClockMessageHandler> clockListeners = new HashMap<>();
 
-    private TopNavConfigMsg latestConfigMessage = null;
-
     private Log log;
 
     public MainController(ConnectedNode connectedNode) {

@@ -183,18 +183,6 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                 startManeuvers();
             }
         }
-
-
-//
-//        if () {
-//            arUcoTracker.stop();
-//            log.info("Successfully reached the requested position");
-//            finishedListener.onStrategyFinished(true);
-//        } else if (isCenteredOn(detection)){
-//            arUcoTracker.start(headRotation, false);
-//
-//        }
-
         // TODO handle detection / switch stages or finish
     }
 
