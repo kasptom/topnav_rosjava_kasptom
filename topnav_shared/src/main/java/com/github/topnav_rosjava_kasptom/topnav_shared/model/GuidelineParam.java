@@ -11,6 +11,10 @@ public class GuidelineParam {
       this.type = type;
    }
 
+   public static GuidelineParam getEmptyParam() {
+      return new GuidelineParam("N/A", "N/A", "emptyParam");
+   }
+
    public String getName() {
       return name;
    }

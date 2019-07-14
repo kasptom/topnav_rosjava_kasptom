@@ -1,6 +1,14 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.constants;
 
 public class Limits {
+    public static final double MIN_MID_RANGE = 1.5;
+    public static final double MAX_MID_RANGE = 2.5;
+    public static final double OFFSET_MARKER_CENTER_METERS = 0.1; // TODO topnav_config
+
+    public static final double ACCORDING_TO_MARKER_DISTANCE = 1.0; // meters
+    public static final double ACCORDING_TO_MARKER_CENTER_OFFSET = 0.5; // meters
+    public static final long MARKER_CENTERING_TIME_MS = 3000;
+
     public static final int LIDAR_SAMPLES_COUNT = 61;
     public static double TOO_CLOSE_RANGE = 0.25;
     public static double DOOR_DETECTION_RANGE = 1.0; // meters
@@ -20,6 +28,7 @@ public class Limits {
 //    public static final double WHEEL_WIDTH = 0.05;    // capo (1)
     public static final double CASE_WIDTH = 0.135;    // capo2
     public static final double WHEEL_WIDTH = 0.01;  // capo2
+    public static final double WHEEL_DIAMETER = 0.09; // [m] capo2
 
     public static final int NOT_DETECTED_LIMIT = 50;   // allowed number of messages with the "-1" ArUco detections in a row
 
@@ -29,6 +38,6 @@ public class Limits {
     public static final double MIN_SEARCH_ANGLE = -180.0;
     public static final double MAX_SEARCH_ANGLE = 180.0;
 
-    public static final double SEARCH_ANGLE_STEP_DEGREES = 30.0;
+    public static final double SEARCH_ANGLE_STEP_DEGREES = 15.0;
     public static final long CAMERA_LATENCY_MS = 1000;
 }

@@ -42,16 +42,22 @@ public class GuidelineUtils {
 
     public static LinkedHashSet<String> asOrderedDoorMarkerIds(HashMap<String, GuidelineParam> guidelineParams) {
         LinkedHashSet<String> doorMarkersOrdered = new LinkedHashSet<>(4);
-        doorMarkersOrdered.add(guidelineParams.get(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID).getValue());
-        doorMarkersOrdered.add(guidelineParams.get(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID).getValue());
-        doorMarkersOrdered.add(guidelineParams.get(DrivingStrategy.ThroughDoor.KEY_BACK_LEFT_MARKER_ID).getValue());
-        doorMarkersOrdered.add(guidelineParams.get(DrivingStrategy.ThroughDoor.KEY_BACK_RIGHT_MARKER_ID).getValue());
+        doorMarkersOrdered.add(guidelineParams.getOrDefault(DrivingStrategy.ThroughDoor.KEY_FRONT_LEFT_MARKER_ID, GuidelineParam.getEmptyParam()).getValue());
+        doorMarkersOrdered.add(guidelineParams.getOrDefault(DrivingStrategy.ThroughDoor.KEY_FRONT_RIGHT_MARKER_ID, GuidelineParam.getEmptyParam()).getValue());
+        doorMarkersOrdered.add(guidelineParams.getOrDefault(DrivingStrategy.ThroughDoor.KEY_BACK_LEFT_MARKER_ID, GuidelineParam.getEmptyParam()).getValue());
+        doorMarkersOrdered.add(guidelineParams.getOrDefault(DrivingStrategy.ThroughDoor.KEY_BACK_RIGHT_MARKER_ID, GuidelineParam.getEmptyParam()).getValue());
         return doorMarkersOrdered;
     }
 
     public static LinkedHashSet<String> approachedMarkerIdAsSet(HashMap<String, GuidelineParam> guidelineParams) {
         LinkedHashSet<String> approachedMarkerSet = new LinkedHashSet<>(1);
-        approachedMarkerSet.add(guidelineParams.get(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID).getValue());
+        approachedMarkerSet.add(guidelineParams.getOrDefault(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID, GuidelineParam.getEmptyParam()).getValue());
+        return approachedMarkerSet;
+    }
+
+    public static LinkedHashSet<String> accordingToMarkerIdAsSet(HashMap<String, GuidelineParam> guidelineParams) {
+        LinkedHashSet<String> approachedMarkerSet = new LinkedHashSet<>(1);
+        approachedMarkerSet.add(guidelineParams.getOrDefault(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID, GuidelineParam.getEmptyParam()).getValue());
         return approachedMarkerSet;
     }
 }

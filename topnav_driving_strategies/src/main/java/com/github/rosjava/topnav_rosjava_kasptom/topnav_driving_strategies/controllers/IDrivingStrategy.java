@@ -5,6 +5,8 @@ import topnav_msgs.*;
 import java.util.List;
 
 public interface IDrivingStrategy {
+    void setGuidelineParameters(List<String> parameters);
+
     void startStrategy();
 
     void handleConfigMessage(TopNavConfigMsg configMsg);
@@ -22,6 +24,4 @@ public interface IDrivingStrategy {
     void setHeadRotationChangeListener(HeadRotationChangeRequestListener listener);
 
     void setStrategyFinishedListener(StrategyFinishedListener listener);
-
-    void setGuidelineParameters(List<String> parameters);
 }

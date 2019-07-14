@@ -71,6 +71,11 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
 
     @Override
     public void start() {
+        start(MIN_SEARCH_ANGLE, true);
+    }
+
+    @Override
+    public void start(double initialAngleDegrees, boolean isLookingForMarkers) {
         foundMarkers.clear();
         angleDegrees = UNDEFINED_ANGLE;
         currentSearchAngle = MIN_SEARCH_ANGLE;
@@ -80,7 +85,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         minTimeSinceLastRotationElapsed = false;
         headRotationChangeListener.onLinearRotationRequestChange(currentSearchAngle);
 
-        isLookingForMarkers = true;
+        this.isLookingForMarkers = isLookingForMarkers;
         isEnabled = true;
     }
 

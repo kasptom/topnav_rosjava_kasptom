@@ -1,5 +1,9 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.model;
 
+import com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits;
+
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.OFFSET_MARKER_CENTER_METERS;
+
 public class MarkerDetection {
     public static final String EMPTY_DETECTION_ID = "-1";
 
@@ -7,7 +11,7 @@ public class MarkerDetection {
     private final double[] cameraPosition = new double[3];
     private final double[] xCorners = new double[4];
     private final double[] yCorners = new double[4];
-    private static final double OFFSET_MARKER_CENTER_METERS = 0.1; // TODO topnav_config
+
 
     private double detectedAtAngle = 0.0;
 
@@ -51,9 +55,9 @@ public class MarkerDetection {
     }
 
     public RelativeDistance getRelativeDistance() {
-        if (cameraPosition[2] < 1.5) {
+        if (cameraPosition[2] < Limits.MIN_MID_RANGE) {
             return RelativeDistance.CLOSE;
-        } else if (cameraPosition[2] > 2.5) {
+        } else if (cameraPosition[2] > Limits.MAX_MID_RANGE) {
             return RelativeDistance.FAR;
         }
         return RelativeDistance.MIDDLE;
