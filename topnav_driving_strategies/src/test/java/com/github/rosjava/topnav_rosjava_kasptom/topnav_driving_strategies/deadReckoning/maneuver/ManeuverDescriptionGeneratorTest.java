@@ -15,8 +15,8 @@ class ManeuverDescriptionGeneratorTest {
 
     @Test
     void sourceCoordinatesA_generateDescriptions_expectedManeuvers() {
-        double srcX = -0.5, srcY = 1.0, srcRotation = Math.atan2(srcY, -srcX) * 180.0 / Math.PI;
-        double dstX = 0.5, dstY = 1.0, dstRotation = Math.atan2(dstY, -dstX) * 180.0 / Math.PI;
+        double srcX = -1.0, srcY = 1.0, srcRotation = 45.0;
+        double dstX = 1.0, dstY = 1.0, dstRotation = 135.0;
         IManeuverDescriptionGenerator generator = new ManeuverDescriptionGenerator();
         int expectedManeuversCount = 3;
 
@@ -29,5 +29,41 @@ class ManeuverDescriptionGeneratorTest {
         assertEquals(0.0, first.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
         assertEquals(VALUE_MANEUVER_NAME_ROTATE, first.getName());
         assertEquals(0.0, first.getRotationDegrees(), MAX_ALLOWED_ANGLE_DELTA_DEGREES);
+    }
+
+    @Test
+    void sourceCoordinatesB_generateDescriptions_expectedManeuvers() {
+        double srcX = 1.0, srcY = 1.0, srcRotation = 135.0;
+        double dstX = -1.0, dstY = 1.0, dstRotation = 45.0;
+        IManeuverDescriptionGenerator generator = new ManeuverDescriptionGenerator();
+        int expectedManeuversCount = 3;
+
+        Queue<ManeuverDescription> descriptions = generator.generateManeuverDescriptions(srcX, srcY, srcRotation, dstX, dstY, dstRotation);
+
+        assertEquals(expectedManeuversCount, descriptions.size());
+
+        ManeuverDescription first = descriptions.poll();
+        assertNotNull(first);
+        assertEquals(0.0, first.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
+        assertEquals(VALUE_MANEUVER_NAME_ROTATE, first.getName());
+        assertEquals(180.0, first.getRotationDegrees(), MAX_ALLOWED_ANGLE_DELTA_DEGREES);
+    }
+
+    @Test
+    void sourceCoordinatesC_generateDescriptions_expectedManeuvers() {
+        double srcX = -1.0, srcY = 1.0, srcRotation = 90.0;
+        double dstX = 1.0, dstY = 1.0, dstRotation = 135.0;
+        IManeuverDescriptionGenerator generator = new ManeuverDescriptionGenerator();
+        int expectedManeuversCount = 3;
+
+        Queue<ManeuverDescription> descriptions = generator.generateManeuverDescriptions(srcX, srcY, srcRotation, dstX, dstY, dstRotation);
+
+        assertEquals(expectedManeuversCount, descriptions.size());
+
+        ManeuverDescription first = descriptions.poll();
+        assertNotNull(first);
+        assertEquals(0.0, first.getDistanceMeters(), MAX_ALLOWED_DISTANCE_DELTA_METERS);
+        assertEquals(VALUE_MANEUVER_NAME_ROTATE, first.getName());
+        assertEquals(45.0, first.getRotationDegrees(), MAX_ALLOWED_ANGLE_DELTA_DEGREES);
     }
 }

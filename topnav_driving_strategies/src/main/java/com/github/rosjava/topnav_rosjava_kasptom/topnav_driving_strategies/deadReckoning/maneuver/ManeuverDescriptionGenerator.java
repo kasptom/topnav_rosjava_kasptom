@@ -31,7 +31,21 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
         double markerSourceDistance = Math.sqrt(Math.pow(srcX, 2) + Math.pow(srcY, 2));
         double markerTargetDistance = Math.sqrt(Math.pow(dstX, 2) + Math.pow(dstY, 2));
         double markerDestinationAngleDiff = getMarkerDestinationAngleDiff(markerTargetDistance, distance, markerSourceDistance);
-        return srcRotation - markerDestinationAngleDiff;
+        return isSourceBeforeDestinationClockwise(srcX, srcY, dstX, dstY)
+                ? srcRotation + markerDestinationAngleDiff
+                : srcRotation - markerDestinationAngleDiff;
+    }
+
+    private boolean isSourceBeforeDestinationClockwise(double srcX, double srcY, double dstX, double dstY) {
+        double angleToSource = computeAngleRelativeToMarker(srcX, srcY);
+        double angleToDestination = computeAngleRelativeToMarker(dstX, dstY);
+        return angleToSource < angleToDestination;
+    }
+
+    private double computeAngleRelativeToMarker(double x, double y) {
+        if (x == 0) return Math.signum(y) * Math.PI / 2;
+
+        return Math.atan2(y, x) * 180.0 / Math.PI;
     }
 
     private double getDriveForwardDistance(double srcX, double srcY, double dstX, double dstY) {
@@ -40,7 +54,7 @@ public class ManeuverDescriptionGenerator implements IManeuverDescriptionGenerat
 
     private double getSecondRotationAngle(double srcX, double srcY, double firstRotationAngle, double dstRotation) {
         double theta = Math.atan(srcX / srcY) * 180.0 / Math.PI;
-        return -(firstRotationAngle + theta + dstRotation);
+        return firstRotationAngle + theta + dstRotation;
     }
 
     private double getMarkerDestinationAngleDiff(double markerTargetDistance, double distance, double markerSourceDistance) {
