@@ -13,5 +13,7 @@ public interface IAutopilotView extends IBaseView {
 
     String getEndMarkerId();
 
+    String getRobotFullRotationMs();
+
     void openGuidelinesWindow(String guidelines);
 }

@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.CheckBox?>
 <GridPane xmlns="http://javafx.com/javafx"
           xmlns:fx="http://javafx.com/fxml"
           fx:controller="com.github.topnav_rosjava_kasptom.components.autopilot.view.AutopilotView"
@@ -15,23 +16,53 @@
 
     <VBox GridPane.columnIndex="1"
           GridPane.rowIndex="1"
-          spacing="10">
-        <HBox alignment="BASELINE_CENTER">
+          spacing="8">
+
+        <HBox spacing="10">
+            <HBox alignment="TOP_CENTER">
+                <Label textFill="white"
+                       style="-fx-font-size: 10; -fx-wrap-text: true;"
+                       alignment="TOP_CENTER"
+                       prefWidth="40"
+                       prefHeight="28">Start marker
+                </Label>
+                <TextField alignment="BASELINE_RIGHT"
+                           prefWidth="40"
+                           prefHeight="28"
+                           fx:id="txtFieldStartMarker"/>
+            </HBox>
+            <HBox alignment="TOP_CENTER">
+                <Label textFill="white"
+                       style="-fx-font-size: 10; -fx-wrap-text: true;"
+                       alignment="TOP_CENTER"
+                       prefWidth="40"
+                       prefHeight="28">End marker
+                </Label>
+                <TextField
+                        alignment="BASELINE_RIGHT"
+                        prefWidth="40"
+                        prefHeight="28"
+                        fx:id="txtFieldEndMarker"/>
+            </HBox>
+        </HBox>
+
+        <HBox spacing="10">
+            <CheckBox minWidth="90"
+                      textFill="white"
+                      textAlignment="CENTER"
+                      text="Use dead reckoning"
+                      onAction="#onControlToggleClick"/>
+        </HBox>
+        <HBox spacing="10"
+              alignment="TOP_CENTER">
             <Label textFill="white"
-                   prefWidth="110">Start marker
+                   style="-fx-font-size: 10; -fx-wrap-text: true;"
+                   alignment="TOP_LEFT"
+                   prefWidth="90">Full robot rotation (ms)
             </Label>
             <TextField alignment="BASELINE_RIGHT"
-                       prefWidth="40"
-                       fx:id="txtFieldStartMarker"/>
-        </HBox>
-        <HBox alignment="BASELINE_CENTER">
-            <Label textFill="white"
-                   prefWidth="110">End marker
-            </Label>
-            <TextField
-                    alignment="BASELINE_RIGHT"
-                    prefWidth="40"
-                    fx:id="txtFieldEndMarker"/>
+                       prefWidth="60"
+                       fx:id="txtFieldRobotFullRotation"/>
         </HBox>
         <HBox spacing="10">
             <Button onMouseClicked="#play">Play</Button>
@@ -44,7 +75,7 @@
           GridPane.rowIndex="1"
           spacing="10">
         <HBox spacing="10">
-            <VBox spacing="5">
+            <VBox spacing="8">
                 <Label textAlignment="CENTER"
                        textFill="white">Current guideline
                 </Label>

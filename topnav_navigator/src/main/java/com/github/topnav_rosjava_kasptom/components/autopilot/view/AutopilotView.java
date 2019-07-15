@@ -4,6 +4,7 @@ import com.github.topnav_rosjava_kasptom.components.IBasePresenter;
 import com.github.topnav_rosjava_kasptom.components.autopilot.presenter.AutopilotPresenter;
 import com.github.topnav_rosjava_kasptom.components.autopilot.presenter.IAutopilotPresenter;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdException;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -33,6 +34,9 @@ public class AutopilotView implements IAutopilotView, Initializable {
 
     @FXML
     public Button btnShowGuidelines;
+
+    @FXML
+    public TextField txtFieldRobotFullRotation;
 
     private IAutopilotPresenter presenter;
 
@@ -68,6 +72,11 @@ public class AutopilotView implements IAutopilotView, Initializable {
     @Override
     public String getEndMarkerId() {
         return txtFieldEndMarker.getText();
+    }
+
+    @Override
+    public String getRobotFullRotationMs() {
+        return txtFieldRobotFullRotation.getText();
     }
 
     @Override
@@ -116,5 +125,10 @@ public class AutopilotView implements IAutopilotView, Initializable {
     @FXML
     public void onShowAllGuidelines() {
         presenter.showAllGuidelines();
+    }
+
+    @FXML
+    public void onControlToggleClick() {
+        presenter.toggleDeadReckoning();
     }
 }

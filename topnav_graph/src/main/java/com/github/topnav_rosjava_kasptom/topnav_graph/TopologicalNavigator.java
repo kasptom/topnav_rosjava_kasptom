@@ -61,6 +61,11 @@ public class TopologicalNavigator implements ITopnavNavigator {
 
     @Override
     public List<Guideline> createGuidelines(String startArUcoId, String endArUcoId) {
+        return createGuidelines(startArUcoId, endArUcoId, false, "");
+    }
+
+    @Override
+    public List<Guideline> createGuidelines(String startArUcoId, String endArUcoId, boolean isDeadReckoningEnabled, String fullRobotRotationMs) {
         algorithm.setSource(getMarkerNodeByArUcoId(startArUcoId).getId());
         algorithm.compute();
 
@@ -78,7 +83,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
             Edge nextEdge = (i + 1 == pathEdges.size()) ? null : pathEdges.get(i + 1);
 
             if (isGateEdgeWithMarkers(edge, nextEdge)) {
-                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(edge, nextEdge);
+                Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(edge, nextEdge, isDeadReckoningEnabled, fullRobotRotationMs);
                 guidelines.add(guideline);
                 i += 2;
             } else if (isWallEndingEdge(edge)) {
@@ -86,7 +91,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
                 guidelines.add(guideline);
                 i++;
             } else if (isMarkerEndingEdge(edge)) {
-                Guideline guideline = TopologicalNavigatorUtils.createLookForMarkerGuideline(edge.getTargetNode());
+                Guideline guideline = TopologicalNavigatorUtils.createLookApproachMarkerGuideline(edge.getTargetNode(), isDeadReckoningEnabled, fullRobotRotationMs);
                 guidelines.add(guideline);
                 i++;
             } else {

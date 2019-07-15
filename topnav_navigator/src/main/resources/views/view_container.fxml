@@ -32,7 +32,7 @@
     <HBox AnchorPane.bottomAnchor="0.0"
           AnchorPane.leftAnchor="0.0"
           AnchorPane.rightAnchor="0.0"
-          prefHeight="130"
+          prefHeight="140"
           style="-fx-background-color: #3e434c;">
         <!--suppress JavaFxUnresolvedFxIdReference -->
         <!-- feedback ==> @FXML autopilotView -->

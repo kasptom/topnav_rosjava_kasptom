@@ -9,7 +9,9 @@ import java.util.List;
 public interface ITopnavNavigator extends OnFeedbackChangeListener {
     void showGraph();
 
-    List<Guideline> createGuidelines(String startArUcoId, String endArUcoId);
+    List<Guideline> createGuidelines(String startMarkerId, String startArUcoId);
+
+    List<Guideline> createGuidelines(String startMarkerId, String startArUcoId, boolean isDeadReckoningEnabled, String fullRobotRotationMs);
 
     void start();
 
