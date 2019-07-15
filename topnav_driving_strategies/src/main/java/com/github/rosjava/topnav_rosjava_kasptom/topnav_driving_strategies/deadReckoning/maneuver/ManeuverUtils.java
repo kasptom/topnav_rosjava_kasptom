@@ -19,7 +19,12 @@ public class ManeuverUtils {
         return relativeAlignmentToMeters.get(alignment.name());
     }
 
-    public static double relativeDirectionToDegrees(RelativeDirection direction) {
+    public static double relativeDirectionToDegreesWithIgnoringOffset(RelativeDirection targetDirection, double dstX, double dstY) {
+        return ManeuverUtils.relativeDirectionToDegrees(targetDirection)
+                + (90.0 - Math.atan2(dstY, dstX) * 180.0 / Math.PI);
+    }
+
+    private static double relativeDirectionToDegrees(RelativeDirection direction) {
         return direction.getRotationDegrees();
     }
 }

@@ -204,8 +204,7 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
         double dstX = ManeuverUtils.relativeAlignmentToMeters(targetAlignment);
         double dstY = ACCORDING_TO_MARKER_DISTANCE;
-        double dstRotation = ManeuverUtils.relativeDirectionToDegrees(targetDirection)
-                + Math.atan2(dstY, dstX) * 180.0 / Math.PI;
+        double dstRotation = ManeuverUtils.relativeDirectionToDegreesWithIgnoringOffset(targetDirection, dstX, dstY);
 
         Queue<ManeuverDescription> newManeuvers = maneuverGenerator
                 .generateManeuverDescriptions(srcX, srcY, headRotation,
