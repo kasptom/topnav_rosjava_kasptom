@@ -97,9 +97,9 @@ public class ApproachMarkerStrategyV2 implements IDrivingStrategy, IArUcoHeadTra
         String approachedMarkerId = guidelineParamsMap.get(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID).getValue();
         String fullRobotRotationTimeMs = guidelineParamsMap.get(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS).getValue();
 
-        GuidelineParam approachedMarkerParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID, approachedMarkerId, "String");
-        GuidelineParam relativeDirectionParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION, RelativeDirection.AHEAD.name(), "String");
-        GuidelineParam relativeDistanceParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT, RelativeAlignment.CENTER.name(), "String");
+        GuidelineParam approachedMarkerParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_1, approachedMarkerId, "String");
+        GuidelineParam relativeDirectionParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_1, RelativeDirection.AHEAD.name(), "String");
+        GuidelineParam relativeDistanceParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_1, RelativeAlignment.CENTER.name(), "String");
         GuidelineParam fullRobotRotationMsParam = new GuidelineParam(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS, fullRobotRotationTimeMs, "Long");
 
         return Arrays.asList(approachedMarkerParam, relativeDirectionParam, relativeDistanceParam, fullRobotRotationMsParam);

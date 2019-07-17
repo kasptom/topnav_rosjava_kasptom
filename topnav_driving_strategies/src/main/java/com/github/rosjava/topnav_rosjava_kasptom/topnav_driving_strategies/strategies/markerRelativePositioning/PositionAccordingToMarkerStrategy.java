@@ -10,7 +10,6 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadR
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.ManeuverDescriptionGenerator;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver.ManeuverUtils;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.CompoundStrategyStage;
-import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.*;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
@@ -22,6 +21,7 @@ import topnav_msgs.HoughAcc;
 import topnav_msgs.TopNavConfigMsg;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
@@ -44,11 +44,8 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     private long earliestCenteredOnTimeStamp = Long.MAX_VALUE;
 
     private boolean isObstacleTooClose;
-
-    private String markerId;
-    private RelativeDirection requestedRelativeDirection;
-    private RelativeAlignment requestedRelativeAlignment;
     private Queue<ManeuverDescription> maneuverDescriptions;
+    private List<Topology> trackedTopologies;
 
     public PositionAccordingToMarkerStrategy(IArUcoHeadTracker arUcoTracker, Log log) {
         guidelineParamsMap = new HashMap<>();
@@ -61,11 +58,13 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
     @Override
     public void startStrategy() {
-        LinkedHashSet<String> markerIds = GuidelineUtils.asOrderedDoorMarkerIds(guidelineParamsMap);
-        markerIds.addAll(GuidelineUtils.approachedMarkerIdAsSet(guidelineParamsMap));
-        markerIds.addAll(GuidelineUtils.accordingToMarkerIdAsSet(guidelineParamsMap));
-        markerIds.remove(GuidelineParam.getEmptyParam().getValue());
-        arUcoTracker.setTrackedMarkers(markerIds);
+        trackedTopologies = GuidelineUtils.accordingToMarkersAsTopologies(guidelineParamsMap);
+
+        arUcoTracker.setTrackedMarkers(trackedTopologies
+                .stream()
+                .map(Topology::getIdentity)
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
+
         deadReckoningDrive = initializeDeadReckoningDrive();
 
         currentStage = CompoundStrategyStage.LOOK_AROUND_FOR_MARKER;
@@ -126,17 +125,6 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     @Override
     public void setGuidelineParameters(List<String> parameters) {
         GuidelineUtils.reloadParameters(parameters, guidelineParamsMap);
-        requestedRelativeDirection = RelativeDirection.valueOf(
-                guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION)
-                        .getValue()
-                        .toUpperCase());
-
-        requestedRelativeAlignment = RelativeAlignment.valueOf(
-                guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT)
-                        .getValue()
-                        .toUpperCase());
-
-        markerId = guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID).getValue();
     }
 
     @Override
@@ -148,15 +136,21 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
 
         boolean isCenteredOn = isCenteredOn(detection);
 
+        Topology detectionTopology = trackedTopologies
+                .stream()
+                .filter(topology -> topology.getIdentity().equals(detection.getId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("topology cannot be null"));
+
         if (currentStage == CompoundStrategyStage.LOOKING_AT_MARKER) {
             if (detection.getId().equals(MarkerDetection.EMPTY_DETECTION_ID)) {
                 arUcoTracker.stop();
                 currentStage = CompoundStrategyStage.LOOK_AROUND_FOR_MARKER;
                 arUcoTracker.start();
-            } else if (isCenteredOn && !isInRequestedPosition(detection, headRotation)) {
+            } else if (isCenteredOn && !isInRequestedPosition(detection, detectionTopology, headRotation)) {
                 System.out.printf("distance: %.2fm, angle %.2f°",
                         ArucoMarkerUtils.distanceTo(detection), headRotation);
-                maneuverDescriptions = createManeuverDescriptions(detection, headRotation);
+                maneuverDescriptions = createManeuverDescriptions(detection, detectionTopology, headRotation);
                 currentStage = CompoundStrategyStage.MANEUVER;
                 startManeuvers();
                 return;
@@ -169,15 +163,19 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                 return;
             }
 
-            if (detection.getId().equals(markerId) && isCenteredOn && isInRequestedPosition(detection, headRotation)) {
+            boolean isTrackedDetectionVisible = trackedTopologies
+                    .stream()
+                    .anyMatch(topology -> topology.getIdentity().equals(detection.getId()));
+
+            if (isTrackedDetectionVisible && isCenteredOn && isInRequestedPosition(detection, detectionTopology, headRotation)) {
                 // TODO - if in correct position - finish with success
                 // else - retry the maneuver
                 // if not found - failure
                 finishedListener.onStrategyFinished(true);
-            } else if (detection.getId().equals(markerId) && isCenteredOn) {
+            } else if (isTrackedDetectionVisible && isCenteredOn) {
                 System.out.printf("distance: %.2fm, angle %.2f°\n",
                         ArucoMarkerUtils.distanceTo(detection), headRotation);
-                maneuverDescriptions = createManeuverDescriptions(detection, headRotation);
+                maneuverDescriptions = createManeuverDescriptions(detection, detectionTopology, headRotation);
                 currentStage = CompoundStrategyStage.MANEUVER;
                 arUcoTracker.stop();
                 startManeuvers();
@@ -186,21 +184,15 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
         // TODO handle detection / switch stages or finish
     }
 
-    private Queue<ManeuverDescription> createManeuverDescriptions(MarkerDetection detection, double headRotation) {
+    private Queue<ManeuverDescription> createManeuverDescriptions(MarkerDetection detection, Topology detectionTopology, double headRotation) {
 
         maneuverDescriptions.clear();
 
         double srcX = detection.getCameraPosition()[0];
         double srcY = detection.getCameraPosition()[2];
 
-        RelativeAlignment targetAlignment = RelativeAlignment
-                .valueOf(guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT)
-                        .getValue()
-                        .toUpperCase());
-        RelativeDirection targetDirection = RelativeDirection
-                .valueOf(guidelineParamsMap.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION)
-                        .getValue()
-                        .toUpperCase());
+        RelativeAlignment targetAlignment = RelativeAlignment.valueOf(detectionTopology.getRelativeAlignment().toUpperCase());
+        RelativeDirection targetDirection = RelativeDirection.valueOf(detectionTopology.getRelativeDirection().toUpperCase());
 
         double dstX = ManeuverUtils.relativeAlignmentToMeters(targetAlignment);
         double dstY = ACCORDING_TO_MARKER_DISTANCE;
@@ -271,15 +263,13 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
         return deadReckoningDrive;
     }
 
-    private boolean isInRequestedPosition(MarkerDetection detection, double angle) {
-        return detection.getId().equals(markerId)
-                && detection.getRelativeDistance().equals(RelativeDistance.CLOSE)
-                && detection.getRelativeAlignment().equals(requestedRelativeAlignment)
-                && isChassisCorrectlyRotated(angle);
-
+    private boolean isInRequestedPosition(MarkerDetection detection, Topology detectionTopology, double angle) {
+        return detection.getRelativeDistance().equals(RelativeDistance.CLOSE)
+                && detection.getRelativeAlignment().equals(RelativeAlignment.valueOf(detectionTopology.getRelativeAlignment().toUpperCase()))
+                && isChassisCorrectlyRotated(angle, detectionTopology);
     }
 
-    private boolean isChassisCorrectlyRotated(double angleDegrees) {
-        return Math.abs(requestedRelativeDirection.getRotationDegrees() - angleDegrees) <= 5.0;
+    private boolean isChassisCorrectlyRotated(double angleDegrees, Topology detectionTopology) {
+        return Math.abs(RelativeDirection.valueOf(detectionTopology.getRelativeDirection().toUpperCase()).getRotationDegrees() - angleDegrees) <= 5.0;
     }
 }

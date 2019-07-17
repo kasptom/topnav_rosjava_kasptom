@@ -36,7 +36,7 @@ public class TopologicalNavigatorUtils {
         String guidelineType = DrivingStrategy.DRIVING_STRATEGY_PASS_THROUGH_DOOR_2;
 
         if (isDeadReckoningEnabled) {
-            guidelineType = DrivingStrategy.DRIVING_STRATEGY_PASS_THROUGH_DOOR_2; // TODO change to pass through door 3 when implemented
+            guidelineType = DrivingStrategy.DRIVING_STRATEGY_PASS_THROUGH_DOOR_3;
             params.add(new GuidelineParam(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS, fullRobotRotationMs, "Long"));
         }
 
