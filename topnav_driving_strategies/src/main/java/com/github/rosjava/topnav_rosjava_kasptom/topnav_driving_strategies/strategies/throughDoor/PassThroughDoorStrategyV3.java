@@ -52,6 +52,10 @@ public class PassThroughDoorStrategyV3 implements IDrivingStrategy, IArUcoHeadTr
         List<String> rewrittenParams = GuidelineUtils.convertToStrings(guidelineParams);
         positionStrategy.setGuidelineParameters(rewrittenParams);
 
+        positionStrategy.setHeadRotationChangeListener(headRotationListener);
+        positionStrategy.setWheelsVelocitiesListener(wheelsListener);
+        positionStrategy.setStrategyFinishedListener(this);
+
         positionStrategy.startStrategy();
         currentStage = CompoundStrategyStage.ALIGN_BETWEEN_DOOR;
     }
@@ -100,7 +104,10 @@ public class PassThroughDoorStrategyV3 implements IDrivingStrategy, IArUcoHeadTr
 
     @Override
     public void handleHeadDirectionChange(std_msgs.String relativeDirectionMsg) {
-
+        if (currentStage != CompoundStrategyStage.ALIGN_BETWEEN_DOOR) {
+            return;
+        }
+        positionStrategy.handleHeadDirectionChange(relativeDirectionMsg);
     }
 
     @Override
@@ -120,7 +127,10 @@ public class PassThroughDoorStrategyV3 implements IDrivingStrategy, IArUcoHeadTr
 
     @Override
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
-
+        if (currentStage != CompoundStrategyStage.ALIGN_BETWEEN_DOOR) {
+            return;
+        }
+        positionStrategy.onTrackedMarkerUpdate(detection, headRotation);
     }
 
     @Override
@@ -131,6 +141,7 @@ public class PassThroughDoorStrategyV3 implements IDrivingStrategy, IArUcoHeadTr
         }
 
         if (currentStage == CompoundStrategyStage.ALIGN_BETWEEN_DOOR) {
+            headRotationListener.onRotationChangeRequest(RelativeDirection.BEHIND);
             throughDoorStrategy.startStrategy();
             currentStage = CompoundStrategyStage.DRIVE_THROUGH_DOOR;
         } else if (currentStage == CompoundStrategyStage.DRIVE_THROUGH_DOOR) {
@@ -146,11 +157,11 @@ public class PassThroughDoorStrategyV3 implements IDrivingStrategy, IArUcoHeadTr
 
         GuidelineParam leftApproachedMarkerParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_1, frontLeftMarker, "String");
         GuidelineParam leftRelativeDirectionParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_1, RelativeDirection.AHEAD.name(), "String");
-        GuidelineParam leftRelativeDistanceParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_1, RelativeAlignment.RIGHT.name(), "String");
+        GuidelineParam leftRelativeDistanceParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_1, RelativeAlignment.LEFT.name(), "String");
 
         GuidelineParam rightApproachedMarkerParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_2, frontRightMarker, "String");
         GuidelineParam rightRelativeDirectionParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_2, RelativeDirection.AHEAD.name(), "String");
-        GuidelineParam rightRelativeDistanceParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_2, RelativeAlignment.LEFT.name(), "String");
+        GuidelineParam rightRelativeDistanceParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_2, RelativeAlignment.RIGHT.name(), "String");
 
         GuidelineParam fullRobotRotationMsParam = new GuidelineParam(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS, fullRobotRotationTimeMs, "Long");
 

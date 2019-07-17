@@ -110,6 +110,7 @@ public class MainController implements IMainController {
         drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL_2, new FollowWallStrategy((IReactionStartListener) reactionController, log));
         drivingStrategies.put(DRIVING_STRATEGY_STOP_BEFORE_WALL, new StopBeforeWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, new PassThroughDoorStrategyV2(arUcoHeadTracker, log));
+        drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_3, new PassThroughDoorStrategyV3(arUcoHeadTracker, log));
         drivingStrategies.put(DRIVING_STRATEGY_APPROACH_MARKER, new ApproachMarkerStrategy(arUcoHeadTracker, log));
         drivingStrategies.put(DRIVING_STRATEGY_APPROACH_MARKER_2, new ApproachMarkerStrategyV2(arUcoHeadTracker, log));
         drivingStrategies.put(DRIVING_STRATEGY_TRACK_ARUCOS, new AruCoTrackerTestStrategy(arUcoHeadTracker));
