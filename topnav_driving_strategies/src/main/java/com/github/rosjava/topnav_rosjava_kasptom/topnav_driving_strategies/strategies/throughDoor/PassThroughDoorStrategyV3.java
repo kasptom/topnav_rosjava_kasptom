@@ -42,7 +42,6 @@ public class PassThroughDoorStrategyV3 implements IDrivingStrategy, IArUcoHeadTr
         currentStage = CompoundStrategyStage.INITIAL;
     }
 
-
     @Override
     public void startStrategy() {
         positionStrategy = new PositionAccordingToMarkerStrategy(arUcoTracker, log);
