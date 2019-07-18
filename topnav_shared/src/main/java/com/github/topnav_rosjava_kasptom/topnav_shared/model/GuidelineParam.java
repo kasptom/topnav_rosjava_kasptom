@@ -5,6 +5,8 @@ public class GuidelineParam {
    private final String value;
    private final String type;
 
+   public static String EMPTY_PARAM_VALUE = "N/A";
+
    public GuidelineParam(String name, String value, String type) {
       this.name = name;
       this.value = value;
@@ -12,7 +14,7 @@ public class GuidelineParam {
    }
 
    public static GuidelineParam getEmptyParam() {
-      return new GuidelineParam("N/A", "N/A", "emptyParam");
+      return new GuidelineParam("N/A", EMPTY_PARAM_VALUE, "emptyParam");
    }
 
    public String getName() {

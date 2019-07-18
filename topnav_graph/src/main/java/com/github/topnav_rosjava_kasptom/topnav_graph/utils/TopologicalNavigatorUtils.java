@@ -16,7 +16,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRo
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRoles.MARKER_ROLE_RIGHT;
 
 public class TopologicalNavigatorUtils {
-    public static Guideline convertToPassThroughDoorGuideline(Edge edge, Edge nextEdge) {
+    public static Guideline convertToPassThroughDoorGuideline(Edge edge, Edge nextEdge, boolean isDeadReckoningEnabled, String fullRobotRotationMs) {
         Node frontDoorNode = edge.getSourceNode();
         Node backDoorNode = nextEdge.getTargetNode();
 
@@ -33,7 +33,14 @@ public class TopologicalNavigatorUtils {
                 .map(marker -> new GuidelineParam(getDoorParameterName(marker.getRole(), false), marker.getAruco().getId(), "String"))
                 .collect(Collectors.toList()));
 
-        return new Guideline(DrivingStrategy.DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, params);
+        String guidelineType = DrivingStrategy.DRIVING_STRATEGY_PASS_THROUGH_DOOR_2;
+
+        if (isDeadReckoningEnabled) {
+            guidelineType = DrivingStrategy.DRIVING_STRATEGY_PASS_THROUGH_DOOR_3;
+            params.add(new GuidelineParam(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS, fullRobotRotationMs, "Long"));
+        }
+
+        return new Guideline(guidelineType, params);
     }
 
     private static String getDoorParameterName(String markerRole, boolean isFrontMarker) {
@@ -61,12 +68,20 @@ public class TopologicalNavigatorUtils {
                         : DrivingStrategy.FollowWall.VALUE_TRACKED_WALL_LEFT, "String");
     }
 
-    public static Guideline createLookForMarkerGuideline(Node node) {
+    public static Guideline createLookApproachMarkerGuideline(Node node, boolean isDeadReckoningEnabled, String fullRobotRotationMs) {
         List<MarkerDto> markers = node.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
         List<GuidelineParam> params = markers
                 .stream()
                 .map(marker -> new GuidelineParam(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID, marker.getAruco().getId(), "String"))
                 .collect(Collectors.toList());
-        return new Guideline(DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER, params);
+
+        String guidelineType = DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER;
+
+        if (isDeadReckoningEnabled) {
+            guidelineType = DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2;
+            params.add(new GuidelineParam(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS, fullRobotRotationMs, "Long"));
+        }
+
+        return new Guideline(guidelineType, params);
     }
 }

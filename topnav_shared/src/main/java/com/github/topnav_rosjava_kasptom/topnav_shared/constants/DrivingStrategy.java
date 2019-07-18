@@ -10,7 +10,9 @@ public class DrivingStrategy {
     public static final String DRIVING_STRATEGY_STOP_BEFORE_WALL = "DS_STOP_WALL";
     public static final String DRIVING_STRATEGY_TRACK_ARUCOS = "DS_TEST_TRACK_ARUCOS";
     public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR_2 = "DS_PASS_THROUGH_DOOR_2";
+    public static final String DRIVING_STRATEGY_PASS_THROUGH_DOOR_3 = "DS_PASS_THROUGH_DOOR_3";
     public static final String DRIVING_STRATEGY_APPROACH_MARKER = "DS_APPROACH_MARKER";
+    public static final String DRIVING_STRATEGY_APPROACH_MARKER_2 = "DS_APPROACH_MARKER_2";
     public static final String DRIVING_STRATEGY_DEAD_RECKONING_TEST = "DS_DEAD_RECKONING_TEST";
     public static final String DRIVING_STRATEGY_ACCORDING_TO_MARKER = "DS_ACCORDING_TO_MARKER";
 
@@ -19,7 +21,9 @@ public class DrivingStrategy {
             DRIVING_STRATEGY_ALONG_WALL_2,
             DRIVING_STRATEGY_STOP_BEFORE_WALL,
             DRIVING_STRATEGY_PASS_THROUGH_DOOR_2,
+            DRIVING_STRATEGY_PASS_THROUGH_DOOR_3,
             DRIVING_STRATEGY_APPROACH_MARKER,
+            DRIVING_STRATEGY_APPROACH_MARKER_2,
             DRIVING_STRATEGY_TRACK_ARUCOS,
             DRIVING_STRATEGY_DEAD_RECKONING_TEST,
             DRIVING_STRATEGY_ACCORDING_TO_MARKER));
@@ -64,14 +68,17 @@ public class DrivingStrategy {
     }
 
     public class PositionAccordingToMarker {
-        public static final String KEY_ACCORDING_MARKER_ID = "DS_PARAM_ACCORDING_MARKER_ID";
+        public static final String KEY_ACCORDING_MARKER_ID_1 = "DS_PARAM_ACCORDING_MARKER_ID_1";
+        public static final String KEY_ACCORDING_MARKER_ID_2 = "DS_PARAM_ACCORDING_MARKER_ID_2";
 
-        public static final String KEY_ACCORDING_ALIGNMENT = "DS_PARAM_ACCORDING_ALIGNMENT";
+        public static final String KEY_ACCORDING_ALIGNMENT_1 = "DS_PARAM_ACCORDING_ALIGNMENT_1";
+        public static final String KEY_ACCORDING_ALIGNMENT_2 = "DS_PARAM_ACCORDING_ALIGNMENT_2";
         public static final String VALUE_ACCORDING_ALIGNMENT_LEFT = "left";
         public static final String VALUE_ACCORDING_ALIGNMENT_RIGHT = "right";
         public static final String VALUE_ACCORDING_ALIGNMENT_CENTER = "center";
 
-        public static final String KEY_ACCORDING_DIRECTION = "DS_PARAM_ACCORDING_DIRECTION";
+        public static final String KEY_ACCORDING_DIRECTION_1 = "DS_PARAM_ACCORDING_DIRECTION_1";
+        public static final String KEY_ACCORDING_DIRECTION_2 = "DS_PARAM_ACCORDING_DIRECTION_2";
         public static final String VALUE_ACCORDING_DIRECTION_AHEAD = "ahead";
         public static final String VALUE_ACCORDING_DIRECTION_BEHIND = "behind";
         public static final String VALUE_ACCORDING_DIRECTION_TO_LEFT = "to_left";
@@ -89,7 +96,10 @@ public class DrivingStrategy {
             DeadReckoning.KEY_MANEUVER_ANGLE_DEGREES,
             DeadReckoning.KEY_MANEUVER_DISTANCE_METERS,
             DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS,
-            PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID,
-            PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT,
-            PositionAccordingToMarker.KEY_ACCORDING_DIRECTION);
+            PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_1,
+            PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_1,
+            PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_1,
+            PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_2,
+            PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_2,
+            PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_2);
 }

@@ -26,6 +26,7 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
 
     private boolean isPaused;
     private boolean isStopped;
+    private boolean isDeadReckoningEnabled;
     private Guideline currentGuideline;
 
     public AutopilotPresenter(IAutopilotView autopilotView) {
@@ -55,8 +56,9 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
         if (isStopped) {
             String startMarkerId = autopilotView.getStartMarkerId();
             String endMarkerId = autopilotView.getEndMarkerId();
+            String robotFullRotationMs = autopilotView.getRobotFullRotationMs();
 
-            navigator.createGuidelines(startMarkerId, endMarkerId);
+            navigator.createGuidelines(startMarkerId, endMarkerId, isDeadReckoningEnabled, robotFullRotationMs);
 
             navigator.start();
             isStopped = false;
@@ -109,6 +111,16 @@ public class AutopilotPresenter implements IAutopilotPresenter, OnGuidelineChang
 
         autopilotView.openGuidelinesWindow(guidelines
                 + String.format("\ncurrent guideline idx: %d", navigator.getCurrentGuidelineIndex()));
+    }
+
+    @Override
+    public void toggleDeadReckoning() {
+        isDeadReckoningEnabled = !isDeadReckoningEnabled;
+    }
+
+    @Override
+    public boolean isDeadReckoningEnabled() {
+        return isDeadReckoningEnabled;
     }
 
     private void loadRosonFile(String fullFilePath) {

@@ -1,18 +1,12 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDistance;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.Topology;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRoles.MARKER_ROLE_LEFT;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.MarkerRoles.MARKER_ROLE_RIGHT;
 
 public class GuidelineUtils {
     public static void reloadParameters(List<String> guidelineParameters, HashMap<String, GuidelineParam> guidelineParamsMap) {
@@ -55,9 +49,25 @@ public class GuidelineUtils {
         return approachedMarkerSet;
     }
 
-    public static LinkedHashSet<String> accordingToMarkerIdAsSet(HashMap<String, GuidelineParam> guidelineParams) {
-        LinkedHashSet<String> approachedMarkerSet = new LinkedHashSet<>(1);
-        approachedMarkerSet.add(guidelineParams.getOrDefault(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID, GuidelineParam.getEmptyParam()).getValue());
-        return approachedMarkerSet;
+    public static List<Topology> accordingToMarkersAsTopologies(HashMap<String, GuidelineParam> guidelineParams) {
+        ArrayList<Topology> topologies = new ArrayList<>();
+
+        if (guidelineParams.containsKey(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_1)
+                && guidelineParams.containsKey(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_1)
+                && guidelineParams.containsKey(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_1)) {
+            topologies.add(new Topology(0L, guidelineParams.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_1).getValue(),
+                    guidelineParams.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_1).getValue(),
+                    guidelineParams.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_1).getValue(), RelativeDistance.CLOSE.name()));
+        }
+
+        if (guidelineParams.containsKey(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_2)
+                && guidelineParams.containsKey(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_2)
+                && guidelineParams.containsKey(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_2)) {
+            topologies.add(new Topology(0L, guidelineParams.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_2).getValue(),
+                    guidelineParams.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_2).getValue(),
+                    guidelineParams.get(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_2).getValue(), RelativeDistance.CLOSE.name()));
+        }
+
+        return topologies;
     }
 }

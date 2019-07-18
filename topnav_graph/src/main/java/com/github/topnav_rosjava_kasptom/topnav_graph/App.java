@@ -41,7 +41,7 @@ public class App {
                 secondMarkerId = args[2];
             }
 
-            List<Guideline> guidelines = navigator.createGuidelines(firstMarkerId, secondMarkerId);
+            List<Guideline> guidelines = navigator.createGuidelines(firstMarkerId, secondMarkerId, false, "");
             guidelines.forEach(guideline -> System.out.println(guideline.toString() + "\n"));
         } catch (InputMismatchException e) {
             System.out.println("Invalid ArUco ids");
