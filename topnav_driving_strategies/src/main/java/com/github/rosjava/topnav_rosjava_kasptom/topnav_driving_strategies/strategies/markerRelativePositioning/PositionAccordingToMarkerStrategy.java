@@ -46,11 +46,13 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     private boolean isObstacleTooClose;
     private Queue<ManeuverDescription> maneuverDescriptions;
     private List<Topology> trackedTopologies;
+    private int notDetectedCounter;
 
     public PositionAccordingToMarkerStrategy(IArUcoHeadTracker arUcoTracker, Log log) {
         guidelineParamsMap = new HashMap<>();
         this.arUcoTracker = arUcoTracker;
         this.log = log;
+        notDetectedCounter = 0;
         currentStage = CompoundStrategyStage.INITIAL;
         maneuverGenerator = new ManeuverDescriptionGenerator();
         maneuverDescriptions = new ArrayDeque<>();
@@ -140,7 +142,18 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
                 .stream()
                 .filter(topology -> topology.getIdentity().equals(detection.getId()))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("topology cannot be null"));
+                .orElse(null);
+
+        if (detectionTopology != null) {
+            notDetectedCounter = 0;
+        } else {
+            notDetectedCounter++;
+            if (notDetectedCounter >= NOT_DETECTED_LIMIT) {
+                log.info("not detected counter reached its limit");
+                finishedListener.onStrategyFinished(false);
+            }
+            return;
+        }
 
         if (currentStage == CompoundStrategyStage.LOOKING_AT_MARKER) {
             if (detection.getId().equals(MarkerDetection.EMPTY_DETECTION_ID)) {

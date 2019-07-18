@@ -157,7 +157,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
     }
 
     private void trackMarker(MarkersMsg markersMsg) {
-        if (isHeadRotationInProgress) {
+        if (isHeadRotationInProgress || !minTimeSinceLastRotationElapsed) {
             return;
         }
 
@@ -184,6 +184,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         angleDegrees += headRotationCorrection;
         System.out.printf("setting angle to %.2f\n", angleDegrees);
 
+        isHeadRotationInProgress = true;
         headRotationChangeListener.onLinearRotationRequestChange(angleDegrees);
         trackedMarkerListener.onTrackedMarkerUpdate(marker, angleDegrees);
     }
