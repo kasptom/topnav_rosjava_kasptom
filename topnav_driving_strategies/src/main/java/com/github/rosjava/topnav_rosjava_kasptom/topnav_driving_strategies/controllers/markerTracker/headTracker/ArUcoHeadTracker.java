@@ -186,6 +186,7 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
 
         isHeadRotationInProgress = true;
         headRotationChangeListener.onLinearRotationRequestChange(angleDegrees);
+        marker.setDetectedAtAngle(angleDegrees);
         trackedMarkerListener.onTrackedMarkerUpdate(marker, angleDegrees);
     }
 

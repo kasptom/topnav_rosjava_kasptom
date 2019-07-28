@@ -76,6 +76,6 @@ public class AruCoTrackerTestStrategy implements IDrivingStrategy, IArUcoHeadTra
 
     @Override
     public void onTrackedMarkerUpdate(MarkerDetection detection, double headRotation) {
-
+        System.out.println(detection);
     }
 }
