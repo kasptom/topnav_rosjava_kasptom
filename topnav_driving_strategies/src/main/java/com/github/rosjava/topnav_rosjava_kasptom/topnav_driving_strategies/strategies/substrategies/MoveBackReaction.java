@@ -31,7 +31,7 @@ public class MoveBackReaction implements IReaction {
     public WheelsVelocities onAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
         List<AngleRange> angleRanges = AngleRange.messageToAngleRange(angleRangesMsg);
         angleRanges = angleRanges.stream()
-                .filter(angleRange -> angleRange.getRange() <= 2 * TOO_CLOSE_RANGE)
+                .filter(angleRange -> angleRange.getRange() <= SAVE_RANGE)
                 .collect(Collectors.toList());
         AngleRange minAngleRange = angleRanges
                 .stream()

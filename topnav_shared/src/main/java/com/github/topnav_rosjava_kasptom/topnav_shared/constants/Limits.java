@@ -10,7 +10,8 @@ public class Limits {
     public static final long MARKER_CENTERING_TIME_MS = 3000;
 
     public static final int LIDAR_SAMPLES_COUNT = 61;
-    public static double TOO_CLOSE_RANGE = 0.25;
+    public static double SAVE_RANGE = 0.75;
+    public static double TOO_CLOSE_RANGE = 0.15;
     public static double DOOR_DETECTION_RANGE = 1.0; // meters
 
     public static final double BASE_VELOCITY = 2.0;

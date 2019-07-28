@@ -88,6 +88,9 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
         isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
 
         if (isObstacleTooClose) {
+            double distance = Arrays.stream(angleRangesMsg.getDistances()).filter(dist -> dist <= TOO_CLOSE_RANGE)
+                    .findFirst().orElse(-1.0);
+            System.out.printf("Obstacle is too close %.2f\n", distance);
             wheelsVelocitiesChangeListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
             finishedListener.onStrategyFinished(false);
         }
