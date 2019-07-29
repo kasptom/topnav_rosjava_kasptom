@@ -44,6 +44,8 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     private long earliestCenteredOnTimeStamp = Long.MAX_VALUE;
 
     private boolean isObstacleTooClose;
+    private long obstacleTooCloseCounter = 0;
+
     private Queue<ManeuverDescription> maneuverDescriptions;
     private List<Topology> trackedTopologies;
     private int notDetectedCounter;
@@ -88,11 +90,16 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
         isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
 
         if (isObstacleTooClose) {
+            obstacleTooCloseCounter++;
             double distance = Arrays.stream(angleRangesMsg.getDistances()).filter(dist -> dist <= TOO_CLOSE_RANGE)
                     .findFirst().orElse(-1.0);
             System.out.printf("Obstacle is too close %.2f\n", distance);
-            wheelsVelocitiesChangeListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
-            finishedListener.onStrategyFinished(false);
+            if (obstacleTooCloseCounter >= OBSTACLE_TOO_CLOSE_LIMIT) {
+                wheelsVelocitiesChangeListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
+                finishedListener.onStrategyFinished(false);
+            }
+        } else {
+            obstacleTooCloseCounter = 0;
         }
     }
 

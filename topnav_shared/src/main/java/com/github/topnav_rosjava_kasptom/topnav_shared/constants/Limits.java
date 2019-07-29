@@ -5,9 +5,10 @@ public class Limits {
     public static final double MAX_MID_RANGE = 2.5;
     public static final double OFFSET_MARKER_CENTER_METERS = 0.1; // TODO topnav_config
 
-    public static final double ACCORDING_TO_MARKER_DISTANCE = 1.0; // meters
+    public static final double ACCORDING_TO_MARKER_DISTANCE = 0.5; // meters
     public static final double ACCORDING_TO_MARKER_CENTER_OFFSET = 0.5; // meters
     public static final long MARKER_CENTERING_TIME_MS = 3000;
+    public static long OBSTACLE_TOO_CLOSE_LIMIT = 50;
 
     public static final int LIDAR_SAMPLES_COUNT = 61;
     public static double SAVE_RANGE = 0.75;
