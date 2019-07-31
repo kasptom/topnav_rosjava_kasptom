@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 
+import static com.google.common.io.Resources.getResource;
+
 public class PropertiesService implements IPropertiesService {
     private static IPropertiesService instance;
     private final Properties properties;
@@ -28,14 +30,18 @@ public class PropertiesService implements IPropertiesService {
         return instance;
     }
 
+    /**
+     * @param configFilePath set to null to use the default config
+     * @throws IOException if could not open the specified config file
+     */
     private PropertiesService(String configFilePath) throws IOException {
         properties = new Properties();
         if (configFilePath != null) {
             properties.load(new FileInputStream(configFilePath));
         } else {
-            String deraultConfigFilePath = Objects.requireNonNull(PropertiesService.class.getClassLoader().getResource("default.properties")).getPath();
-            System.out.println("using default config file");
-            properties.load(new FileInputStream(deraultConfigFilePath));
+            String defaultConfigFilePath = Objects.requireNonNull(getResource("default.properties")).getPath();
+            System.out.println("using the default config file");
+            properties.load(new FileInputStream(defaultConfigFilePath));
         }
     }
 
