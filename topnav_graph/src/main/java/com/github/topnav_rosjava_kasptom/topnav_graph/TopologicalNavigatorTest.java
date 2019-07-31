@@ -32,9 +32,9 @@ public class TopologicalNavigatorTest {
         navigator.createGuidelines(startMarkerId, endMarkerId, true, "6200");
 
         Assert.assertNotNull(navigator.getGuidelines());
-        Assert.assertEquals(navigator.getGuidelines().get(0).getGuidelineType(), DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2);
-        Assert.assertEquals(navigator.getGuidelines().get(1).getGuidelineType(), DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2);
-        Assert.assertEquals(navigator.getGuidelines().get(2).getGuidelineType(), DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2);
+        Assert.assertEquals(DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2, navigator.getGuidelines().get(0).getGuidelineType());
+        Assert.assertEquals(DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2, navigator.getGuidelines().get(1).getGuidelineType());
+        Assert.assertEquals(DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2, navigator.getGuidelines().get(2).getGuidelineType());
 
         Assert.assertEquals("1", getMarkerId(navigator, 0));
         Assert.assertEquals( "2", getMarkerId(navigator, 1));

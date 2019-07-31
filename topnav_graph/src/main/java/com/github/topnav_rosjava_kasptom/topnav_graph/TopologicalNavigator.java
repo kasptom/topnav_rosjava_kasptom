@@ -110,7 +110,6 @@ public class TopologicalNavigator implements ITopnavNavigator {
         return guidelines;
     }
 
-
     @Override
     public void start() {
         isPaused = false;

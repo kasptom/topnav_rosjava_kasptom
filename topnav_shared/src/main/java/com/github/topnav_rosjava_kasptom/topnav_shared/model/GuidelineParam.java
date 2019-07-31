@@ -9,7 +9,7 @@ public class GuidelineParam {
 
    /**
     * @param name available values {@link com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ApproachMarker#PARAM_NAMES}
-    * @param value {@link @link com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy}
+    * @param value {@link com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy}
     * @param type e.g. String, Long, ...
     */
    public GuidelineParam(String name, String value, String type) {

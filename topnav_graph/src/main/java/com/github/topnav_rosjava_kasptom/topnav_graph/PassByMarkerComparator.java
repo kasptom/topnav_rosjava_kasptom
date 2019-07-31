@@ -45,7 +45,6 @@ public class PassByMarkerComparator implements Comparator<Guideline> {
                 .map(GuidelineParam::getValue)
                 .findFirst().orElse(null);
 
-
         String firstMarkerRole = markers.stream()
                 .filter(marker -> marker.getAruco().getId().equals(firstId))
                 .map(MarkerDto::getRole)
