@@ -87,7 +87,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
                 guidelines.add(guideline);
                 i += 2;
             } else if (isEdgeWithMarkersToPassBy(edge, nextEdge) && isDeadReckoningEnabled) {
-                List<Guideline> passByGuidelines = TopologicalNavigatorUtils.createPassByMarkerGuidelines(edge);
+                List<Guideline> passByGuidelines = TopologicalNavigatorUtils.createPassByMarkerGuidelines(edge, fullRobotRotationMs);
                 guidelines.addAll(passByGuidelines);
                 i++;
             } else if (isWallEndingEdge(edge)) {

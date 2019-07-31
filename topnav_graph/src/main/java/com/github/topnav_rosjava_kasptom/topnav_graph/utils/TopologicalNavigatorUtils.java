@@ -86,15 +86,16 @@ public class TopologicalNavigatorUtils {
         return new Guideline(guidelineType, params);
     }
 
-    public static List<Guideline> createPassByMarkerGuidelines(Edge edge) {
+    public static List<Guideline> createPassByMarkerGuidelines(Edge edge, String fullRobotRotationMs) {
         Node node = edge.getSourceNode();
         List<MarkerDto> markers = node.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
 
         return markers.stream().map(marker -> {
             List<GuidelineParam> params = new ArrayList<>();
-            params.add(new GuidelineParam(DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2, marker.getAruco().getId(), "String"));
+            params.add(new GuidelineParam(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID, marker.getAruco().getId(), "String"));
             params.add(createRelativeDirectionParameter(edge));
             params.add(createRelativeAlignmentParameter(edge));
+            params.add(new GuidelineParam(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS, fullRobotRotationMs, "Long"));
 
             return new Guideline(DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2, params);
         }).sorted(new PassByMarkerComparator(edge)).collect(Collectors.toList());

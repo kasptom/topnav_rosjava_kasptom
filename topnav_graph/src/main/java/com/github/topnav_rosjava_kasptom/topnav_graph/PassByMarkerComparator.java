@@ -24,7 +24,7 @@ public class PassByMarkerComparator implements Comparator<Guideline> {
 
         markers = edge.getSourceNode().getAttribute(TopNavConstants.TOPNAV_ATTRIBUTE_KEY_MARKERS);
 
-        if (TopNavConstants.TOPNAV_ATTRIBUTE_VALUE_EDGE_TYPE_LEFTWARD.equals(topnavEdgeDirection)) {
+        if (TopNavConstants.TOPNAV_ATTRIBUTE_VALUE_EDGE_TYPE_RIGHTWARD.equals(topnavEdgeDirection)) {
             markerTypeToIdx.put(MarkerRoles.MARKER_ROLE_LEFT, 1);
             markerTypeToIdx.put(MarkerRoles.MARKER_ROLE_RIGHT, 2);
         } else {

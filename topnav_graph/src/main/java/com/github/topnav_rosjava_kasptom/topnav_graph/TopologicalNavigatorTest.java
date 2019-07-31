@@ -6,6 +6,7 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNod
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.PropertyKeys;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.services.IPropertiesService;
 import com.github.topnav_rosjava_kasptom.topnav_shared.services.PropertiesService;
 import org.junit.Assert;
@@ -34,6 +35,20 @@ public class TopologicalNavigatorTest {
         Assert.assertEquals(navigator.getGuidelines().get(0).getGuidelineType(), DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2);
         Assert.assertEquals(navigator.getGuidelines().get(1).getGuidelineType(), DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2);
         Assert.assertEquals(navigator.getGuidelines().get(2).getGuidelineType(), DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2);
+
+        Assert.assertEquals("1", getMarkerId(navigator, 0));
+        Assert.assertEquals( "2", getMarkerId(navigator, 1));
+    }
+
+    private String getMarkerId(ITopnavNavigator navigator, int idx) {
+        return navigator.getGuidelines()
+                .get(idx)
+                .getParameters()
+                .stream()
+                .filter(param -> param.getName().equals(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID))
+                .map(GuidelineParam::getValue)
+                .findFirst()
+                .orElse(null);
     }
 
     private ITopnavNavigator createNavigator() throws InvalidRosonNodeIdException, InvalidRosonNodeKindException, InvalidArUcoIdException, IOException {
