@@ -4,10 +4,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker.IArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.markerRelativePositioning.PositionAccordingToMarkerStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeAlignment;
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.*;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import org.apache.commons.logging.Log;
 import std_msgs.UInt64;
@@ -122,13 +119,21 @@ public class ApproachMarkerStrategyV2 implements IDrivingStrategy, IArUcoHeadTra
 
     private List<GuidelineParam> rewriteGuidelinesForInnerStrategy() {
         String approachedMarkerId = guidelineParamsMap.get(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID).getValue();
+        String approachedMarkerId2 = guidelineParamsMap.getOrDefault(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID_2, GuidelineParam.getEmptyParam()).getValue();
         String fullRobotRotationTimeMs = guidelineParamsMap.get(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS).getValue();
 
         GuidelineParam approachedMarkerParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_1, approachedMarkerId, "String");
+        GuidelineParam approachedMarkerParam2 = !approachedMarkerId2.equals(EMPTY_PARAM_VALUE)
+                ? new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_MARKER_ID_2, approachedMarkerId2, "String")
+                : GuidelineParam.getEmptyParam();
+
         GuidelineParam relativeDirectionParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_DIRECTION_1, direction.name(), "String");
         GuidelineParam relativeDistanceParam = new GuidelineParam(DrivingStrategy.PositionAccordingToMarker.KEY_ACCORDING_ALIGNMENT_1, alignment.name(), "String");
+
         GuidelineParam fullRobotRotationMsParam = new GuidelineParam(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS, fullRobotRotationTimeMs, "Long");
 
-        return Arrays.asList(approachedMarkerParam, relativeDirectionParam, relativeDistanceParam, fullRobotRotationMsParam);
+        List<GuidelineParam> params = Arrays.asList(approachedMarkerParam, approachedMarkerParam2, relativeDirectionParam, relativeDistanceParam, fullRobotRotationMsParam);
+        params.remove(GuidelineParam.getEmptyParam());
+        return params;
     }
 }

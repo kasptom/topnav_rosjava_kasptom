@@ -71,9 +71,14 @@ public class TopologicalNavigatorUtils {
 
     public static Guideline createLookApproachMarkerGuideline(Node node, boolean isDeadReckoningEnabled, String fullRobotRotationMs) {
         List<MarkerDto> markers = node.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+
+        int[] markerCounter = {0};
         List<GuidelineParam> params = markers
                 .stream()
-                .map(marker -> new GuidelineParam(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID, marker.getAruco().getId(), "String"))
+                .map(marker -> new GuidelineParam(
+                        ++markerCounter[0] == 1 ? DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID : DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID_2,
+                        marker.getAruco().getId(),
+                        "String"))
                 .collect(Collectors.toList());
 
         String guidelineType = DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER;

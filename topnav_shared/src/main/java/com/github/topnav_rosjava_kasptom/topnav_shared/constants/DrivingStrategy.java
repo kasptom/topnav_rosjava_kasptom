@@ -65,6 +65,7 @@ public class DrivingStrategy {
 
     public class ApproachMarker {
         public static final String KEY_APPROACHED_MARKER_ID = "DS_PARAM_APPROACHED_MARKER_ID";
+        public static final String KEY_APPROACHED_MARKER_ID_2 = "DS_PARAM_APPROACHED_MARKER_ID_2";
         public static final String KEY_APPROACHED_DIRECTION = "DS_PARAM_APPROACHED_DIRECTION";
         public static final String KEY_APPROACHED_ALIGNMENT = "DS_PARAM_APPROACHED_ALIGNMENT";
 
