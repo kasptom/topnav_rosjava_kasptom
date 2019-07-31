@@ -5,12 +5,10 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionStartListener;
-import com.github.topnav_rosjava_kasptom.topnav_shared.exceptions.PointNotFoundException;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
-import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.DoorFinder;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.HoughUtils;
 import org.apache.commons.logging.Log;
@@ -46,12 +44,10 @@ public class FollowWallStrategy implements IDrivingStrategy {
     private static final double RIGHT_WALL_ANGLE = -90;
     private static final double LEFT_WALL_ANGLE = 90;
     private double chosenWallAngle = LEFT_WALL_ANGLE;
-    private DoorFinder doorFinder;
 
     public FollowWallStrategy(IReactionStartListener reactionStartListener, Log log) {
         this.reactionStartListener = reactionStartListener;
         this.log = log;
-        this.doorFinder = new DoorFinder();
     }
 
     @Override
@@ -86,25 +82,6 @@ public class FollowWallStrategy implements IDrivingStrategy {
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
         isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
-
-        if (isObstacleTooClose) {
-            switchToMoveBackReaction();
-            return;
-        }
-
-        doorFinder.dividePointsToClusters(angleRangesMsg);
-
-        try {
-            List<DoorFinder.Point> points = doorFinder.getMidPointWithClosestClustersPoints();
-            HoughCell cell = HoughUtils.toHoughCell(points.get(1), points.get(2));
-            if (cell.getRange() <= TOO_CLOSE_RANGE) {
-                log.info("Avoiding unwanted door passage");
-                isObstacleTooClose = true;
-            }
-
-        } catch (PointNotFoundException pointNotFoundException) {
-            isObstacleTooClose = false;
-        }
 
         if (isObstacleTooClose) {
             switchToMoveBackReaction();
