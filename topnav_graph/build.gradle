@@ -49,6 +49,7 @@ dependencies {
   /* compile project(':sibling_gradle_project') */
   compileOnly 'org.projectlombok:lombok:1.18.4'
   apt 'org.projectlombok:lombok:1.18.4'
+  testCompile 'junit:junit:4.12'
 
   compile project(':topnav_shared')
 }

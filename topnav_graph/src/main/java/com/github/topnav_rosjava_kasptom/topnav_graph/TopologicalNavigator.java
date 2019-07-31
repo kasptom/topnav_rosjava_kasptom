@@ -86,6 +86,10 @@ public class TopologicalNavigator implements ITopnavNavigator {
                 Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(edge, nextEdge, isDeadReckoningEnabled, fullRobotRotationMs);
                 guidelines.add(guideline);
                 i += 2;
+            } else if (isEdgeWithMarkersToPassBy(edge, nextEdge) && isDeadReckoningEnabled) {
+                List<Guideline> passByGuidelines = TopologicalNavigatorUtils.createPassByMarkerGuidelines(edge, fullRobotRotationMs);
+                guidelines.addAll(passByGuidelines);
+                i++;
             } else if (isWallEndingEdge(edge)) {
                 Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline(edge);
                 guidelines.add(guideline);
@@ -171,6 +175,24 @@ public class TopologicalNavigator implements ITopnavNavigator {
                 && backDoorNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
     }
 
+    private boolean isEdgeWithMarkersToPassBy(Edge edge, Edge nextEdge) {
+        if (nextEdge == null) return false;
+
+        Node nodeWithMarkers = edge.getSourceNode();
+        Node nextNode = edge.getTargetNode();
+
+        if (!nodeWithMarkers.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)) {
+            return false;
+        }
+
+        return !isGateNode(nextNode);
+    }
+
+    private boolean isGateNode(Node nextNode) {
+        return nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE)
+                && nextNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE);
+    }
+
     private boolean isWallEndingEdge(Edge edge) {
         Node node = edge.getTargetNode();
         return node.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_WALL);
@@ -190,7 +212,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
     public void onFeedbackChange(Feedback feedback) {
         if (feedbackResolver.shouldSwitchToNextGuideline(feedback, currentGuidelineIdx, guidelines)) {
             currentGuidelineIdx++;
-            logger.info(String.format("Feedback change, next guideline: %s",guidelines.get(currentGuidelineIdx)));
+            logger.info(String.format("Feedback change, next guideline: %s", guidelines.get(currentGuidelineIdx)));
             guidelineChangeListener.onGuidelineChange(guidelines.get(currentGuidelineIdx));
         } else if (feedbackResolver.shouldStop(feedback, currentGuidelineIdx, guidelines)) {
 //            logger.info("No guideline available");

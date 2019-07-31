@@ -1,6 +1,7 @@
 package com.github.topnav_rosjava_kasptom.topnav_shared.model;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.ArucoMarkerUtils;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.OFFSET_MARKER_CENTER_METERS;
 
@@ -84,6 +85,14 @@ public class MarkerDetection {
 
     private MarkerDetection(String id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s [%.2f, %.2f, %.2f], %.2fm, %.2f°",
+                id,
+                cameraPosition[0], cameraPosition[1], cameraPosition[2],
+                ArucoMarkerUtils.distanceTo(this), detectedAtAngle);
     }
 }
 

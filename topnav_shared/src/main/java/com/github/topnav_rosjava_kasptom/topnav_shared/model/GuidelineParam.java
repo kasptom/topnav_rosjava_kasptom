@@ -7,6 +7,11 @@ public class GuidelineParam {
 
    public static String EMPTY_PARAM_VALUE = "N/A";
 
+   /**
+    * @param name available values {@link com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.ApproachMarker#PARAM_NAMES}
+    * @param value {@link com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy}
+    * @param type e.g. String, Long, ...
+    */
    public GuidelineParam(String name, String value, String type) {
       this.name = name;
       this.value = value;

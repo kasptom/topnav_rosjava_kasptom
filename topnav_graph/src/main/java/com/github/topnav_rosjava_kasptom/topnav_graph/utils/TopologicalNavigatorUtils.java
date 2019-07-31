@@ -1,5 +1,6 @@
 package com.github.topnav_rosjava_kasptom.topnav_graph.utils;
 
+import com.github.topnav_rosjava_kasptom.topnav_graph.PassByMarkerComparator;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.marker.MarkerDto;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.Guideline;
@@ -70,9 +71,14 @@ public class TopologicalNavigatorUtils {
 
     public static Guideline createLookApproachMarkerGuideline(Node node, boolean isDeadReckoningEnabled, String fullRobotRotationMs) {
         List<MarkerDto> markers = node.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+
+        int[] markerCounter = {0};
         List<GuidelineParam> params = markers
                 .stream()
-                .map(marker -> new GuidelineParam(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID, marker.getAruco().getId(), "String"))
+                .map(marker -> new GuidelineParam(
+                        ++markerCounter[0] == 1 ? DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID : DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID_2,
+                        marker.getAruco().getId(),
+                        "String"))
                 .collect(Collectors.toList());
 
         String guidelineType = DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER;
@@ -83,5 +89,34 @@ public class TopologicalNavigatorUtils {
         }
 
         return new Guideline(guidelineType, params);
+    }
+
+    public static List<Guideline> createPassByMarkerGuidelines(Edge edge, String fullRobotRotationMs) {
+        Node node = edge.getSourceNode();
+        List<MarkerDto> markers = node.getAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+
+        return markers.stream().map(marker -> {
+            List<GuidelineParam> params = new ArrayList<>();
+            params.add(new GuidelineParam(DrivingStrategy.ApproachMarker.KEY_APPROACHED_MARKER_ID, marker.getAruco().getId(), "String"));
+            params.add(createRelativeDirectionParameter(edge));
+            params.add(createRelativeAlignmentParameter(edge));
+            params.add(new GuidelineParam(DrivingStrategy.DeadReckoning.KEY_MANEUVER_ROBOT_FULL_ROTATION_MS, fullRobotRotationMs, "Long"));
+
+            return new Guideline(DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2, params);
+        }).sorted(new PassByMarkerComparator(edge)).collect(Collectors.toList());
+    }
+
+    private static GuidelineParam createRelativeDirectionParameter(Edge edge) {
+        return new GuidelineParam(DrivingStrategy.ApproachMarker.KEY_APPROACHED_DIRECTION,
+                edge.getAttribute(TOPNAV_ATTRIBUTE_KEY_EDGE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_EDGE_TYPE_LEFTWARD)
+                        ? DrivingStrategy.ApproachMarker.VALUE_APPROACHED_DIRECTION_AT_RIGHT
+                        : DrivingStrategy.ApproachMarker.VALUE_APPROACHED_DIRECTION_AT_LEFT, "String");
+    }
+
+    private static GuidelineParam createRelativeAlignmentParameter(Edge edge) {
+        return new GuidelineParam(DrivingStrategy.ApproachMarker.KEY_APPROACHED_ALIGNMENT,
+                edge.getAttribute(TOPNAV_ATTRIBUTE_KEY_EDGE_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_EDGE_TYPE_LEFTWARD)
+                        ? DrivingStrategy.ApproachMarker.VALUE_APPROACHED_ALIGNMENT_RIGHT
+                        : DrivingStrategy.ApproachMarker.VALUE_APPROACHED_ALIGNMENT_LEFT, "String");
     }
 }
