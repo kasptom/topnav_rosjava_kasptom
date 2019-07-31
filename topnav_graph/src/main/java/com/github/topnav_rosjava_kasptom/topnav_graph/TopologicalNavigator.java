@@ -86,10 +86,9 @@ public class TopologicalNavigator implements ITopnavNavigator {
                 Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(edge, nextEdge, isDeadReckoningEnabled, fullRobotRotationMs);
                 guidelines.add(guideline);
                 i += 2;
-            } else if (isEdgeWithMarkersToPassBy(edge, nextEdge)) {
-                // TODO uzupelnic metody
-                Guideline guideline = TopologicalNavigatorUtils.createPassByMarkerGuideline(edge);
-                guidelines.add(guideline);
+            } else if (isEdgeWithMarkersToPassBy(edge, nextEdge) && isDeadReckoningEnabled) {
+                List<Guideline> passByGuidelines = TopologicalNavigatorUtils.createPassByMarkerGuidelines(edge);
+                guidelines.addAll(passByGuidelines);
                 i++;
             } else if (isWallEndingEdge(edge)) {
                 Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline(edge);
@@ -110,7 +109,6 @@ public class TopologicalNavigator implements ITopnavNavigator {
         this.guidelines.addAll(guidelines);
         return guidelines;
     }
-
 
 
     @Override
@@ -179,7 +177,21 @@ public class TopologicalNavigator implements ITopnavNavigator {
     }
 
     private boolean isEdgeWithMarkersToPassBy(Edge edge, Edge nextEdge) {
-        return false; // TODO
+        if (nextEdge == null) return false;
+
+        Node nodeWithMarkers = edge.getSourceNode();
+        Node nextNode = edge.getTargetNode();
+
+        if (!nodeWithMarkers.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)) {
+            return false;
+        }
+
+        return !isGateNode(nextNode);
+    }
+
+    private boolean isGateNode(Node nextNode) {
+        return nextNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE)
+                && nextNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE);
     }
 
     private boolean isWallEndingEdge(Edge edge) {
@@ -201,7 +213,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
     public void onFeedbackChange(Feedback feedback) {
         if (feedbackResolver.shouldSwitchToNextGuideline(feedback, currentGuidelineIdx, guidelines)) {
             currentGuidelineIdx++;
-            logger.info(String.format("Feedback change, next guideline: %s",guidelines.get(currentGuidelineIdx)));
+            logger.info(String.format("Feedback change, next guideline: %s", guidelines.get(currentGuidelineIdx)));
             guidelineChangeListener.onGuidelineChange(guidelines.get(currentGuidelineIdx));
         } else if (feedbackResolver.shouldStop(feedback, currentGuidelineIdx, guidelines)) {
 //            logger.info("No guideline available");

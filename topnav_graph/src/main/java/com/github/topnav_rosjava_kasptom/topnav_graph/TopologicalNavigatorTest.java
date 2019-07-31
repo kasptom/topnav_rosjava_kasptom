@@ -4,6 +4,7 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidArUcoIdE
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeIdException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
+import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.PropertyKeys;
 import com.github.topnav_rosjava_kasptom.topnav_shared.services.IPropertiesService;
 import com.github.topnav_rosjava_kasptom.topnav_shared.services.PropertiesService;
@@ -25,11 +26,14 @@ public class TopologicalNavigatorTest {
     @Test
     public void graph_createGuidelinesWithEnabledDeadReckoning_correctPath() {
         String startMarkerId = "1";
-        String endMarkerId = "2";
+        String endMarkerId = "7";
 
         navigator.createGuidelines(startMarkerId, endMarkerId, true, "6200");
 
         Assert.assertNotNull(navigator.getGuidelines());
+        Assert.assertEquals(navigator.getGuidelines().get(0).getGuidelineType(), DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2);
+        Assert.assertEquals(navigator.getGuidelines().get(1).getGuidelineType(), DrivingStrategy.DRIVING_STRATEGY_APPROACH_MARKER_2);
+        Assert.assertEquals(navigator.getGuidelines().get(2).getGuidelineType(), DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2);
     }
 
     private ITopnavNavigator createNavigator() throws InvalidRosonNodeIdException, InvalidRosonNodeKindException, InvalidArUcoIdException, IOException {
