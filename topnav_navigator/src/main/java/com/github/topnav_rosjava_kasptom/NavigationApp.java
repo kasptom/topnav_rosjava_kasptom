@@ -6,7 +6,7 @@ import com.github.topnav_rosjava_kasptom.components.remote_controller.IRemoteCon
 import com.github.topnav_rosjava_kasptom.components.remote_controller.KeyPressHandler;
 import com.github.topnav_rosjava_kasptom.components.remote_controller.RemoteControlCommandSender;
 import com.github.topnav_rosjava_kasptom.components.remote_controller.presenter.IRemoteControlPresenter;
-import com.github.topnav_rosjava_kasptom.services.PropertiesService;
+import com.github.topnav_rosjava_kasptom.topnav_shared.services.PropertiesService;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;

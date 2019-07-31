@@ -86,6 +86,11 @@ public class TopologicalNavigator implements ITopnavNavigator {
                 Guideline guideline = TopologicalNavigatorUtils.convertToPassThroughDoorGuideline(edge, nextEdge, isDeadReckoningEnabled, fullRobotRotationMs);
                 guidelines.add(guideline);
                 i += 2;
+            } else if (isEdgeWithMarkersToPassBy(edge, nextEdge)) {
+                // TODO uzupelnic metody
+                Guideline guideline = TopologicalNavigatorUtils.createPassByMarkerGuideline(edge);
+                guidelines.add(guideline);
+                i++;
             } else if (isWallEndingEdge(edge)) {
                 Guideline guideline = TopologicalNavigatorUtils.createFollowWallGuideline(edge);
                 guidelines.add(guideline);
@@ -105,6 +110,8 @@ public class TopologicalNavigator implements ITopnavNavigator {
         this.guidelines.addAll(guidelines);
         return guidelines;
     }
+
+
 
     @Override
     public void start() {
@@ -169,6 +176,10 @@ public class TopologicalNavigator implements ITopnavNavigator {
                 && backDoorNode.getAttribute(TOPNAV_ATTRIBUTE_KEY_TOPOLOGY_TYPE).equals(TOPNAV_ATTRIBUTE_VALUE_TOPOLOGY_TYPE_GATE_TOPOLOGY)
                 && frontDoorNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS)
                 && backDoorNode.hasAttribute(TOPNAV_ATTRIBUTE_KEY_MARKERS);
+    }
+
+    private boolean isEdgeWithMarkersToPassBy(Edge edge, Edge nextEdge) {
+        return false; // TODO
     }
 
     private boolean isWallEndingEdge(Edge edge) {

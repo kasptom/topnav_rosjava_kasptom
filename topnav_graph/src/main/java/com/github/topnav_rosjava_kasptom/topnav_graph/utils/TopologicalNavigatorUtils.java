@@ -84,4 +84,8 @@ public class TopologicalNavigatorUtils {
 
         return new Guideline(guidelineType, params);
     }
+
+    public static Guideline createPassByMarkerGuideline(Edge edge) {
+        return null; // TODO implement
+    }
 }

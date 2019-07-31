@@ -65,6 +65,8 @@ public class DrivingStrategy {
 
     public class ApproachMarker {
         public static final String KEY_APPROACHED_MARKER_ID = "DS_PARAM_APPROACHED_MARKER_ID";
+        public static final String KEY_APPROACHED_DIRECTION = "DS_PARAM_APPROACHED_DIRECTION";
+        public static final String KEY_APPROACHED_ALIGNMENT = "DS_PARAM_APPROACHED_ALIGNMENT";
     }
 
     public class PositionAccordingToMarker {
@@ -92,6 +94,8 @@ public class DrivingStrategy {
             ThroughDoor.KEY_BACK_RIGHT_MARKER_ID,
             FollowWall.KEY_TRACKED_WALL_ALIGNMENT,
             ApproachMarker.KEY_APPROACHED_MARKER_ID,
+            ApproachMarker.KEY_APPROACHED_ALIGNMENT,
+            ApproachMarker.KEY_APPROACHED_DIRECTION,
             DeadReckoning.KEY_MANEUVER_NAME,
             DeadReckoning.KEY_MANEUVER_ANGLE_DEGREES,
             DeadReckoning.KEY_MANEUVER_DISTANCE_METERS,
