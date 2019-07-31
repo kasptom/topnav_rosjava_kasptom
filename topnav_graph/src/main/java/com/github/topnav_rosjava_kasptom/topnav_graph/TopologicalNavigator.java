@@ -49,7 +49,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
 
         feedbackResolver = new FeedbackResolver();
         guidelines = new ArrayList<>();
-        currentGuidelineIdx = 0;
+        currentGuidelineIdx = -1;
         this.algorithm = new DynamicOneToAllShortestPath(TOPNAV_ATTRIBUTE_KEY_COST);
         algorithm.init(graph);
     }
@@ -112,6 +112,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
 
     @Override
     public void start() {
+        currentGuidelineIdx = 0;
         isPaused = false;
         if (guidelines.isEmpty()) throw new RuntimeException("Guidelines list is empty");
 
@@ -127,7 +128,7 @@ public class TopologicalNavigator implements ITopnavNavigator {
     @Override
     public void stop() {
         guidelines.clear();
-        currentGuidelineIdx = 0;
+        currentGuidelineIdx = -1;
         guidelineChangeListener.onNoGuidelineAvailable();
     }
 
@@ -210,6 +211,10 @@ public class TopologicalNavigator implements ITopnavNavigator {
 
     @Override
     public void onFeedbackChange(Feedback feedback) {
+        if (currentGuidelineIdx == -1) {
+            return;
+        }
+
         if (feedbackResolver.shouldSwitchToNextGuideline(feedback, currentGuidelineIdx, guidelines)) {
             currentGuidelineIdx++;
             logger.info(String.format("Feedback change, next guideline: %s", guidelines.get(currentGuidelineIdx)));

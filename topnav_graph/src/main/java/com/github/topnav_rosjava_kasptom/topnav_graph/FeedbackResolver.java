@@ -38,10 +38,12 @@ public class FeedbackResolver implements IFeedbackResolver {
 
     @Override
     public boolean shouldStop(Feedback feedback, int currentGuidelineIdx, List<Guideline> guidelines) {
-        if (currentGuidelineIdx >= guidelines.size() - 1) return true;
+        if (currentGuidelineIdx > guidelines.size() - 1) return true;
 
         Guideline currentGuideline = guidelines.get(currentGuidelineIdx);
-        Guideline nextGuideline = guidelines.get(currentGuidelineIdx + 1);
+        Guideline nextGuideline = currentGuidelineIdx == guidelines.size() - 1
+                ? null
+                : guidelines.get(currentGuidelineIdx + 1);
 
         return false; // TODO close to the unexpected marker
     }
