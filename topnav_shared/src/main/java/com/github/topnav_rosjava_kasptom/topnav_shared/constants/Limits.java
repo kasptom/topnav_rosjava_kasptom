@@ -9,10 +9,11 @@ public class Limits {
     public static final double ACCORDING_TO_MARKER_CENTER_OFFSET = 0.5; // meters
     public static final long MARKER_CENTERING_TIME_MS = 3000;
     public static long OBSTACLE_TOO_CLOSE_LIMIT = 50;
+    public static long MAX_NUMBER_OF_REACTION_RETRIES = 3;
 
     public static final int LIDAR_SAMPLES_COUNT = 61;
     public static double SAVE_RANGE = 0.75;
-    public static double TOO_CLOSE_RANGE = 0.15;
+    public static double TOO_CLOSE_RANGE = 0.3;
     public static double DOOR_DETECTION_RANGE = 1.0; // meters
 
     public static final double BASE_VELOCITY = 2.0;

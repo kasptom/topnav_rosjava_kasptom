@@ -83,6 +83,8 @@ public class FollowWallStrategy implements IDrivingStrategy {
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
         isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
 
+//        AngleRangeUtils.printClosestPointInfo(angleRangesMsg);
+
         if (isObstacleTooClose) {
             switchToMoveBackReaction();
         }
