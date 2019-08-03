@@ -2,23 +2,28 @@ package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reac
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.substrategies.MoveBackReaction;
-import com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.AngleRangeUtils;
 import org.apache.commons.logging.Log;
 import org.ros.node.ConnectedNode;
 import topnav_msgs.AngleRangesMsg;
-import topnav_msgs.HoughAcc;
+
+import java.util.Arrays;
+
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
 public class ReactionController implements IReactionController, IReactionStartListener {
     private final Log log;
+    private final IReactionFinishListener reactionFinishListener;
     private WheelsVelocitiesChangeListener wheelsListener;
 
     private IReaction reaction = new MoveBackReaction();    // TODO HashMap
     private boolean isReactionInProgress;
-    private boolean isFallbackMode = false;
 
-    public ReactionController(ConnectedNode node) {
+    public ReactionController(ConnectedNode node, IReactionFinishListener reactionFinishListener) {
         this.log = node.getLog();
+        this.reactionFinishListener = reactionFinishListener;
     }
 
     @Override
@@ -27,29 +32,32 @@ public class ReactionController implements IReactionController, IReactionStartLi
     }
 
     @Override
-    public void onHoughAccMessage(HoughAcc houghAcc) {
-        if (!isReactionInProgress) {
-            return;
+    public boolean checkIfObstacleIsTooClose(AngleRangesMsg message) {
+        isReactionInProgress = Arrays.stream(message.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
+        if (isReactionInProgress) {
+            log.info("Obstacle is too close. Starting the reaction");
+            AngleRangeUtils.printClosestPointInfo(message);
         }
+        return isReactionInProgress;
+    }
 
-        WheelsVelocities wheelsVelocities = reaction.onHoughAccMessage(houghAcc);
-        if (wheelsVelocities == WheelsVelocityConstants.ZERO_VELOCITY) {
-            isFallbackMode = true;
-            return;
-        }
-
-        wheelsListener.onWheelsVelocitiesChanged(wheelsVelocities);
+    @Override
+    public void stopReaction() {
+        log.info("Stopping the reaction");
+        wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
+        isReactionInProgress = false;
     }
 
     @Override
     public void onAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-        if (!isReactionInProgress || !isFallbackMode) {
+        if (!isReactionInProgress) {
             return;
         }
 
         WheelsVelocities wheelsVelocities = reaction.onAngleRangeMessage(angleRangesMsg);
-        if (wheelsVelocities == WheelsVelocityConstants.ZERO_VELOCITY) {
+        if (wheelsVelocities == ZERO_VELOCITY) {
             isReactionInProgress = false;
+            reactionFinishListener.onReactionFinished();
             return;
         }
 

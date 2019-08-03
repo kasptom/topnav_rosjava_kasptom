@@ -4,6 +4,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker.IArUcoHeadTracker;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.MarkerDetection;
+import com.github.topnav_rosjava_kasptom.topnav_shared.utils.AngleRangeUtils;
 import com.github.topnav_rosjava_kasptom.topnav_shared.utils.GuidelineUtils;
 import topnav_msgs.AngleRangesMsg;
 import topnav_msgs.FeedbackMsg;
@@ -41,7 +42,7 @@ public class AruCoTrackerTestStrategy implements IDrivingStrategy, IArUcoHeadTra
 
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
-
+        AngleRangeUtils.printClosestPointInfo(angleRangesMsg);
     }
 
     @Override
