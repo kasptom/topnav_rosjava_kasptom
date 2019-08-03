@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.*;
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.MAX_NUMBER_OF_REACTION_RETRIES;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
@@ -36,7 +37,9 @@ public class MainController implements IMainController, IReactionController.IRea
     private final IHeadController headController;
     private final IWheelsController wheelsController;
     private final IArUcoHeadTracker arUcoHeadTracker;
+
     private final IReactionController reactionController;
+    private int retriesInRow;
 
     private final Publisher<std_msgs.String> strategyFinishedPublisher;
 
@@ -67,7 +70,10 @@ public class MainController implements IMainController, IReactionController.IRea
         headController = new HeadController(connectedNode);
         wheelsController = new WheelsController(connectedNode);
         arUcoHeadTracker = new ArUcoHeadTracker(log);
+
         reactionController = new ReactionController(connectedNode, this);
+        retriesInRow = 0;
+
         manualSteeringController = new ManualSteeringController();
 
         strategyFinishedPublisher = connectedNode.newPublisher(TOPNAV_STRATEGY_CHANGE_TOPIC, std_msgs.String._TYPE);
@@ -101,6 +107,7 @@ public class MainController implements IMainController, IReactionController.IRea
             if (reactionController.isReactionInProgress()) {
                 reactionController.stopReaction();
             }
+            retriesInRow = 0;
             selectStrategy(guidelineMsg.getGuidelineType(), guidelineMsg.getParameters());
         });
     }
@@ -217,7 +224,15 @@ public class MainController implements IMainController, IReactionController.IRea
                 return;
             }
 
-            if (reactionController.checkIfObstacleIsTooClose(message)) {
+            boolean isObstacleTooClose = reactionController.checkIfObstacleIsTooClose(message);
+            if (isObstacleTooClose && ++retriesInRow > MAX_NUMBER_OF_REACTION_RETRIES) {
+                log.info(String.format("Failure. Max number of retries (%d) exceeded", MAX_NUMBER_OF_REACTION_RETRIES));
+                selectStrategy(DRIVING_STRATEGY_IDLE, null);
+                return;
+            }
+
+            if (isObstacleTooClose) {
+                log.info(String.format("Retrying %d/%d", retriesInRow, MAX_NUMBER_OF_REACTION_RETRIES));
                 selectStrategy(DRIVING_STRATEGY_RESTART, null);
                 angleRangesMsgSubscriber.addMessageListener(reactionController::onAngleRangeMessage);
                 return;
