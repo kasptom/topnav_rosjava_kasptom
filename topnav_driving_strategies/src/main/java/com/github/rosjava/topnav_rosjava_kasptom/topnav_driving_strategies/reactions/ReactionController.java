@@ -10,6 +10,7 @@ import topnav_msgs.AngleRangesMsg;
 
 import java.util.Arrays;
 
+import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.OBSTACLE_TOO_CLOSE_LIMIT;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.TOO_CLOSE_RANGE;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
@@ -20,6 +21,9 @@ public class ReactionController implements IReactionController, IReactionStartLi
 
     private IReaction reaction = new MoveBackReaction();    // TODO HashMap
     private boolean isReactionInProgress;
+
+    private boolean isObstacleTooClose;
+    private int tooCloseCounter;
 
     public ReactionController(ConnectedNode node, IReactionFinishListener reactionFinishListener) {
         this.log = node.getLog();
@@ -33,7 +37,13 @@ public class ReactionController implements IReactionController, IReactionStartLi
 
     @Override
     public boolean checkIfObstacleIsTooClose(AngleRangesMsg message) {
-        isReactionInProgress = Arrays.stream(message.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
+
+        isObstacleTooClose = Arrays.stream(message.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
+
+        tooCloseCounter = isObstacleTooClose ? tooCloseCounter++ : 0;
+
+        isReactionInProgress = tooCloseCounter > OBSTACLE_TOO_CLOSE_LIMIT;
+
         if (isReactionInProgress) {
             log.info("Obstacle is too close. Starting the reaction");
             AngleRangeUtils.printClosestPointInfo(message);
@@ -56,6 +66,7 @@ public class ReactionController implements IReactionController, IReactionStartLi
 
         WheelsVelocities wheelsVelocities = reaction.onAngleRangeMessage(angleRangesMsg);
         if (wheelsVelocities == ZERO_VELOCITY) {
+            tooCloseCounter = 0;
             isReactionInProgress = false;
             reactionFinishListener.onReactionFinished();
             return;
