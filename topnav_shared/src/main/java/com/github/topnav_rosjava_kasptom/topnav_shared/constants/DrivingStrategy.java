@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class DrivingStrategy {
+    public static final String DRIVING_STRATEGY_RESTART = "DS_RESTART";
     public static final String DRIVING_STRATEGY_IDLE = "DS_IDLE";
     public static final String DRIVING_STRATEGY_ALONG_WALL_2 = "DS_ALONG_WALL_2";
     public static final String DRIVING_STRATEGY_STOP_BEFORE_WALL = "DS_STOP_WALL";

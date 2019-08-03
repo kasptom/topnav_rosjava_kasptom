@@ -7,9 +7,15 @@ import topnav_msgs.HoughAcc;
 public interface IReactionController {
     boolean isReactionInProgress();
 
-    void onHoughAccMessage(HoughAcc houghAcc);
-
     void onAngleRangeMessage(AngleRangesMsg angleRangesMsg);
 
     void setWheelsVelocitiesListener(WheelsVelocitiesChangeListener wheelsListener);
+
+    boolean checkIfObstacleIsTooClose(AngleRangesMsg message);
+
+    void stopReaction();
+
+    interface IReactionFinishListener {
+        void onReactionFinished();
+    }
 }

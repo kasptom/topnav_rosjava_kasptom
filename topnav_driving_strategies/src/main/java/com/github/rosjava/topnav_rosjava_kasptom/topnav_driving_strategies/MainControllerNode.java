@@ -17,9 +17,6 @@ import topnav_msgs.MarkersMsg;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.TOPNAV_ARUCO_TOPIC;
 
-//import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.HoughLineTestStrategy;
-//import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.StopBeforeWallStrategy;
-
 
 @SuppressWarnings("unused")
 public class MainControllerNode extends AbstractNodeMain {

@@ -4,7 +4,6 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.ManualSteeringController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.markerTracker.headTracker.IArUcoHeadTracker;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionController;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionStartListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.ReactionController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.AruCoTrackerTestStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DeadReckoningTestStrategy;
@@ -32,7 +31,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingS
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
-public class MainController implements IMainController {
+public class MainController implements IMainController, IReactionController.IReactionFinishListener {
 
     private final IHeadController headController;
     private final IWheelsController wheelsController;
@@ -58,6 +57,8 @@ public class MainController implements IMainController {
     private final HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners = new HashMap<>();
     private final HashMap<String, IClockMessageHandler> clockListeners = new HashMap<>();
 
+    private GuidelineMsg lastGuideline;
+
     private Log log;
 
     public MainController(ConnectedNode connectedNode) {
@@ -66,7 +67,7 @@ public class MainController implements IMainController {
         headController = new HeadController(connectedNode);
         wheelsController = new WheelsController(connectedNode);
         arUcoHeadTracker = new ArUcoHeadTracker(log);
-        reactionController = new ReactionController(connectedNode);
+        reactionController = new ReactionController(connectedNode, this);
         manualSteeringController = new ManualSteeringController();
 
         strategyFinishedPublisher = connectedNode.newPublisher(TOPNAV_STRATEGY_CHANGE_TOPIC, std_msgs.String._TYPE);
@@ -94,7 +95,19 @@ public class MainController implements IMainController {
         selectStrategy(DRIVING_STRATEGY_IDLE, null);
         reactionController.setWheelsVelocitiesListener(wheelsController::setVelocities);
 
-        guidelineSubscriber.addMessageListener(guidelineMsg -> selectStrategy(guidelineMsg.getGuidelineType(), guidelineMsg.getParameters()));
+        guidelineSubscriber.addMessageListener(guidelineMsg -> {
+            lastGuideline = guidelineMsg;
+
+            if (reactionController.isReactionInProgress()) {
+                reactionController.stopReaction();
+            }
+            selectStrategy(guidelineMsg.getGuidelineType(), guidelineMsg.getParameters());
+        });
+    }
+
+    @Override
+    public void onReactionFinished() {
+        restartCurrentStrategy();
     }
 
     private void initializeManualSteering(Subscriber<Int16> manualSteeringSubscriber) {
@@ -107,7 +120,7 @@ public class MainController implements IMainController {
     private void initializeDrivingStrategies(HashMap<String, IDrivingStrategy> drivingStrategies,
                                              HashMap<String, IArUcoHeadTracker.TrackedMarkerListener> trackedMarkerListeners,
                                              HashMap<String, IClockMessageHandler> clockListeners) {
-        drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL_2, new FollowWallStrategy((IReactionStartListener) reactionController, log));
+        drivingStrategies.put(DRIVING_STRATEGY_ALONG_WALL_2, new FollowWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_STOP_BEFORE_WALL, new StopBeforeWallStrategy(log));
         drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_2, new PassThroughDoorStrategyV2(arUcoHeadTracker, log));
         drivingStrategies.put(DRIVING_STRATEGY_PASS_THROUGH_DOOR_3, new PassThroughDoorStrategyV3(arUcoHeadTracker, log));
@@ -145,6 +158,7 @@ public class MainController implements IMainController {
         tearDownDrivingStrategy();
         tearDownArUcoListeners();
         tearDownClockListeners();
+        wheelsController.setVelocities(ZERO_VELOCITY);
 
         publishStrategyChangeMessage(strategyName);
 
@@ -153,7 +167,11 @@ public class MainController implements IMainController {
         log.info(String.format("Selecting %s strategy", strategyName));
         if (DRIVING_STRATEGY_IDLE.equals(strategyName)) {
             log.info("Set to idle state");
-            wheelsController.setVelocities(ZERO_VELOCITY);
+            return;
+        }
+
+        if (DRIVING_STRATEGY_RESTART.equals(strategyName)) {
+            log.info("Set to restart state");
             return;
         }
 
@@ -198,14 +216,18 @@ public class MainController implements IMainController {
                 reactionController.onAngleRangeMessage(message);
                 return;
             }
+
+            if (reactionController.checkIfObstacleIsTooClose(message)) {
+                selectStrategy(DRIVING_STRATEGY_RESTART, null);
+                angleRangesMsgSubscriber.addMessageListener(reactionController::onAngleRangeMessage);
+                return;
+            }
+
             drivingStrategy.handleAngleRangeMessage(message);
         });
 
         houghAccSubscriber.addMessageListener(message -> {
-            if (reactionController.isReactionInProgress()) {
-                reactionController.onHoughAccMessage(message);
-                return;
-            }
+            if (reactionController.isReactionInProgress()) return;
             drivingStrategy.handleHoughAccMessage(message);
         });
 
@@ -213,7 +235,15 @@ public class MainController implements IMainController {
             if (reactionController.isReactionInProgress()) return;
             drivingStrategy.handleDetectionMessage(message);
         });
+
         headDirectionChangeSubscriber.addMessageListener(drivingStrategy::handleHeadDirectionChange);
+    }
+
+    private void restartCurrentStrategy() {
+        if (lastGuideline != null) {
+            log.info(String.format("Restarting current strategy %s", lastGuideline.getGuidelineType()));
+            selectStrategy(lastGuideline.getGuidelineType(), lastGuideline.getParameters());
+        }
     }
 
     private void tearDownDrivingStrategy() {
@@ -222,6 +252,7 @@ public class MainController implements IMainController {
         houghAccSubscriber.removeAllMessageListeners();
         markerDetectionSubscriber.removeAllMessageListeners();
         headDirectionChangeSubscriber.removeAllMessageListeners();
+
         arUcoHeadTracker.stop();
     }
 

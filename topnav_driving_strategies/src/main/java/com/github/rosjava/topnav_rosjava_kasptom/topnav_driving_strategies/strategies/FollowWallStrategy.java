@@ -4,7 +4,6 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IDrivingStrategy;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.StrategyFinishedListener;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.WheelsVelocitiesChangeListener;
-import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.reactions.IReactionStartListener;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.RelativeDirection;
@@ -23,13 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.FollowWall.*;
-import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.REACTIVE_DRIVING_STRATEGY_MOVE_BACK;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.*;
 
 public class FollowWallStrategy implements IDrivingStrategy {
 
-    private final IReactionStartListener reactionStartListener;
     private final Log log;
     private HashMap<String, GuidelineParam> guidelineParamsMap = new HashMap<>();
 
@@ -45,8 +42,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     private static final double LEFT_WALL_ANGLE = 90;
     private double chosenWallAngle = LEFT_WALL_ANGLE;
 
-    public FollowWallStrategy(IReactionStartListener reactionStartListener, Log log) {
-        this.reactionStartListener = reactionStartListener;
+    public FollowWallStrategy(Log log) {
         this.log = log;
     }
 
@@ -82,12 +78,7 @@ public class FollowWallStrategy implements IDrivingStrategy {
     @Override
     public void handleAngleRangeMessage(AngleRangesMsg angleRangesMsg) {
         isObstacleTooClose = Arrays.stream(angleRangesMsg.getDistances()).anyMatch(dist -> dist <= TOO_CLOSE_RANGE);
-
 //        AngleRangeUtils.printClosestPointInfo(angleRangesMsg);
-
-        if (isObstacleTooClose) {
-            switchToMoveBackReaction();
-        }
     }
 
     @Override
@@ -134,12 +125,6 @@ public class FollowWallStrategy implements IDrivingStrategy {
         headListener.onRotationChangeRequest(chosenWallAngle == LEFT_WALL_ANGLE
                 ? RelativeDirection.AT_LEFT
                 : RelativeDirection.AT_RIGHT);
-    }
-
-    private void switchToMoveBackReaction() {
-        log.info("switching to move back reaction");
-        wheelsListener.onWheelsVelocitiesChanged(ZERO_VELOCITY);
-        reactionStartListener.onReactionStart(REACTIVE_DRIVING_STRATEGY_MOVE_BACK);
     }
 
     private RelativeDirection getInitialRelativeDirection(HashMap<String, GuidelineParam> guidelineParamsMap) {

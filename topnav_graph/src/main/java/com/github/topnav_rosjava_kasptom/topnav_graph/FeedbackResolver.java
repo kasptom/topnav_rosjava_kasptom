@@ -15,6 +15,8 @@ public class FeedbackResolver implements IFeedbackResolver {
     public boolean shouldSwitchToNextGuideline(Feedback feedback, int currentGuidelineIdx, List<Guideline> guidelines) {
         if (currentGuidelineIdx >= guidelines.size() - 1) return false;
 
+        if (DrivingStrategy.DRIVING_STRATEGY_RESTART.equals(feedback.getStrategyName())) return false;
+
         if (DrivingStrategy.DRIVING_STRATEGY_IDLE.equals(feedback.getStrategyName())) return true;
 
         if (!DrivingStrategy.DRIVING_STRATEGY_ALONG_WALL_2.equals(feedback.getStrategyName())) return false;
