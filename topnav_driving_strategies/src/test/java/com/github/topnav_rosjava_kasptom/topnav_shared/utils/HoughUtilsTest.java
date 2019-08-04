@@ -2,16 +2,16 @@ package com.github.topnav_rosjava_kasptom.topnav_shared.utils;
 
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.HoughCell;
 import com.github.topnav_rosjava_kasptom.topnav_shared.services.doorFinder.DoorFinder;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
-class HoughUtilsTest {
+public class HoughUtilsTest {
 
     private double angleDelta = 0.0001;
 
     @Test
-    void pointsAB1_toHoughCell_returnsAngleAndRange() {
+    public void pointsAB1_toHoughCell_returnsAngleAndRange() {
         DoorFinder.Point a = new DoorFinder.Point(5.0, -5.0 / Math.sqrt(3.0));
         DoorFinder.Point b = new DoorFinder.Point(5.0, 5.0 / Math.sqrt(3.0));
 
@@ -21,7 +21,7 @@ class HoughUtilsTest {
     }
 
     @Test
-    void pointsAB2_toHoughCell_returnsAngleAndRange() {
+    public void pointsAB2_toHoughCell_returnsAngleAndRange() {
         DoorFinder.Point a = new DoorFinder.Point(0.0, 10.0 / Math.sqrt(3.0));
         DoorFinder.Point b = new DoorFinder.Point(5.0, 5.0 / Math.sqrt(3.0));
 
@@ -31,7 +31,7 @@ class HoughUtilsTest {
     }
 
     @Test
-    void pointsAB3_toHoughCell_returnsAngleAndRange() {
+    public void pointsAB3_toHoughCell_returnsAngleAndRange() {
         DoorFinder.Point a = new DoorFinder.Point(0.0, 10.0 / Math.sqrt(3.0));
         DoorFinder.Point b = new DoorFinder.Point(-5.0, 5.0 / Math.sqrt(3.0));
 
@@ -41,7 +41,7 @@ class HoughUtilsTest {
     }
 
     @Test
-    void pointsAB4_toHoughCell_returnsAngleAndRange() {
+    public void pointsAB4_toHoughCell_returnsAngleAndRange() {
         DoorFinder.Point a = new DoorFinder.Point(-5.0, 5.0 / Math.sqrt(3.0));
         DoorFinder.Point b = new DoorFinder.Point(-5.0, -5.0 / Math.sqrt(3.0));
 
@@ -51,7 +51,7 @@ class HoughUtilsTest {
     }
 
     @Test
-    void pointsAB5_toHoughCell_returnsAngleAndRange() {
+    public void pointsAB5_toHoughCell_returnsAngleAndRange() {
         DoorFinder.Point a = new DoorFinder.Point(-5.0, -5.0 / Math.sqrt(3.0));
         DoorFinder.Point b = new DoorFinder.Point(0.0, -10.0 / Math.sqrt(3.0));
 
@@ -61,7 +61,7 @@ class HoughUtilsTest {
     }
 
     @Test
-    void pointsAB6_toHoughCell_returnsAngleAndRange() {
+    public void pointsAB6_toHoughCell_returnsAngleAndRange() {
         DoorFinder.Point a = new DoorFinder.Point(0.0, -10.0 / Math.sqrt(3.0));
         DoorFinder.Point b = new DoorFinder.Point(5.0, -5.0 / Math.sqrt(3.0));
 
@@ -71,7 +71,7 @@ class HoughUtilsTest {
     }
 
     @Test
-    void pointsDifferentOrder_toHoughCell_noChangeInValueAndrange() {
+    public void pointsDifferentOrder_toHoughCell_noChangeInValueAndrange() {
         DoorFinder.Point a1 = new DoorFinder.Point(5.0, -5.0 / Math.sqrt(3.0));
         DoorFinder.Point b1 = new DoorFinder.Point(5.0, 5.0 / Math.sqrt(3.0));
 
@@ -109,22 +109,22 @@ class HoughUtilsTest {
         HoughCell cell62 = HoughUtils.toHoughCell(b6, a6);
 
 
-        assertEquals(cell11.getRange(), cell12.getRange());
-        assertEquals(cell11.getAngleDegreesLidarDomain(), cell12.getAngleDegreesLidarDomain());
+        assertEquals(cell11.getRange(), cell12.getRange(), 0.0);
+        assertEquals(cell11.getAngleDegreesLidarDomain(), cell12.getAngleDegreesLidarDomain(), 0.0);
 
-        assertEquals(cell21.getRange(), cell22.getRange());
-        assertEquals(cell21.getAngleDegreesLidarDomain(), cell22.getAngleDegreesLidarDomain());
+        assertEquals(cell21.getRange(), cell22.getRange(), 0.0);
+        assertEquals(cell21.getAngleDegreesLidarDomain(), cell22.getAngleDegreesLidarDomain(), 0.0);
 
-        assertEquals(cell31.getRange(), cell32.getRange());
-        assertEquals(cell31.getAngleDegreesLidarDomain(), cell32.getAngleDegreesLidarDomain());
+        assertEquals(cell31.getRange(), cell32.getRange(), 0.0);
+        assertEquals(cell31.getAngleDegreesLidarDomain(), cell32.getAngleDegreesLidarDomain(), 0.0);
 
-        assertEquals(cell41.getRange(), cell42.getRange());
-        assertEquals(cell41.getAngleDegreesLidarDomain(), cell42.getAngleDegreesLidarDomain());
+        assertEquals(cell41.getRange(), cell42.getRange(), 0.0);
+        assertEquals(cell41.getAngleDegreesLidarDomain(), cell42.getAngleDegreesLidarDomain(), 0.0);
 
-        assertEquals(cell51.getRange(), cell52.getRange());
-        assertEquals(cell51.getAngleDegreesLidarDomain(), cell52.getAngleDegreesLidarDomain());
+        assertEquals(cell51.getRange(), cell52.getRange(), 0.0);
+        assertEquals(cell51.getAngleDegreesLidarDomain(), cell52.getAngleDegreesLidarDomain(), 0.0);
 
-        assertEquals(cell61.getRange(), cell62.getRange());
-        assertEquals(cell61.getAngleDegreesLidarDomain(), cell62.getAngleDegreesLidarDomain());
+        assertEquals(cell61.getRange(), cell62.getRange(), 0.0);
+        assertEquals(cell61.getAngleDegreesLidarDomain(), cell62.getAngleDegreesLidarDomain(), 0.0);
     }
 }

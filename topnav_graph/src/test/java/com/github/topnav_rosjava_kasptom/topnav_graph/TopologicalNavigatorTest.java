@@ -5,10 +5,7 @@ import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNod
 import com.github.topnav_rosjava_kasptom.topnav_graph.exceptions.InvalidRosonNodeKindException;
 import com.github.topnav_rosjava_kasptom.topnav_graph.model.RosonBuildingDto;
 import com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy;
-import com.github.topnav_rosjava_kasptom.topnav_shared.constants.PropertyKeys;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam;
-import com.github.topnav_rosjava_kasptom.topnav_shared.services.IPropertiesService;
-import com.github.topnav_rosjava_kasptom.topnav_shared.services.PropertiesService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,8 +49,7 @@ public class TopologicalNavigatorTest {
     }
 
     private ITopnavNavigator createNavigator() throws InvalidRosonNodeIdException, InvalidRosonNodeKindException, InvalidArUcoIdException, IOException {
-        IPropertiesService propertiesService = PropertiesService.getInstance(null);
-        String rosonFileName = propertiesService.getProperty(PropertyKeys.PROPERTY_KEY_ROSON_FILE_PATH);
+        String rosonFileName = "topnav_test_01_rm_door_door.min.roson";
 
         RosonParser parser = new RosonParser();
         RosonBuildingDto building = parser.parse(rosonFileName);
