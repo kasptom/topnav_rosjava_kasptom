@@ -38,7 +38,10 @@ dependencies {
   /* An external maven artifact dependency */
   compile 'org.ros.rosjava_core:rosjava:[0.3,0.4)'
   compile 'org.ros.rosjava_messages:sensor_msgs:[1.12,1.13)'
-  compile 'org.ros.rosjava_messages:topnav_msgs:0.0.0'
+  
+//  compile 'org.ros.rosjava_messages:topnav_msgs:0.0.0'
+  compile files('../libs/topnav_msgs-0.0.0.jar')
+  
 //  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
 //  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
   testCompile 'junit:junit:4.12'

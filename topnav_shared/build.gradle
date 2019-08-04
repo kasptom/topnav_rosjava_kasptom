@@ -25,8 +25,11 @@
 dependencies {
   /* Example of an external maven artifact dependency */
   compile 'org.ros.rosjava_core:rosjava:[0.2,)'
-  compile 'org.ros.rosjava_messages:topnav_msgs:0.0.0'
   compile 'com.google.guava:guava:14.0'
+  
+//  compile 'org.ros.rosjava_messages:topnav_msgs:0.0.0'
+  compile files('../libs/topnav_msgs-0.0.0.jar')
+  
 //  compile 'org.apache.commons:commons-math3:3.2' EM Clustering
   /* Example of a local subproject dependency */ 
   /* compile project(':sibling_gradle_project') */
