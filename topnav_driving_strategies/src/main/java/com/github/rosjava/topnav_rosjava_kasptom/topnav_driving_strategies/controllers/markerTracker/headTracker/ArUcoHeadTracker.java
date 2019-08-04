@@ -182,6 +182,11 @@ public class ArUcoHeadTracker implements IArUcoHeadTracker {
         double headRotationCorrection = -averagePicturePosition * CAM_FOV_DEGREES / CAM_PREVIEW_WIDTH;
 
         angleDegrees += headRotationCorrection;
+        if (angleDegrees < -180) {
+            angleDegrees = 180 + (angleDegrees + 180);
+        } else if (angleDegrees > 180) {
+            angleDegrees = -180 + (angleDegrees - 180);
+        }
         System.out.printf("setting angle to %.2f\n", angleDegrees);
 
         isHeadRotationInProgress = true;
