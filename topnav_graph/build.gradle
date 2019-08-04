@@ -54,3 +54,10 @@ dependencies {
   compile project(':topnav_shared')
 }
 
+sourceSets {
+  test {
+    java {
+      srcDirs = ["src/test/java"]
+    }
+  }
+}

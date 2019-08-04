@@ -1,21 +1,21 @@
 package com.github.rosjava.topnav_rosjava_kasptom.toponav_driving_strategies.strategies;
 
-import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
+import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
 import org.apache.commons.logging.Log;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
 @Deprecated
-class DriveAlongWallStrategyTest {
+public class DriveAlongWallStrategyTest {
     @Mock
     Log logMock;
 
 
     @Test
-    void lowerAngle_testKeepTargetAngle_leftSpinsFaster() {
+    public void lowerAngle_testKeepTargetAngle_leftSpinsFaster() {
         DriveAlongWallStrategy strategy = new DriveAlongWallStrategy(logMock);
 
         WheelsVelocities expectedVelocity = new WheelsVelocities(2.39, 1.61, 2.39, 1.61);
@@ -28,7 +28,7 @@ class DriveAlongWallStrategyTest {
     }
 
     @Test
-    void lowerAngle_testKeepTargetAngle_rightSpinsFaster() {
+    public void lowerAngle_testKeepTargetAngle_rightSpinsFaster() {
         DriveAlongWallStrategy strategy = new DriveAlongWallStrategy(logMock);
 
         WheelsVelocities expectedVelocity = new WheelsVelocities(1.61, 2.39, 1.61, 2.39);
