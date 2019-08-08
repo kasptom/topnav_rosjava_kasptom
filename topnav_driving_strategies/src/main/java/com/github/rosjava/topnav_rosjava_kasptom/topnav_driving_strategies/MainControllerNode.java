@@ -4,6 +4,7 @@ import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.contr
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.IMainController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.controllers.MainController;
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.navigation.MarkerMessageHandler;
+import com.github.topnav_rosjava_kasptom.topnav_shared.constants.TopicNames;
 import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
@@ -32,7 +33,7 @@ public class MainControllerNode extends AbstractNodeMain {
 
     @Override
     public GraphName getDefaultNodeName() {
-        return GraphName.of("topnav/driving_strategies/line_follower");
+        return GraphName.of(TopicNames.TOPNAV_MAIN_CONTROLLER_NODE_NAME);
     }
 
     @Override
