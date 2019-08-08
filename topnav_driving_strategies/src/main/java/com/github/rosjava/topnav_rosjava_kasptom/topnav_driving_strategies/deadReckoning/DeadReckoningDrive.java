@@ -75,7 +75,7 @@ public class DeadReckoningDrive implements IDeadReckoningDrive {
     }
 
     @Override
-    public void onClockMessage(UInt64 clockMessage) {
+    public void onTickerMessage(UInt64 tickerMessage) {
         if (!isRunning) return;
 
         long millisecondsSinceStart = getMillisecondSinceStart();

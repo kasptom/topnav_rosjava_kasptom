@@ -2,9 +2,9 @@ package com.github.topnav_rosjava_kasptom.topnav_shared.constants;
 
 public class TopicNames {
     public static final String HEAD_JOINT_TOPIC = "/capo_head_rotation_controller/command";
-    public static final String HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC = "/topnav/head_relative_direction_state";
-    public static final String HEAD_LINEAR_DIRECTION_CHANGE_TOPIC = "/toponav_head_linear_direction_state";
-    public static final String HEAD_TIME_MS_SINCE_LAST_ROTATION_TOPIC = "/topnav/head_time_ms_since_last_rotation";
+    public static final String HEAD_RELATIVE_DIRECTION_CHANGE_TOPIC = "/topnav/head/relative_direction_state";
+    public static final String HEAD_LINEAR_DIRECTION_CHANGE_TOPIC = "/topnav/head/linear_direction_state";
+    public static final String HEAD_TIME_MS_SINCE_LAST_ROTATION_TOPIC = "/topnav/head/time_ms_since_last_rotation";
 
     public static final String TOPNAV_FEEDBACK_TOPIC = "/topnav/feedback";
     public static final String TOPNAV_STRATEGY_CHANGE_TOPIC = "/topnav/strategy_change";
@@ -17,7 +17,7 @@ public class TopicNames {
     public static final String TOPNAV_HOUGH_TOPIC = "/capo/laser/hough";
     public static final String TOPNAV_ANGLE_RANGE_TOPIC = "/capo/laser/angle_range";
     public static final String TOPNAV_ARUCO_TOPIC = "/capo/camera1/aruco";
-    public static final String TOPNAV_CAPO_CLOCK_TOPIC = "/capo/clock";
+    public static final String TOPNAV_CAPO_TICKER_TOPIC = "/capo/ticker";
     public static final String TOPNAV_GUIDELINES_TOPIC = "/topnav/guidelines";
     public static final String TOPNAV_CONFIG_TOPIC = "/topnav/config";
 

@@ -18,7 +18,7 @@ import java.util.List;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.DrivingStrategy.DeadReckoning.*;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*;
 
-public class DeadReckoningTestStrategy implements IDrivingStrategy, IDeadReckoningManeuverListener, WheelsVelocitiesChangeListener, IClockMessageHandler {
+public class DeadReckoningTestStrategy implements IDrivingStrategy, IDeadReckoningManeuverListener, WheelsVelocitiesChangeListener, ITickerMessageHandler {
 
     private DeadReckoningDrive deadReckoningDrive;
     private StrategyFinishedListener strategyFinishedListener;
@@ -100,7 +100,7 @@ public class DeadReckoningTestStrategy implements IDrivingStrategy, IDeadReckoni
     }
 
     @Override
-    public void handleClockMessage(UInt64 clockMsg) {
-        deadReckoningDrive.onClockMessage(clockMsg);
+    public void handleTickerMessage(UInt64 tickerMsg) {
+        deadReckoningDrive.onTickerMessage(tickerMsg);
     }
 }

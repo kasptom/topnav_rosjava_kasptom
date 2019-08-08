@@ -16,5 +16,5 @@ public interface IDeadReckoningDrive {
 
     void onAngleRangeMessage(AngleRangesMsg angleRangesMsg);
 
-    void onClockMessage(UInt64 clockMessage);
+    void onTickerMessage(UInt64 tickerMessage);
 }

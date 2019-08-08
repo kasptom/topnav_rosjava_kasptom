@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class PassThroughDoorStrategyV3 implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener, IClockMessageHandler, StrategyFinishedListener {
+public class PassThroughDoorStrategyV3 implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener, ITickerMessageHandler, StrategyFinishedListener {
 
     private final IArUcoHeadTracker arUcoTracker;
     private final Log log;
@@ -60,12 +60,12 @@ public class PassThroughDoorStrategyV3 implements IDrivingStrategy, IArUcoHeadTr
     }
 
     @Override
-    public void handleClockMessage(UInt64 clockMsg) {
+    public void handleTickerMessage(UInt64 tickerMsg) {
         if (currentStage != CompoundStrategyStage.ALIGN_BETWEEN_DOOR) {
             return;
         }
 
-        positionStrategy.handleClockMessage(clockMsg);
+        positionStrategy.handleTickerMessage(tickerMsg);
     }
 
     @Override
