@@ -19,7 +19,7 @@ import java.util.List;
 
 import static com.github.topnav_rosjava_kasptom.topnav_shared.model.GuidelineParam.EMPTY_PARAM_VALUE;
 
-public class ApproachMarkerStrategyV2 implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener, IClockMessageHandler {
+public class ApproachMarkerStrategyV2 implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener, ITickerMessageHandler {
 
     private final PositionAccordingToMarkerStrategy positionStrategy;
     private final HashMap<String, GuidelineParam> guidelineParamsMap;
@@ -45,8 +45,8 @@ public class ApproachMarkerStrategyV2 implements IDrivingStrategy, IArUcoHeadTra
     }
 
     @Override
-    public void handleClockMessage(UInt64 clockMsg) {
-        positionStrategy.handleClockMessage(clockMsg);
+    public void handleTickerMessage(UInt64 tickerMsg) {
+        positionStrategy.handleTickerMessage(tickerMsg);
     }
 
     @Override

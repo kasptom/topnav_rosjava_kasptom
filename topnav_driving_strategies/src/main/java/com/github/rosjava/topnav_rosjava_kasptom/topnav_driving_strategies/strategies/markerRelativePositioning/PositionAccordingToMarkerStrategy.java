@@ -28,7 +28,7 @@ import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Limits.*
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.Preview.CAM_PREVIEW_WIDTH;
 import static com.github.topnav_rosjava_kasptom.topnav_shared.constants.WheelsVelocityConstants.ZERO_VELOCITY;
 
-public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener, IDeadReckoningManeuverListener, IClockMessageHandler {
+public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArUcoHeadTracker.TrackedMarkerListener, IDeadReckoningManeuverListener, ITickerMessageHandler {
 
     private final IArUcoHeadTracker arUcoTracker;
     private final IManeuverDescriptionGenerator maneuverGenerator;
@@ -104,10 +104,10 @@ public class PositionAccordingToMarkerStrategy implements IDrivingStrategy, IArU
     }
 
     @Override
-    public void handleClockMessage(UInt64 clockMsg) {
+    public void handleTickerMessage(UInt64 tickerMsg) {
         if (isObstacleTooClose || currentStage != CompoundStrategyStage.MANEUVER) return;
 
-        deadReckoningDrive.onClockMessage(clockMsg);
+        deadReckoningDrive.onTickerMessage(tickerMsg);
     }
 
     @Override
