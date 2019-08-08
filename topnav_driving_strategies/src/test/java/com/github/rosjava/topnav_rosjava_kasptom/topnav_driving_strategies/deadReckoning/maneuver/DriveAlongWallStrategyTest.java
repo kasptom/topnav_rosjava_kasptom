@@ -1,4 +1,4 @@
-package com.github.rosjava.topnav_rosjava_kasptom.toponav_driving_strategies.strategies;
+package com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.deadReckoning.maneuver;
 
 import com.github.rosjava.topnav_rosjava_kasptom.topnav_driving_strategies.strategies.DriveAlongWallStrategy;
 import com.github.topnav_rosjava_kasptom.topnav_shared.model.WheelsVelocities;
