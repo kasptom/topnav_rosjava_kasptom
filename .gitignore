@@ -16,6 +16,8 @@
 
 # Package Files #
 *.jar
+!libs/topnav_msgs-0.0.0.jar
+!libs/topnav_msgs-0.0.0.pom
 *.war
 *.nar
 *.ear
